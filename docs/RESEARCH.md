@@ -270,6 +270,40 @@ selects between these two datasets. `sold` is a better estimate of what you will
 over time; `stock` is a better estimate of what is purchasable right now. This app defaults to
 `stock` (what you can buy today) and makes the choice explicit in the pricing metadata.
 
+### What the price guide tells us about SUPPLY, and what it does not
+
+The same response carries two fields the optimizer uses to judge whether a
+replacement color is practical to buy, not just cheaper:
+
+| Field | Meaning |
+| --- | --- |
+| `unit_quantity` | Number of LOTS behind the figure |
+| `total_quantity` | Total PIECES across those lots |
+
+A lot is one seller's listing of one item in one condition. It is a good proxy
+for "how many stores have this" and it is **not the same number**: one store can
+list the same part in two lots, and the API exposes no store count for a
+price-guide query. The code says "lots" everywhere rather than inventing a store
+count it cannot know.
+
+Two qualifications that matter and are both carried on the quote:
+
+* **Location.** With `country_code` or `region` set, BrickLink restricts the
+  guide to sellers in that location, so the counts reflect who can ship there.
+  Without it they are worldwide, which is a much weaker statement about whether
+  you can actually buy the part. `supplyIsLocationFiltered` records which.
+* **Stock versus history.** Under `guide_type=sold` the counts describe what
+  changed hands over six months, not what is on sale now.
+  `supplyReflectsSoldHistory` records this, and the availability assessment
+  reports UNKNOWN rather than reading past trades as present stock.
+
+**There is no bulk endpoint, and no shipping, seller-minimum or order-total
+information of any kind.** BrickLink's purchasing tools compute those from the
+whole order across all sellers; nothing in the price-guide API exposes them. Any
+"delivered cost" this application produced from these fields would be invented.
+That is why it exports both Wanted Lists and asks BrickLink to price them
+instead.
+
 ---
 
 ## 8. Rebrickable API

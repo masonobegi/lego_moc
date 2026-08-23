@@ -256,16 +256,26 @@ Read `docs/AUDIT.md` for the full list. The ones most likely to affect you:
 2. **Offline color coverage is narrow.** Without a Rebrickable import, color
    validity comes from ~2,000 parts observed in 101 official sets. A part not in
    that data never gets a proposal.
-3. **How much you save depends entirely on the model.** Measured across 15
-   official LEGO sets with the demo price data, savings ranged from **0% to
-   13.5%**. Models with substantial hidden internal structure do well (NASA
-   Apollo Saturn V 13.5%, B-wing 11.2%, Great Wall of China 8.1%); models that
-   are mostly exterior surface do not (TIE Interceptor 0.0%, Black Seas
-   Barracuda 0.0%). A MOC built from whatever colors the designer happened to
-   have plenty of typically has more headroom than an official set.
-4. **Live BrickLink pricing is untested against the real API.**
-5. **The Wanted List XML has not been round-tripped through a real import.**
-6. **`.io` files are not read.** Export to LDraw from Studio first.
+3. **How much you save depends entirely on the model, and on many models it is
+   very little.** Measured across the 103 models of the LDraw Official Model
+   Repository - see `docs/validation-results.json` and the verdict in
+   `docs/AUDIT.md`. Most official sets are hollow shells with open interiors,
+   and what is genuinely sealed inside is often already a cheap color. A MOC
+   built from whatever the designer had plenty of typically has more headroom.
+   Do not assume the numbers on this page apply to your model; run it.
+4. **Analysis is slow on large models.** A 1,845-part model takes about 90
+   seconds and a 3,457-part one about two minutes. That is the price of the
+   observer pass, which cut the rate of changes proposed on parts that can
+   actually be seen from 15.9% to 1.4%. The right fix is a GPU or SIMD ray
+   kernel, not a smaller ray budget.
+5. **A part visible only through a pinhole can still slip through.** Measured
+   residual: 1.4% of proposed changes had a genuine line of sight when
+   re-checked at a much higher budget, none with more than 5% of their surface
+   exposed. Sampling can bound how much of a part is visible; it cannot prove
+   that none of it is, and the app says so rather than claiming invisibility.
+6. **Live BrickLink pricing is untested against the real API.**
+7. **The Wanted List XML has not been round-tripped through a real import.**
+8. **`.io` files are not read.** Export to LDraw from Studio first.
 
 ---
 
