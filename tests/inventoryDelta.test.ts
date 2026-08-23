@@ -17,6 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { applyToInstances } from '@/lib/analysis/pipeline';
+import { selectAppliedCandidates } from '@/lib/optimizer/applyOptimizations';
 import { DefaultCatalogService } from '@/lib/catalog/catalogService';
 import { buildInventoryDelta, type InventoryDelta } from '@/lib/export/inventoryDelta';
 import {
@@ -664,5 +665,50 @@ describe('lots with no price estimate', () => {
     expect(d.unpricedLotCount).toBe(2);
     expect(d.unpricedPieceCount).toBe(4);
     expect(deltaExportPreamble(d, CONTEXT).join('\n')).toContain('no price');
+  });
+});
+
+/**
+ * The two apply paths must agree.
+ *
+ * The delta comes from `applyToInstances`; the downloadable .ldr comes from
+ * `applyOptimizations`. They previously chose between two changes competing for
+ * the same line by different rules - savings in one, array order in the other -
+ * and agreed only because the pipeline happens to sort candidates by descending
+ * saving first. Two independent rules that agree by coincidence are one
+ * refactor away from a shopping list that does not match the model file.
+ */
+describe('conflicting changes on one line', () => {
+  const target = redInstances[0]!;
+  const cheap = candidate({ id: 'a-cheap', instance: target, savings: 0.1, replacementColorId: 0 });
+  const rich = candidate({ id: 'z-rich', instance: target, savings: 5, replacementColorId: 1 });
+
+  it('picks the bigger saving regardless of array order', () => {
+    const enabled = new Set(['a-cheap', 'z-rich']);
+    const forward = applyToInstances(instances, [cheap, rich], enabled);
+    const reversed = applyToInstances(instances, [rich, cheap], enabled);
+
+    const colorOf = (list: typeof instances) =>
+      list.find((i) => i.instanceId === target.instanceId)!.colorId;
+    // Blue is the 5.00 saving; black is the 0.10 one.
+    expect(colorOf(forward)).toBe(1);
+    expect(colorOf(reversed)).toBe(1);
+  });
+
+  it('resolves the same way as the LDraw export does', () => {
+    const enabled = new Set(['a-cheap', 'z-rich']);
+    const selection = selectAppliedCandidates([cheap, rich], enabled);
+    expect([...selection.byCommand.values()].map((c) => c.id)).toEqual(['z-rich']);
+    expect(selection.skipped.map((s) => s.candidateId)).toEqual(['a-cheap']);
+  });
+
+  it('breaks a tie deterministically rather than by position', () => {
+    const tieA = candidate({ id: 'aaa', instance: target, savings: 1, replacementColorId: 0 });
+    const tieB = candidate({ id: 'bbb', instance: target, savings: 1, replacementColorId: 1 });
+    const enabled = new Set(['aaa', 'bbb']);
+    const forward = selectAppliedCandidates([tieA, tieB], enabled);
+    const reversed = selectAppliedCandidates([tieB, tieA], enabled);
+    expect([...forward.byCommand.values()][0]!.id).toBe('aaa');
+    expect([...reversed.byCommand.values()][0]!.id).toBe('aaa');
   });
 });

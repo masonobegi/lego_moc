@@ -287,3 +287,88 @@ describe('XML escaping', () => {
     expect(xmlEscape(`<a href="x">&'`)).toBe('&lt;a href=&quot;x&quot;&gt;&amp;&apos;');
   });
 });
+
+/**
+ * Colliding BrickLink ids.
+ *
+ * The LDraw to BrickLink map is many-to-one, and the collisions are live in the
+ * shipped tables: LDraw colors 32 and 40 are both BrickLink 13, and LDraw parts
+ * 6141 and 4073 are both BrickLink 4073. Counting lots in LDraw space and then
+ * mapping each one - which this code did until an adversarial design review
+ * caught it - emitted two ITEM blocks with the same ITEMID and COLOR, with the
+ * quantity split between them. A buyer needing four got three and one.
+ *
+ * BrickLink's behaviour on a duplicated item inside one upload is unverified,
+ * so the export must never produce one.
+ */
+describe('two LDraw ids that are one BrickLink id', () => {
+  it('sums colors 32 and 40 into a single BrickLink 13 lot', () => {
+    const source = [
+      '0 Colliding colors',
+      '1 32 0 0 0 1 0 0 0 1 0 0 0 1 3005.dat',
+      '1 32 20 0 0 1 0 0 0 1 0 0 0 1 3005.dat',
+      '1 32 40 0 0 1 0 0 0 1 0 0 0 1 3005.dat',
+      '1 40 60 0 0 1 0 0 0 1 0 0 0 1 3005.dat',
+      '0 STEP',
+    ].join('\n');
+    const result = buildWantedListXml(
+      resolveModel(parseLDraw(source, { sourceName: 'c.ldr' })).instances,
+      catalog,
+      'new',
+    );
+    const items = parseInventory(result.xml);
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({ itemId: '3005', color: 13, minQty: 4 });
+    expect(result.itemCount).toBe(1);
+    expect(result.pieceCount).toBe(4);
+  });
+
+  it('sums parts 6141 and 4073 into a single BrickLink 4073 lot', () => {
+    const source = [
+      '0 Colliding parts',
+      '1 4 0 0 0 1 0 0 0 1 0 0 0 1 6141.dat',
+      '1 4 20 0 0 1 0 0 0 1 0 0 0 1 4073.dat',
+      '0 STEP',
+    ].join('\n');
+    const items = parseInventory(
+      buildWantedListXml(
+        resolveModel(parseLDraw(source, { sourceName: 'c2.ldr' })).instances,
+        catalog,
+        'new',
+      ).xml,
+    );
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({ itemId: '4073', minQty: 2 });
+  });
+
+  it('never emits the same item and color twice in any list', () => {
+    const source = [
+      '0 Mixed',
+      '1 32 0 0 0 1 0 0 0 1 0 0 0 1 3005.dat',
+      '1 40 20 0 0 1 0 0 0 1 0 0 0 1 3005.dat',
+      '1 4 40 0 0 1 0 0 0 1 0 0 0 1 6141.dat',
+      '1 4 60 0 0 1 0 0 0 1 0 0 0 1 4073.dat',
+      '0 STEP',
+    ].join('\n');
+    const xml = buildWantedListXml(
+      resolveModel(parseLDraw(source, { sourceName: 'm.ldr' })).instances,
+      catalog,
+      'new',
+    ).xml;
+    const keys = parseInventory(xml).map((i) => `${i.itemId}|${i.color}|${i.condition}`);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('still conserves the total piece count when lots collapse', () => {
+    const source = [
+      '0 Mixed',
+      '1 32 0 0 0 1 0 0 0 1 0 0 0 1 3005.dat',
+      '1 40 20 0 0 1 0 0 0 1 0 0 0 1 3005.dat',
+      '1 4 40 0 0 1 0 0 0 1 0 0 0 1 6141.dat',
+      '0 STEP',
+    ].join('\n');
+    const instances = resolveModel(parseLDraw(source, { sourceName: 'm.ldr' })).instances;
+    const result = buildWantedListXml(instances, catalog, 'new');
+    expect(result.pieceCount).toBe(instances.length);
+  });
+});

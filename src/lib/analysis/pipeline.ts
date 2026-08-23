@@ -25,6 +25,7 @@ import { isSizeAware, type PartSizeHint } from '../pricing/types';
 import { groupInstancesByCommand, type CommandGroup } from '../optimizer/candidates';
 import { alternativeColorsToPrice, findColorCandidates } from '../optimizer/colorOptimizer';
 import { findMoldCandidates, moldPricesToRequest } from '../optimizer/moldOptimizer';
+import { selectAppliedCandidates } from '../optimizer/applyOptimizations';
 import { applyPracticality, DEFAULT_PRACTICALITY, type PracticalityOptions } from '../optimizer/practicality';
 import type { CandidateBlocker, OptimizationCandidate, RejectedCommand, SafetyLevel } from '../optimizer/types';
 import {
@@ -474,13 +475,10 @@ export function applyToInstances(
   candidates: readonly OptimizationCandidate[],
   enabledIds: ReadonlySet<string>,
 ): PartInstance[] {
+  // The same selection the LDraw export uses, so the parts list and the file
+  // can never disagree about which of two conflicting changes won.
   const byInstance = new Map<string, OptimizationCandidate>();
-  const usedCommands = new Set<string>();
-  for (const candidate of candidates) {
-    if (!enabledIds.has(candidate.id)) continue;
-    const commandKey = `${candidate.commandRef.fileIndex}:${candidate.commandRef.commandIndex}`;
-    if (usedCommands.has(commandKey)) continue;
-    usedCommands.add(commandKey);
+  for (const candidate of selectAppliedCandidates(candidates, enabledIds).byCommand.values()) {
     for (const instanceId of candidate.instanceIds) byInstance.set(instanceId, candidate);
   }
 

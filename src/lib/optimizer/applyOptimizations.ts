@@ -42,31 +42,64 @@ export function replacePartInReference(reference: string, newPartId: string): st
   return `${prefix}${newPartId}${extension}`;
 }
 
-export function applyOptimizations(
-  document: LDrawDocument,
+/**
+ * Which candidate actually rewrites each line.
+ *
+ * Two enabled changes can target the same line type 1, and only one of them can
+ * win. This picks the winner explicitly, by saving, with the candidate id as a
+ * deterministic tiebreak.
+ *
+ * It exists as its own function because the choice was previously made twice:
+ * here by comparing savings, and in `applyToInstances` by taking whichever
+ * candidate appeared first in the array. Those agreed only because the pipeline
+ * happens to sort candidates by descending saving before storing them. Two
+ * independent rules that agree by coincidence are one refactor away from the
+ * parts list disagreeing with the exported model - the user is told to buy a
+ * black brick while the file they downloaded still says red.
+ */
+export function selectAppliedCandidates(
   candidates: readonly OptimizationCandidate[],
   enabledIds: ReadonlySet<string>,
-): ApplyResult {
-  const skipped: { candidateId: string; reason: string }[] = [];
+): {
+  byCommand: Map<string, OptimizationCandidate>;
+  skipped: { candidateId: string; reason: string }[];
+} {
   const byCommand = new Map<string, OptimizationCandidate>();
+  const skipped: { candidateId: string; reason: string }[] = [];
 
   for (const candidate of candidates) {
     if (!enabledIds.has(candidate.id)) continue;
     const key = commandRefKey(candidate.commandRef);
     const existing = byCommand.get(key);
-    if (existing) {
-      // Two changes cannot both rewrite the same line. Keep the bigger saving.
-      const loser = existing.savings >= candidate.savings ? candidate : existing;
-      const winner = existing.savings >= candidate.savings ? existing : candidate;
-      byCommand.set(key, winner);
-      skipped.push({
-        candidateId: loser.id,
-        reason: `Conflicts with ${winner.id}: both would rewrite the same line. The larger saving was kept.`,
-      });
+    if (!existing) {
+      byCommand.set(key, candidate);
       continue;
     }
-    byCommand.set(key, candidate);
+    // Bigger saving wins; equal savings fall back to the id so the outcome does
+    // not depend on array order.
+    const existingWins =
+      existing.savings > candidate.savings ||
+      (existing.savings === candidate.savings && existing.id <= candidate.id);
+    const winner = existingWins ? existing : candidate;
+    const loser = existingWins ? candidate : existing;
+    byCommand.set(key, winner);
+    skipped.push({
+      candidateId: loser.id,
+      reason: `Conflicts with ${winner.id}: both would rewrite the same line. The larger saving was kept.`,
+    });
   }
+
+  return { byCommand, skipped };
+}
+
+export function applyOptimizations(
+  document: LDrawDocument,
+  candidates: readonly OptimizationCandidate[],
+  enabledIds: ReadonlySet<string>,
+): ApplyResult {
+  const selection = selectAppliedCandidates(candidates, enabledIds);
+  const skipped: { candidateId: string; reason: string }[] = [...selection.skipped];
+  const byCommand = selection.byCommand;
 
   // Copy the command arrays so the original document is never touched.
   const files: ModelFile[] = document.files.map((file) => ({ ...file, commands: [...file.commands] }));

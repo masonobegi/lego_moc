@@ -1,4 +1,10 @@
 import { applyToInstances } from '@/lib/analysis/pipeline';
+import { applyOptimizations } from '@/lib/optimizer/applyOptimizations';
+import { parseLDraw } from '@/lib/ldraw/parser';
+import { resolveModel } from '@/lib/ldraw/resolve';
+import { serializeDocument } from '@/lib/ldraw/serializer';
+import { countLots } from '@/lib/ldraw/inventory';
+import type { PartInstance } from '@/lib/ldraw/types';
 import { computeSavings } from '@/lib/analysis/pipeline';
 import { calculateCost } from '@/lib/pricing/priceEngine';
 import { exportOptimizedLDraw } from '@/lib/export/ldrawExport';
@@ -136,9 +142,41 @@ export async function POST(
   // rather than from the change list, so lots that MERGE come out right - see
   // the note at the top of inventoryDelta.ts.
   if (kind === 'changed-parts-csv' || kind === 'changed-parts-wanted-list') {
+    const optimizedInstances = applyToInstances(instances, record.result.candidates, enabled);
+
+    // Prove the parts list matches the file.
+    //
+    // The delta comes from `applyToInstances`; the .ldr download comes from
+    // `applyOptimizations`, which has guards the first does not - it refuses to
+    // rewrite a line whose written color or part id is not what the candidate
+    // recorded. A candidate that one applies and the other skips would put a
+    // brick on this shopping list that is not in the model file, and nothing
+    // downstream would notice.
+    //
+    // So round-trip it: rewrite the document, serialize, re-parse, re-resolve,
+    // and check the resulting inventory lot for lot. It costs one parse of a
+    // file we already hold, and it is the only check that covers the whole
+    // path rather than one function's idea of it.
+    const applied = applyOptimizations(document, record.result.candidates, enabled);
+    const roundTripped = resolveModel(
+      parseLDraw(serializeDocument(applied.document), { sourceName: record.result.model.fileName }),
+    ).instances;
+    const mismatch = compareInventories(optimizedInstances, roundTripped);
+    if (mismatch) {
+      return new Response(
+        JSON.stringify({
+          error:
+            `The changed-parts list does not match the optimized model file (${mismatch}). ` +
+            `Rather than hand you a shopping list for a model you would not be downloading, ` +
+            `this export has been refused. The other exports are unaffected.`,
+        }),
+        { status: 500, headers: { 'content-type': 'application/json' } },
+      );
+    }
+
     const delta = buildInventoryDelta({
       originalInstances: instances,
-      optimizedInstances: applyToInstances(instances, record.result.candidates, enabled),
+      optimizedInstances,
       prices,
       condition: record.result.pricing.condition,
       currency: record.result.pricing.currency,
@@ -249,4 +287,28 @@ function download(body: string, filename: string, contentType: string): Response
 
 function escapeComment(value: string): string {
   return value.replace(/--/g, '- -').replace(/[<>]/g, '');
+}
+
+/**
+ * Lot-for-lot comparison of two inventories. Returns a description of the first
+ * difference, or null when they agree.
+ */
+function compareInventories(
+  expected: readonly PartInstance[],
+  actual: readonly PartInstance[],
+): string | null {
+  if (expected.length !== actual.length) {
+    return `${expected.length} pieces against ${actual.length}`;
+  }
+  const a = countLots(expected);
+  const b = countLots(actual);
+  if (a.size !== b.size) return `${a.size} lots against ${b.size}`;
+  for (const [key, lot] of a) {
+    const other = b.get(key);
+    if (!other) return `${key} is missing from the model file`;
+    if (other.quantity !== lot.quantity) {
+      return `${key} is ${lot.quantity} on the list and ${other.quantity} in the model file`;
+    }
+  }
+  return null;
 }
