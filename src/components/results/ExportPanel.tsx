@@ -41,6 +41,16 @@ const EXPORTS = [
     title: 'Optimized BrickLink Wanted List (XML)',
     body: 'The same inventory with your enabled changes applied. Price this one second and compare the two totals.',
   },
+  {
+    kind: 'changed-parts-csv',
+    title: 'Changed parts only (CSV)',
+    body: 'Just the lots that differ: what to buy more of, what to buy fewer of, and what you no longer need at all. Both directions, with the quantities.',
+  },
+  {
+    kind: 'changed-parts-wanted-list',
+    title: 'Changed parts only (XML)',
+    body: 'The extra pieces alone, for topping up an order you have already placed. A Wanted List cannot express a removal, so the parts you no longer need are in the CSV above, not here.',
+  },
 ] as const;
 
 export function ExportPanel({

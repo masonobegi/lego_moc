@@ -9,6 +9,7 @@ import type { AnalysisResult, OptimizationQualityMetrics, SavingsSummary } from 
 import type { OptimizationCandidate } from '../optimizer/types';
 import type { CostSummary } from '../pricing/priceEngine';
 import type { PartInstance } from '../ldraw/types';
+import { DELTA_ACTION_LABELS, type InventoryDelta } from './inventoryDelta';
 
 // ---------------------------------------------------------------------------
 // JSON report
@@ -203,6 +204,25 @@ export function csvEscape(value: string | number | boolean): string {
   return text;
 }
 
+/**
+ * A number we computed ourselves, formatted for CSV.
+ *
+ * `csvEscape` prefixes anything starting with `-`, `+`, `=` or `@` with an
+ * apostrophe so a spreadsheet cannot evaluate attacker-controlled text as a
+ * formula. That guard is essential for values taken from an uploaded model -
+ * a part description or a color name is whatever the file said - and actively
+ * harmful for a numeric column, where it turns -4 into the TEXT '-4 and breaks
+ * sorting and summing.
+ *
+ * The distinction is provenance, not appearance: these numbers are computed
+ * here from integers and prices, never copied out of the uploaded file, so
+ * there is nothing to inject.
+ */
+export function csvNumber(value: number | null, decimals = 0): string {
+  if (value === null || !Number.isFinite(value)) return '';
+  return value.toFixed(decimals);
+}
+
 export function buildChangeLogCsv(
   candidates: readonly OptimizationCandidate[],
   enabledIds: ReadonlySet<string>,
@@ -322,6 +342,122 @@ export function buildWantedListXml(
     lines.push('    </ITEM>');
     itemCount++;
     pieceCount += lot.quantity;
+  }
+
+  lines.push('</INVENTORY>');
+  return { xml: lines.join('\n') + '\n', itemCount, pieceCount, excluded };
+}
+
+
+// ---------------------------------------------------------------------------
+// Changed parts only: the difference between the two inventories
+// ---------------------------------------------------------------------------
+
+const DELTA_CSV_COLUMNS = [
+  'action',
+  'part',
+  'partDescription',
+  'colorId',
+  'color',
+  'originalQty',
+  'optimizedQty',
+  'change',
+  'estUnitPrice',
+  'estOriginalLineTotal',
+  'estOptimizedLineTotal',
+  'estCostChange',
+] as const;
+
+/**
+ * The delta as a spreadsheet.
+ *
+ * Unlike the Wanted List XML below, this can carry BOTH directions, so it is the
+ * authoritative artifact: the lots you need fewer of only exist here. The
+ * `action` column spells that out in words rather than leaving the reader to
+ * infer it from a minus sign, because this file will be opened out of context.
+ */
+export function buildInventoryDeltaCsv(delta: InventoryDelta): string {
+  const rows: string[] = [DELTA_CSV_COLUMNS.join(',')];
+  for (const lot of delta.lots) {
+    rows.push(
+      [
+        // Text from the model goes through the injection guard; numbers we
+        // computed go through csvNumber so they stay numbers in a spreadsheet.
+        csvEscape(DELTA_ACTION_LABELS[lot.action]),
+        csvEscape(lot.partId),
+        csvEscape(lot.partDescription),
+        csvNumber(lot.colorId),
+        csvEscape(lot.colorName),
+        csvNumber(lot.originalQuantity),
+        csvNumber(lot.optimizedQuantity),
+        // Signed, and negative on purpose: "buy 4 fewer" is -4. The direction is
+        // also spelled out in the action column for anyone reading rather than
+        // computing.
+        csvNumber(lot.difference),
+        csvNumber(lot.unitPrice, 2),
+        csvNumber(lot.originalLineTotal, 2),
+        csvNumber(lot.optimizedLineTotal, 2),
+        csvNumber(lot.costDifference, 2),
+      ].join(','),
+    );
+  }
+  return rows.join('\r\n') + '\r\n';
+}
+
+/**
+ * The delta as a BrickLink Wanted List.
+ *
+ * The format cannot express a decrease. There is no negative MINQTY and no
+ * "remove" element - a Wanted List says what you want, not what you no longer
+ * want. So this file contains ONLY the lots whose quantity went up, and it says
+ * so at length in its own header, because a list of parts is exactly the kind of
+ * file somebody opens a week later and treats as their order.
+ *
+ * The lots that went down are in the CSV. That asymmetry is a property of
+ * BrickLink's format, not a choice, and pretending otherwise by silently
+ * dropping the decreases would be the dishonest option.
+ */
+export function buildInventoryDeltaWantedListXml(
+  delta: InventoryDelta,
+  catalog: CatalogService,
+  condition: 'new' | 'used',
+): WantedListResult {
+  const lines: string[] = ['<INVENTORY>'];
+  const excluded: { partId: string; colorId: number; quantity: number; reason: string }[] = [];
+  let itemCount = 0;
+  let pieceCount = 0;
+
+  for (const lot of delta.lots) {
+    if (lot.difference <= 0) continue;
+    const partMapping = catalog.mapPart(lot.partId);
+    if (partMapping.confidence === 'unmapped' || !partMapping.brickLinkPartId) {
+      excluded.push({
+        partId: lot.partId,
+        colorId: lot.colorId,
+        quantity: lot.difference,
+        reason: partMapping.note ?? 'No BrickLink part number could be resolved.',
+      });
+      continue;
+    }
+    const colorMapping = catalog.mapColor(lot.colorId);
+    if (colorMapping.brickLinkColorId === null) {
+      excluded.push({
+        partId: lot.partId,
+        colorId: lot.colorId,
+        quantity: lot.difference,
+        reason: `No BrickLink color id is known for LDraw color ${lot.colorId} (${lot.colorName}).`,
+      });
+      continue;
+    }
+    lines.push('    <ITEM>');
+    lines.push('        <ITEMTYPE>P</ITEMTYPE>');
+    lines.push(`        <ITEMID>${xmlEscape(partMapping.brickLinkPartId)}</ITEMID>`);
+    lines.push(`        <COLOR>${colorMapping.brickLinkColorId}</COLOR>`);
+    lines.push(`        <MINQTY>${lot.difference}</MINQTY>`);
+    lines.push(`        <CONDITION>${condition === 'new' ? 'N' : 'U'}</CONDITION>`);
+    lines.push('    </ITEM>');
+    itemCount++;
+    pieceCount += lot.difference;
   }
 
   lines.push('</INVENTORY>');

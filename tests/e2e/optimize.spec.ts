@@ -267,3 +267,59 @@ async function analyzeFixture(page: import('@playwright/test').Page, fixture: st
   const body = (await response.json()) as { result: { id: string } };
   return body.result.id;
 }
+
+/**
+ * The changed-parts export is the one a user is most likely to act on without
+ * reading, so these check the artifacts that actually land on disk rather than
+ * just the functions that build them.
+ */
+test.describe('the changed-parts-only export', () => {
+  test('downloads both forms and they agree with each other', async ({ page }) => {
+    const id = await analyzeFixture(page, 'buried-brick.ldr');
+    await page.goto(`/results/${id}`);
+
+    const csvDownload = page.waitForEvent('download');
+    await page.getByTestId('export-changed-parts-csv').getByRole('button', { name: 'Download' }).click();
+    const csv = readFileSync(await (await csvDownload).path(), 'utf8');
+
+    const rows = csv.trim().split('\r\n');
+    expect(rows[0]).toContain('action');
+    expect(rows.length).toBeGreaterThan(1);
+    // buried-brick.ldr recolors one red 2x4 to black: one lot out, one lot in.
+    expect(csv).toContain('No longer needed');
+    expect(csv).toMatch(/Buy/);
+
+    const xmlDownload = page.waitForEvent('download');
+    await page
+      .getByTestId('export-changed-parts-wanted-list')
+      .getByRole('button', { name: 'Download' })
+      .click();
+    const xml = readFileSync(await (await xmlDownload).path(), 'utf8');
+
+    // Only the increase is expressible, and the file says so plainly.
+    expect(xml).toContain('CHANGED PARTS ONLY');
+    expect(xml).toContain('NOT a complete parts list');
+    expect(xml).toContain('Do not order from this file alone');
+    expect(xml).toContain('<INVENTORY>');
+    expect(xml).toContain('<MINQTY>1</MINQTY>');
+
+    // The XML carries only the added lot; the removed one exists only in the CSV.
+    const items = [...xml.matchAll(/<ITEM>/g)].length;
+    expect(items).toBe(1);
+  });
+
+  test('is empty, not broken, when no changes are enabled', async ({ page }) => {
+    const id = await analyzeFixture(page, 'buried-brick.ldr');
+    await page.goto(`/results/${id}`);
+
+    await page.getByRole('button', { name: 'Disable all' }).click();
+    await expect(page.getByTestId('enabled-count')).toContainText('0 enabled', { timeout: 30_000 });
+
+    const csvDownload = page.waitForEvent('download');
+    await page.getByTestId('export-changed-parts-csv').getByRole('button', { name: 'Download' }).click();
+    const csv = readFileSync(await (await csvDownload).path(), 'utf8');
+
+    // Header only: nothing changed, so nothing to buy differently.
+    expect(csv.trim().split('\r\n')).toHaveLength(1);
+  });
+});
