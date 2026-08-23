@@ -80,7 +80,7 @@ export function ExportPanel({ analysisId, enabledIds, isMpd, enabledCount }: Pro
 
       <ul className="mt-4 space-y-2.5">
         {EXPORTS.map((item) => (
-          <li key={item.kind} className="panel-2 p-3.5">
+          <li key={item.kind} data-testid={`export-${item.kind}`} className="panel-2 p-3.5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[0.85rem] font-medium">
@@ -94,7 +94,7 @@ export function ExportPanel({ analysisId, enabledIds, isMpd, enabledCount }: Pro
                 type="button"
                 onClick={() => void download(item.kind)}
                 disabled={busy !== null}
-                className="shrink-0 rounded-md border border-[var(--line-strong)] px-3 py-1.5 text-[0.78rem] font-medium text-[var(--text-dim)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-50"
+                className="shrink-0 rounded-[2px] border border-[var(--line-strong)] px-3 py-1.5 text-[0.78rem] font-medium text-[var(--text-dim)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-50"
               >
                 {busy === item.kind ? 'Preparing...' : 'Download'}
               </button>
@@ -105,7 +105,7 @@ export function ExportPanel({ analysisId, enabledIds, isMpd, enabledCount }: Pro
 
       {error && <p className="mt-3 text-[0.8rem] text-[var(--bad)]">{error}</p>}
 
-      <div className="mt-4 rounded-lg border border-[var(--line)] bg-[var(--panel-2)] p-3.5">
+      <div className="mt-4 rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] p-3.5">
         <h3 className="text-[0.8rem] font-medium">Taking this back into BrickLink Studio</h3>
         <ol className="mt-2 space-y-1.5 text-[0.77rem] leading-relaxed text-[var(--text-dim)]">
           <li>1. Download the optimised model above.</li>

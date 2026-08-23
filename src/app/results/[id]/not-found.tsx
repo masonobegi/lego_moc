@@ -12,7 +12,7 @@ export default function ResultNotFound() {
       </p>
       <Link
         href="/optimize"
-        className="mt-7 inline-block rounded-lg bg-[var(--accent)] px-5 py-2.5 text-[0.9rem] font-semibold text-[#1a1206] hover:opacity-90"
+        className="mt-7 inline-block bg-[var(--accent)] px-5 py-2.5 text-[0.9rem] font-semibold text-[#14100a] hover:bg-[#eeb552]"
       >
         Optimise a model
       </Link>

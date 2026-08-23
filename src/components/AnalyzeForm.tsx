@@ -143,7 +143,7 @@ export function AnalyzeForm({ compact }: Props) {
         role="button"
         tabIndex={0}
         aria-label="Drop a LEGO model here or click to browse"
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-14 text-center transition-colors ${
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-[2px] border-2 border-dashed px-6 py-14 text-center transition-colors ${
           dragging
             ? 'border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_7%,transparent)]'
             : 'border-[var(--line-strong)] hover:border-[var(--text-faint)]'
@@ -171,14 +171,14 @@ export function AnalyzeForm({ compact }: Props) {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg border border-[color-mix(in_srgb,var(--bad)_45%,var(--line))] bg-[color-mix(in_srgb,var(--bad)_9%,transparent)] p-4">
+        <div className="mt-4 rounded-[2px] border border-[color-mix(in_srgb,var(--bad)_45%,var(--line))] bg-[color-mix(in_srgb,var(--bad)_9%,transparent)] p-4">
           <p className="text-[0.86rem] font-medium text-[var(--bad)]">Could not analyse that file</p>
           <p className="mt-1.5 text-[0.83rem] leading-relaxed text-[var(--text-dim)]">{error}</p>
         </div>
       )}
 
       <fieldset className="mt-7">
-        <legend className="text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+        <legend className="label">
           Safety level
         </legend>
         <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
@@ -188,7 +188,7 @@ export function AnalyzeForm({ compact }: Props) {
             return (
               <label
                 key={level}
-                className={`cursor-pointer rounded-lg border p-4 transition-colors ${
+                className={`cursor-pointer rounded-[2px] border p-4 transition-colors ${
                   selected
                     ? 'border-[color-mix(in_srgb,var(--accent)_50%,var(--line))] bg-[color-mix(in_srgb,var(--accent)_6%,transparent)]'
                     : 'border-[var(--line)] hover:border-[var(--line-strong)]'
@@ -205,7 +205,7 @@ export function AnalyzeForm({ compact }: Props) {
                   />
                   <span className="text-[0.88rem] font-medium">{config.label}</span>
                   {level === 'extremely_conservative' && (
-                    <span className="rounded border border-[var(--line-strong)] px-1.5 py-0.5 text-[0.66rem] uppercase tracking-wide text-[var(--text-faint)]">
+                    <span className="rounded-[2px] border border-[var(--line-strong)] px-1.5 py-0.5 text-[0.66rem] uppercase tracking-wide text-[var(--text-faint)]">
                       Default
                     </span>
                   )}

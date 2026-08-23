@@ -4,12 +4,10 @@ export default function HomePage() {
   return (
     <>
       {/* ---- hero ---- */}
-      <section className="stud-grid relative overflow-hidden border-b border-[var(--line)]">
-        <div className="pointer-events-none absolute inset-x-0 -top-40 h-80 bg-[radial-gradient(60%_100%_at_50%_100%,color-mix(in_srgb,var(--accent)_10%,transparent),transparent)]" />
-        <div className="mx-auto grid max-w-[1200px] items-center gap-14 px-5 py-24 sm:py-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
+      <section className="border-b border-[var(--line)]">
+        <div className="mx-auto grid max-w-[1200px] items-center gap-16 px-5 py-24 sm:py-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)]">
         <div>
-          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--line-strong)] bg-[var(--panel)] px-3 py-1 text-[0.73rem] font-medium tracking-wide text-[var(--text-dim)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+          <p className="label mb-6 border-l border-[var(--line-strong)] pl-3">
             For LDraw and BrickLink Studio designers
           </p>
 
@@ -27,13 +25,13 @@ export default function HomePage() {
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Link
               href="/optimize"
-              className="rounded-lg bg-[var(--accent)] px-5 py-2.5 text-[0.92rem] font-semibold text-[#1a1206] transition-opacity hover:opacity-90"
+              className="bg-[var(--accent)] px-5 py-2.5 text-[0.9rem] font-semibold text-[#14100a] transition-colors hover:bg-[#eeb552]"
             >
               Optimise a model
             </Link>
             <Link
               href="/dev"
-              className="rounded-lg border border-[var(--line-strong)] px-5 py-2.5 text-[0.92rem] font-medium text-[var(--text-dim)] transition-colors hover:border-[var(--text-faint)] hover:text-[var(--text)]"
+              className="border border-[var(--line-strong)] px-5 py-2.5 text-[0.9rem] font-medium text-[var(--text-dim)] transition-colors hover:border-[var(--text-faint)] hover:text-[var(--text)]"
             >
               Try it on a test model
             </Link>
@@ -52,34 +50,38 @@ export default function HomePage() {
       {/* ---- worked example ---- */}
       <section className="border-b border-[var(--line)] px-5 py-20">
         <div className="mx-auto max-w-[1100px]">
-          <h2 className="text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
-            The idea
-          </h2>
-          <div className="mt-7 grid gap-4 md:grid-cols-[1fr_auto_1fr]">
-            <ExampleCard
-              title="A brick you can never see"
-              lines={[
-                ['Part', 'Brick 2 x 4'],
-                ['Colour', 'Red'],
-                ['Position', 'Sealed inside the structure'],
-                ['Price', '$0.75 each'],
-              ]}
-            />
-            <div className="flex items-center justify-center py-2 md:py-0">
-              <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden className="text-[var(--accent)] max-md:rotate-90">
-                <path d="M6 17h20m0 0-6.5-6.5M26 17l-6.5 6.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <ExampleCard
-              title="The same brick, cheaper"
-              accent
-              lines={[
-                ['Part', 'Brick 2 x 4'],
-                ['Colour', 'Black'],
-                ['Position', 'Identical'],
-                ['Price', '$0.12 each'],
-              ]}
-            />
+          <h2 className="label">The idea</h2>
+          <div className="mt-7 max-w-[720px] overflow-x-auto">
+            <table className="w-full text-[0.88rem]">
+              <thead>
+                <tr className="border-b border-[var(--line-strong)]">
+                  <th className="label py-2 text-left font-semibold">&nbsp;</th>
+                  <th className="label py-2 text-right font-semibold">Before</th>
+                  <th className="label py-2 text-right font-semibold">After</th>
+                </tr>
+              </thead>
+              <tbody className="tnum">
+                {[
+                  ['Part', 'Brick 2 x 4', 'Brick 2 x 4'],
+                  ['Colour', 'Red', 'Black'],
+                  ['Position and orientation', 'x 0, y -24, z 0', 'Identical'],
+                  ['Build step', 'Step 3', 'Step 3'],
+                  ['Estimated price', '$0.75', '$0.12'],
+                ].map(([label, before, after], index, all) => (
+                  <tr key={label} className={index === all.length - 1 ? 'border-t border-[var(--line)]' : ''}>
+                    <td className="py-2 pr-6 text-[var(--text-faint)]">{label}</td>
+                    <td className="py-2 text-right text-[var(--text-dim)]">{before}</td>
+                    <td
+                      className={`py-2 pl-6 text-right ${
+                        index === all.length - 1 ? 'font-semibold text-[var(--accent)]' : 'text-[var(--text)]'
+                      }`}
+                    >
+                      {after}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
           <p className="mt-6 max-w-[70ch] text-[0.88rem] leading-relaxed text-[var(--text-dim)]">
             Nothing about the finished model changes: same part, same place, same orientation, same
@@ -92,10 +94,8 @@ export default function HomePage() {
       {/* ---- how it works ---- */}
       <section className="border-b border-[var(--line)] px-5 py-20">
         <div className="mx-auto max-w-[1100px]">
-          <h2 className="text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
-            How it decides
-          </h2>
-          <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <h2 className="label">How it decides</h2>
+          <div className="mt-7 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
             <Step
               n="01"
               title="Reads your model properly"
@@ -165,7 +165,7 @@ export default function HomePage() {
                   'It does not generate instructions. It preserves your build steps so Studio can.',
                 ].map((item) => (
                   <li key={item} className="flex gap-2.5">
-                    <span className="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-[var(--text-faint)]" />
+                    <span className="mt-[0.55em] h-[3px] w-[3px] shrink-0 bg-[var(--text-faint)]" />
                     {item}
                   </li>
                 ))}
@@ -225,15 +225,14 @@ function CutawayDiagram() {
                 <rect
                   x={x}
                   y={y}
-                  width={cellW - 4}
-                  height={cellH - 4}
-                  rx={3}
-                  fill={isHidden ? '#B40000' : '#3a4453'}
-                  stroke={isHidden ? '#f0a836' : '#4a5566'}
-                  strokeWidth={isHidden ? 1.6 : 0.8}
+                  width={cellW - 3}
+                  height={cellH - 3}
+                  fill={isHidden ? '#8f2b2b' : '#2b3038'}
+                  stroke={isHidden ? '#e0a33a' : '#3a404a'}
+                  strokeWidth={isHidden ? 1.4 : 0.8}
                 />
-                <rect x={x + 9} y={y - 3} width={13} height={5} rx={2} fill={isHidden ? '#8f0000' : '#2f3846'} />
-                <rect x={x + 34} y={y - 3} width={13} height={5} rx={2} fill={isHidden ? '#8f0000' : '#2f3846'} />
+                <rect x={x + 10} y={y - 3} width={12} height={4} fill={isHidden ? '#6f2020' : '#22262d'} />
+                <rect x={x + 34} y={y - 3} width={12} height={4} fill={isHidden ? '#6f2020' : '#22262d'} />
               </g>
             );
           }),
@@ -250,44 +249,12 @@ function CutawayDiagram() {
   );
 }
 
-function ExampleCard({
-  title,
-  lines,
-  accent,
-}: {
-  title: string;
-  lines: [string, string][];
-  accent?: boolean;
-}) {
-  return (
-    <div
-      className={`panel p-6 ${accent ? 'border-[color-mix(in_srgb,var(--accent)_38%,var(--line))]' : ''}`}
-    >
-      <h3 className="text-[0.9rem] font-semibold">{title}</h3>
-      <dl className="mt-4 space-y-2.5">
-        {lines.map(([label, value]) => (
-          <div key={label} className="flex items-baseline justify-between gap-4">
-            <dt className="text-[0.8rem] text-[var(--text-faint)]">{label}</dt>
-            <dd
-              className={`tnum text-[0.86rem] ${
-                label === 'Price' && accent ? 'font-semibold text-[var(--accent)]' : 'text-[var(--text)]'
-              }`}
-            >
-              {value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
-}
-
 function Step({ n, title, body }: { n: string; title: string; body: string }) {
   return (
-    <div>
-      <span className="tnum text-[0.72rem] font-semibold tracking-widest text-[var(--accent)]">{n}</span>
-      <h3 className="mt-2.5 text-[0.95rem] font-semibold leading-snug">{title}</h3>
-      <p className="mt-2 text-[0.85rem] leading-relaxed text-[var(--text-dim)]">{body}</p>
+    <div className="border-t border-[var(--line)] pt-4">
+      <span className="tnum font-mono text-[0.72rem] text-[var(--text-faint)]">{n}</span>
+      <h3 className="mt-2 text-[0.93rem] font-semibold leading-snug">{title}</h3>
+      <p className="mt-2 text-[0.84rem] leading-relaxed text-[var(--text-dim)]">{body}</p>
     </div>
   );
 }

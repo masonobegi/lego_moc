@@ -404,13 +404,16 @@ export function parseLDraw(source: string, options: ParseOptions = {}): LDrawDoc
     };
   });
 
-  if (files.length === 0) {
+  const hasContent = files.some((file) => file.commands.some((c) => c.type !== 'blank'));
+  if (!hasContent) {
     warnings.push({
       code: 'empty_document',
-      message: 'The file contained no LDraw content.',
+      message: 'The file contained no LDraw content: every line was blank.',
       line: 0,
       file: null,
     });
+  }
+  if (files.length === 0) {
     files.push({
       name: sourceName,
       isAnonymous: true,

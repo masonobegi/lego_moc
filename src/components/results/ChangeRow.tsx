@@ -39,6 +39,8 @@ export function ChangeRow({
 
   return (
     <li
+      data-testid="change-row"
+      data-candidate-id={candidate.id}
       className={`panel-2 overflow-hidden transition-colors ${
         selected ? 'border-[color-mix(in_srgb,var(--accent)_50%,var(--line))]' : ''
       } ${enabled ? '' : 'opacity-[0.62]'}`}
@@ -64,12 +66,12 @@ export function ChangeRow({
               {candidate.partId}
             </span>
             {candidate.quantity > 1 && (
-              <span className="tnum rounded border border-[var(--line-strong)] px-1.5 py-px text-[0.68rem] text-[var(--text-dim)]">
+              <span className="tnum rounded-[2px] border border-[var(--line-strong)] px-1.5 py-px text-[0.68rem] text-[var(--text-dim)]">
                 x{candidate.quantity}
               </span>
             )}
             {isMold && (
-              <span className="rounded border border-[color-mix(in_srgb,var(--good)_35%,var(--line))] px-1.5 py-px text-[0.66rem] uppercase tracking-wide text-[var(--good)]">
+              <span className="rounded-[2px] border border-[color-mix(in_srgb,var(--good)_35%,var(--line))] px-1.5 py-px text-[0.66rem] uppercase tracking-wide text-[var(--good)]">
                 Mold
               </span>
             )}
@@ -100,7 +102,7 @@ export function ChangeRow({
               {money(candidate.originalTotal, currency)} <Arrow />{' '}
               {money(candidate.replacementTotal, currency)}
             </span>
-            <span className={`rounded border px-1.5 py-px ${visibility.className}`}>
+            <span className={`rounded-[2px] border px-1.5 py-px ${visibility.className}`}>
               {visibility.label}
             </span>
             <span className="tnum">{confidenceLabel(candidate.confidence)} confidence</span>
@@ -134,7 +136,7 @@ export function ChangeRow({
           <ul className="mt-2.5 space-y-2">
             {candidate.evidence.map((line, i) => (
               <li key={i} className="flex gap-2.5 text-[0.78rem] leading-relaxed text-[var(--text-dim)]">
-                <span className="mt-[0.5em] h-1 w-1 shrink-0 rounded-full bg-[var(--text-faint)]" />
+                <span className="mt-[0.5em] h-[3px] w-[3px] shrink-0 bg-[var(--text-faint)]" />
                 {line}
               </li>
             ))}

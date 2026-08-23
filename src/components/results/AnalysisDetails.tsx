@@ -35,9 +35,9 @@ export function AnalysisDetails({ result }: { result: AnalysisResult }) {
             return (
               <li key={row.key} className="flex items-center gap-3">
                 <span className="w-28 shrink-0 text-[0.79rem] text-[var(--text-dim)]">{row.label}</span>
-                <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--panel-2)]">
+                <span className="h-1.5 flex-1 overflow-hidden bg-[var(--panel-2)]">
                   <span
-                    className="block h-full rounded-full"
+                    className="block h-full"
                     style={{ width: `${(value / total) * 100}%`, background: row.tone }}
                   />
                 </span>
@@ -73,7 +73,7 @@ export function AnalysisDetails({ result }: { result: AnalysisResult }) {
           </ul>
         )}
         {result.rejections.some((r) => r.reason === 'mixed_visibility') && (
-          <p className="mt-4 rounded-md border border-[var(--line)] bg-[var(--panel-2)] p-3 text-[0.75rem] leading-relaxed text-[var(--text-faint)]">
+          <p className="mt-4 rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] p-3 text-[0.75rem] leading-relaxed text-[var(--text-faint)]">
             &ldquo;Reused submodel where at least one copy is visible&rdquo; is usually the biggest
             missed opportunity in a real model. Those parts are genuinely hidden, but they share a
             line with a copy that is not, and changing that line would recolour the visible one.
@@ -99,7 +99,7 @@ export function AnalysisDetails({ result }: { result: AnalysisResult }) {
         </dl>
 
         {result.geometry.missingParts.length > 0 && (
-          <div className="mt-4 rounded-md border border-[color-mix(in_srgb,var(--warn)_35%,var(--line))] bg-[color-mix(in_srgb,var(--warn)_7%,transparent)] p-3">
+          <div className="mt-4 rounded-[2px] border border-[color-mix(in_srgb,var(--warn)_35%,var(--line))] bg-[color-mix(in_srgb,var(--warn)_7%,transparent)] p-3">
             <p className="text-[0.79rem] font-medium text-[var(--warn)]">
               {count(result.geometry.missingParts.length)} part
               {result.geometry.missingParts.length === 1 ? '' : 's'} could not be found in the LDraw
@@ -118,7 +118,7 @@ export function AnalysisDetails({ result }: { result: AnalysisResult }) {
         )}
 
         {result.parse.unresolvedSubmodels.length > 0 && (
-          <div className="mt-3 rounded-md border border-[color-mix(in_srgb,var(--warn)_35%,var(--line))] p-3">
+          <div className="mt-3 rounded-[2px] border border-[color-mix(in_srgb,var(--warn)_35%,var(--line))] p-3">
             <p className="text-[0.79rem] font-medium text-[var(--warn)]">
               This model references files that were not included
             </p>
@@ -137,7 +137,7 @@ export function AnalysisDetails({ result }: { result: AnalysisResult }) {
         )}
 
         {result.parse.truncated && (
-          <p className="mt-3 rounded-md border border-[color-mix(in_srgb,var(--bad)_35%,var(--line))] p-3 text-[0.77rem] text-[var(--bad)]">
+          <p className="mt-3 rounded-[2px] border border-[color-mix(in_srgb,var(--bad)_35%,var(--line))] p-3 text-[0.77rem] text-[var(--bad)]">
             {result.parse.truncationReason}
           </p>
         )}
@@ -150,7 +150,7 @@ export function AnalysisDetails({ result }: { result: AnalysisResult }) {
           <p className="text-[0.8rem] font-medium">
             Prices: {result.pricing.sourceLabel}
             {result.pricing.isDemoData && (
-              <span className="ml-2 rounded border border-[color-mix(in_srgb,var(--warn)_45%,var(--line))] px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--warn)]">
+              <span className="ml-2 rounded-[2px] border border-[color-mix(in_srgb,var(--warn)_45%,var(--line))] px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--warn)]">
                 Demo price data
               </span>
             )}

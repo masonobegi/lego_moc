@@ -49,7 +49,7 @@ export default function OptimizePage() {
                 'A JSON report, a CSV change log and a BrickLink Wanted List.',
               ].map((item) => (
                 <li key={item} className="flex gap-2.5">
-                  <span className="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-[var(--accent)]" />
+                  <span className="mt-[0.55em] h-[3px] w-[3px] shrink-0 bg-[var(--accent)]" />
                   {item}
                 </li>
               ))}

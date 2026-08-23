@@ -15,7 +15,19 @@ export default defineConfig({
     trace: 'retain-on-failure',
     video: 'off',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        // CHROMIUM_PATH lets a sandbox point at a preinstalled browser.
+        // Left unset, Playwright uses the browser it manages itself.
+        ...(process.env.CHROMIUM_PATH
+          ? { launchOptions: { executablePath: process.env.CHROMIUM_PATH, args: ['--no-sandbox', '--use-gl=swiftshader', '--enable-unsafe-swiftshader'] } }
+          : {}),
+      },
+    },
+  ],
   webServer: {
     command: `npm run build && npx next start -p ${PORT}`,
     url: `http://127.0.0.1:${PORT}`,

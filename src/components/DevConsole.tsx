@@ -115,7 +115,7 @@ export function DevConsole() {
                   type="button"
                   onClick={() => void run(fixture.id)}
                   disabled={running !== null}
-                  className="w-full rounded-lg border border-[var(--line)] p-3 text-left transition-colors hover:border-[var(--line-strong)] disabled:opacity-50"
+                  className="w-full rounded-[2px] border border-[var(--line)] p-3 text-left transition-colors hover:border-[var(--line-strong)] disabled:opacity-50"
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span className="text-[0.85rem] font-medium">{fixture.label}</span>
@@ -147,7 +147,7 @@ export function DevConsole() {
                 value={`${status.priceSource}${status.isDemoData ? ' (DEMO PRICE DATA)' : ''}`}
               />
               {status.priceSourceFallbackReason && (
-                <p className="col-span-2 rounded border border-[color-mix(in_srgb,var(--warn)_40%,var(--line))] p-2 text-[0.74rem] leading-relaxed text-[var(--warn)]">
+                <p className="col-span-2 rounded-[2px] border border-[color-mix(in_srgb,var(--warn)_40%,var(--line))] p-2 text-[0.74rem] leading-relaxed text-[var(--warn)]">
                   {status.priceSourceFallbackReason}
                 </p>
               )}
@@ -171,7 +171,7 @@ export function DevConsole() {
               <Row label="Colour mappings" value={count(status.colorMappingEntries)} />
             </dl>
             {!status.partsLibrary.usingFullLibrary && (
-              <p className="mt-3 rounded border border-[var(--line)] bg-[var(--panel-2)] p-2.5 text-[0.73rem] leading-relaxed text-[var(--text-faint)]">
+              <p className="mt-3 rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] p-2.5 text-[0.73rem] leading-relaxed text-[var(--text-faint)]">
                 Only the bundled part subset is installed. That covers the fixtures and common
                 elements; run <code className="font-mono">npm run parts:fetch</code> before analysing
                 a real MOC.
@@ -192,7 +192,7 @@ export function DevConsole() {
         )}
 
         {error && (
-          <p className="mt-3 rounded-md border border-[color-mix(in_srgb,var(--bad)_40%,var(--line))] p-3 text-[0.83rem] text-[var(--bad)]">
+          <p className="mt-3 rounded-[2px] border border-[color-mix(in_srgb,var(--bad)_40%,var(--line))] p-3 text-[0.83rem] text-[var(--bad)]">
             {error}
           </p>
         )}
@@ -252,9 +252,9 @@ function RunReport({ result, savings }: { result: AnalysisResult; savings: Savin
             return (
               <li key={stage.id} className="flex items-center gap-3 text-[0.77rem]">
                 <span className="w-40 shrink-0 text-[var(--text-dim)]">{stage.label}</span>
-                <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--panel-2)]">
+                <span className="h-1.5 flex-1 overflow-hidden bg-[var(--panel-2)]">
                   <span
-                    className="block h-full rounded-full bg-[var(--accent)]"
+                    className="block h-full bg-[var(--accent)]"
                     style={{ width: `${Math.max(share, ms > 0 ? 1 : 0)}%` }}
                   />
                 </span>

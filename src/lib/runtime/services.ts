@@ -36,36 +36,33 @@ export function getCatalog(config: RuntimeConfig = getRuntimeConfig()): CatalogS
     readFileSync(path.join(config.repoRoot, 'data', 'catalog', 'mold-rules.json'), 'utf8'),
   ) as MoldRulesFile;
 
-  // Written by `npm run catalog:import` when a Rebrickable key is configured.
-  const colorsPath = path.join(config.repoRoot, 'data', 'catalog', 'rebrickable', 'part-colors.json');
+  // Written by `npm run catalog:import` when it has been run.
+  //
+  // Only the MOLD RULES are adopted from that import. Its colour data is keyed
+  // by REBRICKABLE colour ids, which are a different numbering scheme from the
+  // LDraw colour ids this app works in; consuming them without a verified
+  // translation table would silently mis-answer "does this part exist in this
+  // colour", which is the one question the optimiser must never get wrong.
+  // See docs/RESEARCH.md section 10.
+  const importPath = path.join(config.repoRoot, 'data', 'catalog', 'rebrickable', 'catalog-import.json');
 
-  if (existsSync(colorsPath)) {
-    const raw = JSON.parse(readFileSync(colorsPath, 'utf8')) as {
-      generatedAt: string;
-      parts: Record<string, number[]>;
-      externalIds?: Record<string, { bricklink?: string; rebrickable?: string; lego?: string }>;
-      moldRules?: MoldRulesFile['rules'];
-    };
-    const colorsByPart = new Map<string, ReadonlySet<number>>();
-    for (const [partId, colors] of Object.entries(raw.parts)) {
-      colorsByPart.set(partId.toLowerCase(), new Set(colors));
+  if (existsSync(importPath)) {
+    try {
+      const raw = JSON.parse(readFileSync(importPath, 'utf8')) as {
+        generatedAt: string;
+        moldRules?: MoldRulesFile['rules'];
+      };
+      catalogSingleton = new DefaultCatalogService({
+        bundled,
+        moldRules: {
+          ...moldRules,
+          rules: [...(raw.moldRules ?? []), ...moldRules.rules],
+        },
+      });
+      return catalogSingleton;
+    } catch {
+      // A corrupt import must not stop the app; fall through to bundled only.
     }
-    catalogSingleton = new DefaultCatalogService({
-      bundled,
-      moldRules,
-      rebrickable: {
-        source: `Rebrickable catalogue import, ${raw.generatedAt}`,
-        colorsByPart,
-        externalIds: raw.externalIds
-          ? {
-              byLDrawId: new Map(Object.entries(raw.externalIds)),
-              source: `Rebrickable import ${raw.generatedAt}`,
-            }
-          : undefined,
-        moldRules: raw.moldRules,
-      },
-    });
-    return catalogSingleton;
   }
 
   catalogSingleton = new DefaultCatalogService({ bundled, moldRules });

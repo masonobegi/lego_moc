@@ -1,11 +1,13 @@
 /**
  * Assembles the catalog from whichever sources are available.
  *
- * Priority:
- *   1. Rebrickable import (data/catalog/rebrickable/*), when `npm run
- *      catalog:import` has been run. Broadest and third-party maintained.
- *   2. Bundled OMR-derived data (data/catalog/bundled-catalog.json), always
- *      present. Real but narrower.
+ * Colour availability comes from the bundled OMR-derived data
+ * (data/catalog/bundled-catalog.json), which is always present and is keyed by
+ * LDraw colour ids. An additional LDraw-native colour source can be supplied
+ * through `ldrawNativeColors` and takes precedence.
+ *
+ * Mold equivalence rules come from data/catalog/mold-rules.json, plus anything
+ * `npm run catalog:import` pulled from Rebrickable's part_relationships.csv.
  *
  * A part/colour combination that appears in NEITHER source is treated as
  * "not known to exist" and is never proposed. That biases the product towards
@@ -54,14 +56,21 @@ export interface MoldRulesFile {
 export interface CatalogInputs {
   bundled: BundledCatalogFile;
   moldRules: MoldRulesFile;
-  /** Present only when `npm run catalog:import` has been run. */
-  rebrickable?: {
+  /**
+   * Colour availability from a source that uses LDRAW colour ids.
+   *
+   * Deliberately not wired to the Rebrickable import: that data is keyed by
+   * Rebrickable colour ids, and treating them as LDraw ids would silently
+   * corrupt every colour-validity decision. The hook exists so a verified
+   * LDraw-native colour source can be dropped in without touching the
+   * optimiser. See docs/RESEARCH.md section 10.
+   */
+  ldrawNativeColors?: {
     source: string;
-    /** part id -> colour ids known to exist. */
+    label: string;
+    /** part id -> LDRAW colour ids known to exist. */
     colorsByPart: ReadonlyMap<string, ReadonlySet<number>>;
     externalIds?: ExternalIdTable;
-    /** Rebrickable `part_relationships.csv` rows of type M. */
-    moldRules?: EquivalentPartRule[];
   };
   /** BrickLink colour ids resolved by name against the live API, when available. */
   brickLinkColorOverrides?: ReadonlyMap<number, number>;
@@ -70,18 +79,18 @@ export interface CatalogInputs {
 export class DefaultCatalogService implements CatalogService {
   readonly status: CatalogStatus;
   private readonly bundled: BundledCatalogFile;
-  private readonly rebrickable: CatalogInputs['rebrickable'];
+  private readonly extraColors: CatalogInputs['ldrawNativeColors'];
   private readonly rulesByPart: Map<string, EquivalentPartRule[]>;
   private readonly colorOverrides: ReadonlyMap<number, number> | undefined;
   private readonly externalIds: ExternalIdTable | undefined;
 
   constructor(inputs: CatalogInputs) {
     this.bundled = inputs.bundled;
-    this.rebrickable = inputs.rebrickable;
+    this.extraColors = inputs.ldrawNativeColors;
     this.colorOverrides = inputs.brickLinkColorOverrides;
-    this.externalIds = inputs.rebrickable?.externalIds;
+    this.externalIds = inputs.ldrawNativeColors?.externalIds;
 
-    const allRules = [...(inputs.rebrickable?.moldRules ?? []), ...inputs.moldRules.rules];
+    const allRules = inputs.moldRules.rules;
     this.rulesByPart = new Map();
     for (const rule of allRules) {
       push(this.rulesByPart, rule.originalPart, rule);
@@ -97,10 +106,10 @@ export class DefaultCatalogService implements CatalogService {
       list.sort((a, b) => b.confidence - a.confidence);
     }
 
-    const usingRebrickable = this.rebrickable !== undefined;
-    const sourceId: CatalogSourceId = usingRebrickable ? 'rebrickable' : 'bundled-omr';
+    const usingExtra = this.extraColors !== undefined;
+    const sourceId: CatalogSourceId = usingExtra ? 'rebrickable' : 'bundled-omr';
     const limitations: string[] = [];
-    if (!usingRebrickable) {
+    if (!usingExtra) {
       limitations.push(
         `Colour availability comes from ${this.bundled.setCount} official LEGO sets modelled in the ` +
           `LDraw Official Model Repository, covering ${this.bundled.partCount.toLocaleString()} parts. ` +
@@ -108,7 +117,8 @@ export class DefaultCatalogService implements CatalogService {
           `have no cheaper colour proposed simply because we cannot prove one exists.`,
       );
       limitations.push(
-        'Run "npm run catalog:import" (needs network access to rebrickable.com) for full coverage.',
+        'Run "npm run catalog:import" for Rebrickable\'s alternate-mold rules. Note that its ' +
+          'colour data uses Rebrickable colour ids, so it is NOT used for colour validity.',
       );
     }
     limitations.push(
@@ -118,13 +128,11 @@ export class DefaultCatalogService implements CatalogService {
 
     this.status = {
       sourceId,
-      label: usingRebrickable ? 'Rebrickable catalogue' : 'Bundled LDraw OMR catalogue',
-      description: usingRebrickable
-        ? `Rebrickable catalogue import (${this.rebrickable!.source}).`
-        : this.bundled.description,
-      partCount: usingRebrickable ? this.rebrickable!.colorsByPart.size : this.bundled.partCount,
-      pairCount: usingRebrickable
-        ? [...this.rebrickable!.colorsByPart.values()].reduce((sum, s) => sum + s.size, 0)
+      label: usingExtra ? this.extraColors!.label : 'Bundled LDraw OMR catalogue',
+      description: usingExtra ? this.extraColors!.source : this.bundled.description,
+      partCount: usingExtra ? this.extraColors!.colorsByPart.size : this.bundled.partCount,
+      pairCount: usingExtra
+        ? [...this.extraColors!.colorsByPart.values()].reduce((sum, set) => sum + set.size, 0)
         : this.bundled.pairCount,
       moldRuleCount: allRules.length,
       limitations,
@@ -134,12 +142,13 @@ export class DefaultCatalogService implements CatalogService {
   availableColors(partId: string): readonly ColorAvailability[] | null {
     const id = partId.toLowerCase();
 
-    const fromRebrickable = this.rebrickable?.colorsByPart.get(id);
-    if (fromRebrickable) {
-      return [...fromRebrickable].sort((a, b) => a - b).map((colorId) => ({
+    const fromExtra = this.extraColors?.colorsByPart.get(id);
+    if (fromExtra) {
+      return [...fromExtra].sort((a, b) => a - b).map((colorId) => ({
         colorId,
         evidence: {
           source: 'rebrickable' as CatalogSourceId,
+          // The extra source records existence, not which set it came from.
           sets: [],
           observations: 1,
         },

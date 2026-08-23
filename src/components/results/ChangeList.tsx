@@ -140,7 +140,7 @@ export function ChangeList({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Filter by part number, description, colour or submodel"
-            className="w-full rounded-md border border-[var(--line)] bg-[var(--panel-2)] px-3 py-2 text-[0.83rem] outline-none placeholder:text-[var(--text-faint)] focus:border-[var(--line-strong)]"
+            className="w-full rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] px-3 py-2 text-[0.83rem] outline-none placeholder:text-[var(--text-faint)] focus:border-[var(--line-strong)]"
           />
         </div>
       </div>
@@ -178,7 +178,7 @@ function BulkButton({ onClick, children }: { onClick: () => void; children: Reac
     <button
       type="button"
       onClick={onClick}
-      className="rounded-md border border-[var(--line-strong)] px-2.5 py-1.5 text-[0.76rem] text-[var(--text-dim)] transition-colors hover:border-[var(--text-faint)] hover:text-[var(--text)]"
+      className="rounded-[2px] border border-[var(--line-strong)] px-2.5 py-1.5 text-[0.76rem] text-[var(--text-dim)] transition-colors hover:border-[var(--text-faint)] hover:text-[var(--text)]"
     >
       {children}
     </button>
@@ -188,7 +188,7 @@ function BulkButton({ onClick, children }: { onClick: () => void; children: Reac
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-[0.71rem] uppercase tracking-wide text-[var(--text-faint)]">{label}</span>
+      <span className="label">{label}</span>
       {children}
     </label>
   );
@@ -207,7 +207,7 @@ function Select({
     <select
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="mt-1 w-full rounded-md border border-[var(--line)] bg-[var(--panel-2)] px-2.5 py-1.5 text-[0.82rem] outline-none focus:border-[var(--line-strong)]"
+      className="mt-1 w-full rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] px-2.5 py-1.5 text-[0.82rem] outline-none focus:border-[var(--line-strong)]"
     >
       {children}
     </select>

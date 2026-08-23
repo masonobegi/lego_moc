@@ -78,7 +78,7 @@ export default function AboutPage() {
             'Mold substitutions where the two molds are not visually identical are only offered for parts that are hidden anyway.',
           ].map((item) => (
             <li key={item} className="flex gap-2.5">
-              <span className="mt-[0.6em] h-1 w-1 shrink-0 rounded-full bg-[var(--text-faint)]" />
+              <span className="mt-[0.6em] h-[3px] w-[3px] shrink-0 bg-[var(--text-faint)]" />
               {item}
             </li>
           ))}
@@ -115,7 +115,7 @@ export default function AboutPage() {
             'A model meant to be viewed from underneath is analysed from every direction, including underneath, so this case is handled - but a model displayed permanently against a wall will not gain the savings it could.',
           ].map((item) => (
             <li key={item} className="flex gap-2.5">
-              <span className="mt-[0.6em] h-1 w-1 shrink-0 rounded-full bg-[var(--text-faint)]" />
+              <span className="mt-[0.6em] h-[3px] w-[3px] shrink-0 bg-[var(--text-faint)]" />
               {item}
             </li>
           ))}
@@ -158,13 +158,13 @@ export default function AboutPage() {
       <div className="mt-12 flex flex-wrap gap-3">
         <Link
           href="/optimize"
-          className="rounded-lg bg-[var(--accent)] px-5 py-2.5 text-[0.9rem] font-semibold text-[#1a1206] hover:opacity-90"
+          className="bg-[var(--accent)] px-5 py-2.5 text-[0.9rem] font-semibold text-[#14100a] hover:bg-[#eeb552]"
         >
           Optimise a model
         </Link>
         <Link
           href="/dev"
-          className="rounded-lg border border-[var(--line-strong)] px-5 py-2.5 text-[0.9rem] font-medium text-[var(--text-dim)] hover:border-[var(--text-faint)] hover:text-[var(--text)]"
+          className="border border-[var(--line-strong)] px-5 py-2.5 text-[0.9rem] font-medium text-[var(--text-dim)] hover:border-[var(--text-faint)] hover:text-[var(--text)]"
         >
           Run the test fixtures
         </Link>

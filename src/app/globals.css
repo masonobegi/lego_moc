@@ -1,75 +1,83 @@
 @import 'tailwindcss';
 
 /*
- * BrickThrift design tokens.
+ * BrickThrift visual system.
  *
- * Restrained, typographic, dark-first. The single accent is a warm amber used
- * only for money saved, so the number the product exists to produce is the one
- * thing on the page that is coloured. No LEGO trademarks, logos or brand
- * colours are used anywhere.
+ * Reference points are precision tools, not consumer apps: hairline rules,
+ * near-square corners, a tight neutral palette, tabular figures for anything
+ * numeric. No gradients, no glass, no glow, no decorative colour. Exactly one
+ * accent, used only for money saved, so the number the product exists to
+ * produce is the only coloured thing on the page.
  */
 @theme {
-  --color-ink-950: #08090c;
-  --color-ink-900: #0d0f14;
-  --color-ink-850: #12151c;
-  --color-ink-800: #171b24;
-  --color-ink-700: #222833;
-  --color-ink-600: #2f3746;
-  --color-ink-500: #48526414;
-  --color-slate-1: #8b93a5;
-  --color-slate-2: #a8b0c0;
-  --color-slate-3: #d3d8e2;
-
-  --color-amber-accent: #f0a836;
-  --color-amber-soft: #6b4a12;
-  --color-teal-accent: #3fb8a8;
-  --color-rose-accent: #e2617a;
-
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, 'Noto Sans', sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono', Menlo, Consolas,
-    'Liberation Mono', monospace;
+    Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
 :root {
   color-scheme: dark;
-  --bg: #08090c;
-  --panel: #0d0f14;
-  --panel-2: #12151c;
-  --line: #1e2430;
-  --line-strong: #2a3140;
-  --text: #e8ebf2;
-  --text-dim: #a8b0c0;
-  --text-faint: #7c8496;
-  --accent: #f0a836;
-  --accent-dim: #b3781f;
-  --good: #3fb8a8;
-  --warn: #e0a458;
-  --bad: #e2617a;
+
+  --bg: #0a0b0d;
+  --panel: #101114;
+  --panel-2: #16181c;
+  --line: #23262c;
+  --line-strong: #33373f;
+
+  --text: #e6e8ec;
+  --text-dim: #9aa0aa;
+  --text-faint: #6e747e;
+
+  --accent: #e0a33a;
+  --good: #4a9d8e;
+  --warn: #c98f3f;
+  --bad: #c8596c;
+
+  /* Near-square. Radius is a decoration budget, and this design spends almost none. */
+  --r: 2px;
 }
 
 * {
   border-color: var(--line);
 }
 
-html,
+html {
+  background: var(--bg);
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-body {
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+h1,
+h2,
+h3 {
+  letter-spacing: -0.014em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  background: #2b3038;
+  color: var(--text);
 }
 
-/* Numeric figures line up in tables and in the savings headline. */
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Figures line up in tables, headline numbers and the change list. */
 .tnum {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
@@ -78,41 +86,62 @@ body {
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 0.75rem;
+  border-radius: var(--r);
 }
 
 .panel-2 {
   background: var(--panel-2);
   border: 1px solid var(--line);
-  border-radius: 0.625rem;
+  border-radius: var(--r);
 }
 
-.hairline {
-  border-top: 1px solid var(--line);
-}
-
-/* Subtle grid used behind the hero, evoking a stud grid without imitating it. */
-.stud-grid {
-  background-image:
-    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--text) 7%, transparent) 1px, transparent 0);
-  background-size: 24px 24px;
+/* Small-caps style section label used throughout. */
+.label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
 }
 
 input[type='range'] {
   accent-color: var(--accent);
 }
 
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--accent);
+}
+
+select,
+input[type='search'],
+input[type='text'] {
+  border-radius: var(--r);
+}
+
+/* Native select arrow is inconsistent across platforms; keep it, just tame it. */
+select {
+  background-image: none;
+}
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
 .scroll-thin::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
 }
 .scroll-thin::-webkit-scrollbar-thumb {
   background: var(--line-strong);
-  border-radius: 6px;
-  border: 2px solid var(--panel);
+  border-radius: 0;
 }
 .scroll-thin::-webkit-scrollbar-track {
   background: transparent;
+}
+
+table {
+  border-collapse: collapse;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -120,6 +149,7 @@ input[type='range'] {
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
 }

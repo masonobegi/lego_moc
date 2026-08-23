@@ -2,7 +2,7 @@ export function Swatch({ hex, alpha = 255, size = 13 }: { hex: string; alpha?: n
   return (
     <span
       aria-hidden
-      className="inline-block shrink-0 rounded-[3px] ring-1 ring-inset ring-white/12"
+      className="inline-block shrink-0 rounded-[2px] ring-1 ring-inset ring-white/12"
       style={{
         width: size,
         height: size,

@@ -142,14 +142,25 @@ export function ResultsView({ result, initialSavings }: Props) {
 
         <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto]">
           <div className="panel flex flex-wrap items-end gap-x-10 gap-y-5 p-6">
-            <Figure label="Original estimated parts cost" value={money(savings.originalCost, savings.currency)} />
-            <Figure label="Optimised" value={money(savings.optimizedCost, savings.currency)} />
+            <Figure
+              label="Original estimated parts cost"
+              value={money(savings.originalCost, savings.currency)}
+              testId="original-cost"
+            />
+            <Figure
+              label="Optimised"
+              value={money(savings.optimizedCost, savings.currency)}
+              testId="optimized-cost"
+            />
             <div>
-              <p className="text-[0.73rem] uppercase tracking-[0.13em] text-[var(--text-faint)]">
+              <p className="label">
                 Potential savings
               </p>
-              <p className="tnum mt-1.5 flex items-baseline gap-2.5 text-[2rem] font-semibold leading-none text-[var(--accent)]">
-                {money(savings.savings, savings.currency)}
+              <p
+                data-testid="savings"
+                className="tnum mt-1.5 flex items-baseline gap-2.5 text-[2rem] font-semibold leading-none text-[var(--accent)]"
+              >
+                <span data-testid="savings-amount">{money(savings.savings, savings.currency)}</span>
                 <span className="text-[1.05rem] font-medium opacity-80">
                   {percent(savings.savingsPercent)}
                 </span>
@@ -165,7 +176,7 @@ export function ResultsView({ result, initialSavings }: Props) {
               <strong className="font-semibold">{count(result.candidates.length)}</strong> candidate
               change{result.candidates.length === 1 ? '' : 's'}
             </p>
-            <p className="tnum text-[0.85rem] text-[var(--text-dim)]">
+            <p data-testid="enabled-count" className="tnum text-[0.85rem] text-[var(--text-dim)]">
               {count(savings.enabledCount)} enabled &middot; {count(savings.disabledCount)} disabled
             </p>
             <p className="tnum text-[0.85rem] text-[var(--text-dim)]">
@@ -179,7 +190,7 @@ export function ResultsView({ result, initialSavings }: Props) {
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {result.pricing.isDemoData ? (
-            <Badge tone="warn">
+            <Badge tone="warn" testId="demo-price-badge">
               DEMO PRICE DATA &mdash; synthetic figures, not real BrickLink prices
             </Badge>
           ) : (
@@ -198,9 +209,9 @@ export function ResultsView({ result, initialSavings }: Props) {
 
       {/* ---- viewer + change list ---- */}
       <div className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-        <section className="panel flex min-h-[520px] flex-col overflow-hidden xl:sticky xl:top-[4.5rem] xl:max-h-[calc(100vh-6rem)]">
+        <section className="panel flex h-[clamp(460px,72vh,780px)] flex-col overflow-hidden xl:sticky xl:top-[4.25rem]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-2.5">
-            <div className="flex rounded-md border border-[var(--line-strong)] p-0.5">
+            <div className="flex border border-[var(--line-strong)]">
               {(
                 [
                   ['optimized', 'Optimised'],
@@ -212,10 +223,10 @@ export function ResultsView({ result, initialSavings }: Props) {
                   key={mode}
                   type="button"
                   onClick={() => setViewMode(mode)}
-                  className={`rounded px-2.5 py-1 text-[0.78rem] transition-colors ${
+                  className={`border-r border-[var(--line-strong)] px-3 py-[5px] text-[0.78rem] transition-colors last:border-r-0 ${
                     viewMode === mode
-                      ? 'bg-[var(--accent)] font-medium text-[#1a1206]'
-                      : 'text-[var(--text-dim)] hover:text-[var(--text)]'
+                      ? 'bg-[var(--panel-2)] font-medium text-[var(--text)]'
+                      : 'text-[var(--text-faint)] hover:text-[var(--text-dim)]'
                   }`}
                 >
                   {label}
@@ -285,7 +296,7 @@ export function ResultsView({ result, initialSavings }: Props) {
           )}
         </section>
 
-        <section className="panel flex max-h-[calc(100vh-6rem)] min-h-[520px] flex-col overflow-hidden">
+        <section className="panel flex h-[clamp(460px,72vh,780px)] flex-col overflow-hidden xl:sticky xl:top-[4.25rem]">
           <ChangeList
             candidates={result.candidates}
             enabledIds={enabledIds}
@@ -310,7 +321,7 @@ export function ResultsView({ result, initialSavings }: Props) {
       </div>
 
       <div className="mt-5">
-        <h2 className="mb-3 text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+        <h2 className="label mb-3">
           Analysis details
         </h2>
         <AnalysisDetails result={result} />
@@ -319,22 +330,35 @@ export function ResultsView({ result, initialSavings }: Props) {
   );
 }
 
-function Figure({ label, value }: { label: string; value: string }) {
+function Figure({ label, value, testId }: { label: string; value: string; testId?: string }) {
   return (
     <div>
-      <p className="text-[0.73rem] uppercase tracking-[0.13em] text-[var(--text-faint)]">{label}</p>
-      <p className="tnum mt-1.5 text-[1.55rem] font-semibold leading-none">{value}</p>
+      <p className="label">{label}</p>
+      <p data-testid={testId} className="tnum mt-1.5 text-[1.55rem] font-semibold leading-none">
+        {value}
+      </p>
     </div>
   );
 }
 
-function Badge({ children, tone }: { children: React.ReactNode; tone: 'warn' | 'neutral' }) {
+function Badge({
+  children,
+  tone,
+  testId,
+}: {
+  children: React.ReactNode;
+  tone: 'warn' | 'neutral';
+  testId?: string;
+}) {
   const className =
     tone === 'warn'
       ? 'border-[color-mix(in_srgb,var(--warn)_45%,var(--line))] text-[var(--warn)]'
       : 'border-[var(--line-strong)] text-[var(--text-faint)]';
   return (
-    <span className={`rounded border px-2 py-0.5 text-[0.7rem] font-medium ${className}`}>
+    <span
+      data-testid={testId}
+      className={`rounded-[2px] border px-2 py-0.5 text-[0.7rem] font-medium ${className}`}
+    >
       {children}
     </span>
   );
@@ -342,7 +366,7 @@ function Badge({ children, tone }: { children: React.ReactNode; tone: 'warn' | '
 
 function SplitLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="pointer-events-none absolute left-3 top-3 z-10 rounded bg-[var(--panel)]/85 px-2 py-1 text-[0.7rem] uppercase tracking-wide text-[var(--text-faint)] backdrop-blur">
+    <span className="pointer-events-none absolute left-3 top-3 z-10 rounded-[2px] bg-[var(--panel)] px-2 py-1 text-[0.7rem] uppercase tracking-wide text-[var(--text-faint)]">
       {children}
     </span>
   );
@@ -384,7 +408,7 @@ function SelectionPanel({
                 <span>Step {part.step}</span>
                 <span className="truncate">{part.subModel}</span>
                 {style && (
-                  <span className={`rounded border px-1.5 py-px text-[0.72rem] ${style.className}`}>
+                  <span className={`rounded-[2px] border px-1.5 py-px text-[0.72rem] ${style.className}`}>
                     {style.label}
                   </span>
                 )}
@@ -434,7 +458,7 @@ function SelectionPanel({
           type="button"
           onClick={onClear}
           aria-label="Clear selection"
-          className="shrink-0 rounded border border-[var(--line-strong)] px-2 py-1 text-[0.72rem] text-[var(--text-faint)] hover:text-[var(--text)]"
+          className="shrink-0 rounded-[2px] border border-[var(--line-strong)] px-2 py-1 text-[0.72rem] text-[var(--text-faint)] hover:text-[var(--text)]"
         >
           Clear
         </button>

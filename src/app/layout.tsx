@@ -28,29 +28,29 @@ const NAV = [
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen">
         <div className="flex min-h-screen flex-col">
-          <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[color-mix(in_srgb,var(--bg)_88%,transparent)] backdrop-blur-xl">
-            <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-6 px-5">
-              <Link href="/" className="group flex items-center gap-2.5">
+          <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--bg)]">
+            <div className="mx-auto flex h-[52px] max-w-[1600px] items-center gap-8 px-5">
+              <Link href="/" className="flex items-center gap-2.5">
                 <BrandMark />
-                <span className="text-[0.94rem] font-semibold tracking-tight">
-                  Brick<span className="text-[var(--accent)]">Thrift</span>
+                <span className="font-mono text-[0.86rem] font-medium tracking-[-0.01em]">
+                  brickthrift
                 </span>
               </Link>
-              <nav className="ml-auto flex items-center gap-1">
+              <nav className="ml-auto flex items-center gap-6">
                 {NAV.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="rounded-md px-3 py-1.5 text-[0.86rem] text-[var(--text-dim)] transition-colors hover:bg-[var(--panel-2)] hover:text-[var(--text)]"
+                    className="text-[0.85rem] text-[var(--text-dim)] transition-colors hover:text-[var(--text)]"
                   >
                     {item.label}
                   </Link>
                 ))}
                 <Link
                   href="/optimize"
-                  className="ml-2 rounded-md bg-[var(--accent)] px-3.5 py-1.5 text-[0.86rem] font-semibold text-[#1a1206] transition-opacity hover:opacity-90"
+                  className="border border-[var(--line-strong)] px-3 py-[5px] text-[0.85rem] font-medium text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
                 >
                   Optimise a model
                 </Link>
@@ -86,13 +86,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 }
 
-/** An abstract mark: three descending bars, suggesting a falling price. */
+/** Three descending bars: a falling price. No rounding, no gradient. */
 function BrandMark() {
   return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-      <rect x="2" y="3" width="18" height="4.4" rx="1.2" fill="var(--accent)" />
-      <rect x="2" y="8.8" width="13" height="4.4" rx="1.2" fill="var(--accent)" opacity="0.62" />
-      <rect x="2" y="14.6" width="8" height="4.4" rx="1.2" fill="var(--accent)" opacity="0.34" />
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="1" y="2" width="14" height="3" fill="var(--accent)" />
+      <rect x="1" y="6.5" width="9.5" height="3" fill="var(--accent)" opacity="0.6" />
+      <rect x="1" y="11" width="5" height="3" fill="var(--accent)" opacity="0.32" />
     </svg>
   );
 }

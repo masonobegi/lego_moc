@@ -149,7 +149,7 @@ export function ModelViewer({
 
       {status === 'loading' && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="flex items-center gap-2.5 rounded-lg bg-[var(--panel)]/90 px-4 py-2.5 text-[0.82rem] text-[var(--text-dim)] backdrop-blur">
+          <div className="flex items-center gap-2.5 rounded-[2px] bg-[var(--panel)] px-4 py-2.5 text-[0.82rem] text-[var(--text-dim)]">
             <Spinner />
             Building geometry
           </div>
@@ -196,7 +196,7 @@ function ViewerButton({
       onClick={onClick}
       title={label}
       aria-label={label}
-      className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--panel)]/85 text-[var(--text-dim)] backdrop-blur transition-colors hover:border-[var(--line-strong)] hover:text-[var(--text)]"
+      className="flex h-8 w-8 items-center justify-center rounded-[2px] border border-[var(--line)] bg-[var(--panel)] text-[var(--text-dim)] transition-colors hover:border-[var(--line-strong)] hover:text-[var(--text)]"
     >
       {children}
     </button>
@@ -225,7 +225,7 @@ interface SceneHandles {
     selectedId: string | null,
   ): void;
   /** Hand the scene its instanced meshes once the payload has been decoded. */
-  attach(built: Built, sphere: THREE.Sphere): void;
+  attach(built: Built, sphere: THREE.Sphere, box: THREE.Box3): void;
   dispose(): void;
 }
 
@@ -273,19 +273,21 @@ function createScene(mount: HTMLElement): SceneHandles {
 
   let built: Built | null = null;
   let boundingSphere = new THREE.Sphere(new THREE.Vector3(), 100);
+  let boundingBox = new THREE.Box3(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1));
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
 
+  let hasFitted = false;
   const resize = (): void => {
     const width = mount.clientWidth || 1;
     const height = mount.clientHeight || 1;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
+    if (hasFitted) fitToView();
   };
-  const observer = new ResizeObserver(resize);
+  const observer = new ResizeObserver(() => resize());
   observer.observe(mount);
-  resize();
 
   let frame = 0;
   const tick = (): void => {
@@ -295,25 +297,75 @@ function createScene(mount: HTMLElement): SceneHandles {
   };
   tick();
 
+  /**
+   * Frame the model's bounding BOX as seen from the camera, not its bounding
+   * sphere. Most MOCs are much wider than they are tall, and a sphere fit
+   * leaves such a model as a small object floating in a large panel.
+   *
+   * The eight box corners are projected onto the camera's right and up axes and
+   * the required distance is computed from the resulting 2D extents against the
+   * horizontal and vertical fields of view separately.
+   */
   const fitToView = (): void => {
-    const distance = (boundingSphere.radius / Math.sin((camera.fov * Math.PI) / 360)) * 1.12;
-    const direction = new THREE.Vector3(0.72, 0.52, 0.92).normalize();
-    const target = boundingSphere.center.clone().applyMatrix4(root.matrixWorld);
-    camera.position.copy(target).addScaledVector(direction, Math.max(distance, 40));
-    camera.near = Math.max(1, boundingSphere.radius / 400);
-    camera.far = Math.max(2000, boundingSphere.radius * 40);
+    // The scene root carries the LDraw -Y-up correction. Its world matrix is
+    // normally refreshed during render, so it must be forced here or the first
+    // fit aims at the un-rotated centre and the model sits off to one side.
+    root.updateMatrixWorld(true);
+
+    const direction = new THREE.Vector3(0.72, 0.46, 0.92).normalize();
+    const up = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(direction, up).normalize();
+    const camUp = new THREE.Vector3().crossVectors(right, direction).normalize();
+
+    const worldBox = boundingBox.clone().applyMatrix4(root.matrixWorld);
+    const target = worldBox.getCenter(new THREE.Vector3());
+
+    let halfWidth = 0;
+    let halfHeight = 0;
+    let halfDepth = 0;
+    const corner = new THREE.Vector3();
+    for (let i = 0; i < 8; i++) {
+      corner.set(
+        i & 1 ? worldBox.max.x : worldBox.min.x,
+        i & 2 ? worldBox.max.y : worldBox.min.y,
+        i & 4 ? worldBox.max.z : worldBox.min.z,
+      );
+      corner.sub(target);
+      halfWidth = Math.max(halfWidth, Math.abs(corner.dot(right)));
+      halfHeight = Math.max(halfHeight, Math.abs(corner.dot(camUp)));
+      halfDepth = Math.max(halfDepth, Math.abs(corner.dot(direction)));
+    }
+
+    const vFov = (camera.fov * Math.PI) / 180;
+    const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+    const distance =
+      Math.max(halfHeight / Math.tan(vFov / 2), halfWidth / Math.tan(hFov / 2)) * 1.14 + halfDepth;
+
+    camera.position.copy(target).addScaledVector(direction, Math.max(distance, 30));
+    const radius = Math.max(1, boundingSphere.radius);
+    camera.near = Math.max(0.5, radius / 500);
+    camera.far = Math.max(2000, (distance + radius) * 4);
     camera.updateProjectionMatrix();
     controls.target.copy(target);
     controls.update();
   };
 
+  resize();
+
   return {
     root,
-    fitToView,
-    resetCamera: fitToView,
-    attach(next, sphere) {
+    fitToView: () => {
+      hasFitted = true;
+      fitToView();
+    },
+    resetCamera: () => {
+      hasFitted = true;
+      fitToView();
+    },
+    attach(next, sphere, box) {
       built = next;
       boundingSphere = sphere;
+      boundingBox = box;
     },
     pick(ndcX, ndcY) {
       if (!built) return null;
@@ -463,7 +515,11 @@ function buildModel(handles: SceneHandles, payload: DecodedPayload): void {
   const center = new THREE.Vector3((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2);
   const radius =
     Math.max(1, new THREE.Vector3(max[0] - center.x, max[1] - center.y, max[2] - center.z).length());
+  const box = new THREE.Box3(
+    new THREE.Vector3(min[0], min[1], min[2]),
+    new THREE.Vector3(max[0], max[1], max[2]),
+  );
 
-  handles.attach({ meshes, slotToGlobal, payload, root }, new THREE.Sphere(center, radius));
+  handles.attach({ meshes, slotToGlobal, payload, root }, new THREE.Sphere(center, radius), box);
   handles.applyColors(true, null, new Set(), null);
 }
