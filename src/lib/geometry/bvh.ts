@@ -26,6 +26,16 @@ export interface RayHitOptions {
   epsilon?: number;
 }
 
+/** Plain-data form of a TriangleBVH, cheap to send to a worker thread. */
+export interface TransferableBVH {
+  readonly positions: Float32Array;
+  readonly nodeBounds: Float32Array;
+  readonly nodeLeft: Int32Array;
+  readonly nodeCount: Int32Array;
+  readonly triIndices: Uint32Array;
+  readonly nodeUsed: number;
+}
+
 export class TriangleBVH {
   /** 9 floats per triangle. */
   readonly positions: Float32Array;
@@ -39,6 +49,35 @@ export class TriangleBVH {
   private readonly nodeCount: Int32Array;
   private readonly triIndices: Uint32Array;
   private readonly nodeUsed: number;
+
+  /**
+   * Rebuild from a TransferableBVH without redoing the (expensive) tree
+   * construction. Used when handing the scene to worker threads.
+   */
+  static fromTransfer(data: TransferableBVH): TriangleBVH {
+    const bvh = Object.create(TriangleBVH.prototype) as {
+      -readonly [K in keyof TriangleBVH]: TriangleBVH[K];
+    } & Record<string, unknown>;
+    bvh.positions = data.positions;
+    bvh.triangleCount = Math.floor(data.positions.length / 9);
+    bvh.nodeBounds = data.nodeBounds;
+    bvh.nodeLeft = data.nodeLeft;
+    bvh.nodeCount = data.nodeCount;
+    bvh.triIndices = data.triIndices;
+    bvh.nodeUsed = data.nodeUsed;
+    return bvh as unknown as TriangleBVH;
+  }
+
+  toTransfer(): TransferableBVH {
+    return {
+      positions: this.positions,
+      nodeBounds: this.nodeBounds,
+      nodeLeft: this.nodeLeft,
+      nodeCount: this.nodeCount,
+      triIndices: this.triIndices,
+      nodeUsed: this.nodeUsed,
+    };
+  }
 
   constructor(positions: Float32Array) {
     this.positions = positions;
@@ -278,43 +317,37 @@ export class TriangleBVH {
   ): boolean {
     if (this.triangleCount === 0) return false;
 
-    const invDx = 1 / dx;
-    const invDy = 1 / dy;
-    const invDz = 1 / dz;
+    const invDx = 1 / (dx === 0 ? 1e-30 : dx);
+    const invDy = 1 / (dy === 0 ? 1e-30 : dy);
+    const invDz = 1 / (dz === 0 ? 1e-30 : dz);
 
     const stack = TriangleBVH.scratchStack;
+    const stackT = TriangleBVH.scratchStackT;
     let sp = 0;
-    stack[sp++] = 0;
+    stack[sp] = 0;
+    stackT[sp] = epsilon;
+    sp++;
 
     while (sp > 0) {
-      const node = stack[--sp]!;
-      const b = node * 6;
-
-      let tmin = (this.nodeBounds[b]! - ox) * invDx;
-      let tmax = (this.nodeBounds[b + 3]! - ox) * invDx;
-      if (tmin > tmax) { const tmp = tmin; tmin = tmax; tmax = tmp; }
-
-      let tymin = (this.nodeBounds[b + 1]! - oy) * invDy;
-      let tymax = (this.nodeBounds[b + 4]! - oy) * invDy;
-      if (tymin > tymax) { const tmp = tymin; tymin = tymax; tymax = tmp; }
-      if (tmin > tymax || tymin > tmax) continue;
-      if (tymin > tmin) tmin = tymin;
-      if (tymax < tmax) tmax = tymax;
-
-      let tzmin = (this.nodeBounds[b + 2]! - oz) * invDz;
-      let tzmax = (this.nodeBounds[b + 5]! - oz) * invDz;
-      if (tzmin > tzmax) { const tmp = tzmin; tzmin = tzmax; tzmax = tmp; }
-      if (tmin > tzmax || tzmin > tmax) continue;
-      if (tzmin > tmin) tmin = tzmin;
-      if (tzmax < tmax) tmax = tzmax;
-
-      if (tmax < epsilon || tmin > tMax) continue;
-
+      sp--;
+      const node = stack[sp]!;
       const count = this.nodeCount[node]!;
+
       if (count === 0) {
+        // Interior node: descend into the nearer child first so an occluded
+        // ray finds its blocker almost immediately instead of walking the
+        // whole path. For a boolean "is anything in the way" query this is
+        // the difference between a handful of triangle tests and hundreds.
         const left = this.nodeLeft[node]!;
-        stack[sp++] = left;
-        stack[sp++] = left + 1;
+        const tLeft = this.entryDistance(left, ox, oy, oz, invDx, invDy, invDz, epsilon, tMax);
+        const tRight = this.entryDistance(left + 1, ox, oy, oz, invDx, invDy, invDz, epsilon, tMax);
+        if (tLeft <= tRight) {
+          if (tRight < Infinity) { stack[sp] = left + 1; stackT[sp] = tRight; sp++; }
+          if (tLeft < Infinity) { stack[sp] = left; stackT[sp] = tLeft; sp++; }
+        } else {
+          if (tLeft < Infinity) { stack[sp] = left; stackT[sp] = tLeft; sp++; }
+          if (tRight < Infinity) { stack[sp] = left + 1; stackT[sp] = tRight; sp++; }
+        }
         continue;
       }
 
@@ -325,6 +358,36 @@ export class TriangleBVH {
       }
     }
     return false;
+  }
+
+  /** Ray entry distance into a node's box, or Infinity when it misses. */
+  private entryDistance(
+    node: number,
+    ox: number, oy: number, oz: number,
+    invDx: number, invDy: number, invDz: number,
+    tMin: number, tMax: number,
+  ): number {
+    const b = node * 6;
+    let t0 = (this.nodeBounds[b]! - ox) * invDx;
+    let t1 = (this.nodeBounds[b + 3]! - ox) * invDx;
+    if (t0 > t1) { const tmp = t0; t0 = t1; t1 = tmp; }
+    let lo = t0;
+    let hi = t1;
+
+    t0 = (this.nodeBounds[b + 1]! - oy) * invDy;
+    t1 = (this.nodeBounds[b + 4]! - oy) * invDy;
+    if (t0 > t1) { const tmp = t0; t0 = t1; t1 = tmp; }
+    if (t0 > lo) lo = t0;
+    if (t1 < hi) hi = t1;
+    if (lo > hi) return Infinity;
+
+    t0 = (this.nodeBounds[b + 2]! - oz) * invDz;
+    t1 = (this.nodeBounds[b + 5]! - oz) * invDz;
+    if (t0 > t1) { const tmp = t0; t0 = t1; t1 = tmp; }
+    if (t0 > lo) lo = t0;
+    if (t1 < hi) hi = t1;
+    if (lo > hi || hi < tMin || lo > tMax) return Infinity;
+    return lo > tMin ? lo : tMin;
   }
 
   private intersectTriangle(
@@ -362,8 +425,9 @@ export class TriangleBVH {
     return dist > epsilon && dist < tMax;
   }
 
-  /** Shared traversal stack. Single-threaded by construction. */
+  /** Shared traversal stacks. Single-threaded by construction. */
   private static readonly scratchStack = new Int32Array(128);
+  private static readonly scratchStackT = new Float64Array(128);
 }
 
 function surfaceArea(x0: number, y0: number, z0: number, x1: number, y1: number, z1: number): number {

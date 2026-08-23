@@ -43,9 +43,31 @@
  */
 
 import type { ModelScene } from '../geometry/scene';
-import type { PartMesh } from '../geometry/partMesh';
-import type { PartInstance } from '../ldraw/types';
-import { areaStratifiedSamples, coverageSamples, fibonacciDirections } from './sampling';
+import type { Mat3, Vec3 } from '../ldraw/math';
+import {
+  areaStratifiedSamples,
+  coverageSamples,
+  fibonacciDirections,
+  type SampleableMesh,
+} from './sampling';
+
+/**
+ * Everything the engine needs to know about one part instance.
+ *
+ * Deliberately a flat, plain-data record rather than a PartInstance plus a
+ * ModelScene lookup: it can be sent to a worker thread as-is, and it keeps the
+ * engine independent of how the rest of the app models a part.
+ */
+export interface VisibilityTarget {
+  readonly instanceId: string;
+  readonly partId: string;
+  readonly partFile: string;
+  readonly matrix: Mat3;
+  readonly position: Vec3;
+  /** The part's own mesh could not be fully resolved from the library. */
+  readonly geometryIncomplete: boolean;
+  readonly isTransparent: boolean;
+}
 
 export type VisibilityClass =
   | 'VISIBLE'
@@ -129,9 +151,10 @@ export interface VisibilityAnalysis {
 
 export function analyzeVisibility(
   scene: ModelScene,
-  instances: readonly PartInstance[],
-  meshByPart: ReadonlyMap<string, PartMesh>,
+  targets: readonly VisibilityTarget[],
+  meshByPart: ReadonlyMap<string, SampleableMesh>,
   options: VisibilityOptions = DEFAULT_VISIBILITY_OPTIONS,
+  range?: { start: number; end: number },
   onProgress?: (done: number, total: number) => void,
 ): VisibilityAnalysis {
   const started = Date.now();
@@ -146,9 +169,44 @@ export function analyzeVisibility(
   const screenDirs = fibonacciDirections(options.screenDirections);
   const verifyDirs = fibonacciDirections(options.verifyDirections);
 
-  for (let index = 0; index < instances.length; index++) {
-    const instance = instances[index]!;
-    const sceneInstance = scene.instances[index]!;
+  // Surface samples are computed in the part's own coordinate space, so every
+  // instance of the same part reuses them. A model with 3,500 parts but only
+  // 130 distinct ones would otherwise redo this work 27 times over.
+  const screenSampleCache = new Map<string, Float64Array>();
+  const verifySampleCache = new Map<string, { points: Float64Array; covered: number; total: number }>();
+
+  const screenSamplesFor = (partId: string, mesh: SampleableMesh): Float64Array => {
+    let cached = screenSampleCache.get(partId);
+    if (!cached) {
+      cached = packPoints(areaStratifiedSamples(mesh, options.screenPoints).map((s) => s.point));
+      screenSampleCache.set(partId, cached);
+    }
+    return cached;
+  };
+
+  const verifySamplesFor = (
+    partId: string,
+    mesh: SampleableMesh,
+  ): { points: Float64Array; covered: number; total: number } => {
+    let cached = verifySampleCache.get(partId);
+    if (!cached) {
+      const sampling = coverageSamples(mesh, options.verifyPoints);
+      cached = {
+        points: packPoints(sampling.samples.map((s) => s.point)),
+        covered: sampling.coveredTriangles,
+        total: sampling.totalTriangles,
+      };
+      verifySampleCache.set(partId, cached);
+    }
+    return cached;
+  };
+
+  const start = range?.start ?? 0;
+  const end = Math.min(range?.end ?? targets.length, targets.length);
+  const total = end - start;
+
+  for (let index = start; index < end; index++) {
+    const instance = targets[index]!;
     const mesh = meshByPart.get(instance.partId);
 
     if (!mesh || mesh.triangleCount === 0) {
@@ -170,29 +228,21 @@ export function analyzeVisibility(
           `No LDraw geometry is available for ${instance.partFile}, so its visibility could not be ` +
           `evaluated. Nothing will be changed about this part.`,
       });
-      onProgress?.(index + 1, instances.length);
+      onProgress?.(index - start + 1, total);
       continue;
     }
 
     // ---- pass 1: cheap screen, exit on the first escaping ray --------------
-    const screen = castPass(
-      scene,
-      sceneInstance.index,
-      instance,
-      areaStratifiedSamples(mesh, options.screenPoints).map((s) => s.point),
-      screenDirs,
-      options.epsilon,
-      1,
-    );
+    const screenPoints = screenSamplesFor(instance.partId, mesh);
+    const screen = castPass(scene, instance, screenPoints, screenDirs, options.epsilon, 1);
     totalRays += screen.raysCast;
 
     if (screen.escapedRays > 0) {
       // Visible. Estimate how visible with the full screen budget, no early exit.
       const full = castPass(
         scene,
-        sceneInstance.index,
         instance,
-        areaStratifiedSamples(mesh, options.screenPoints).map((s) => s.point),
+        screenPoints,
         screenDirs,
         options.epsilon,
         Number.POSITIVE_INFINITY,
@@ -200,30 +250,22 @@ export function analyzeVisibility(
       totalRays += full.raysCast;
       results.set(
         instance.instanceId,
-        classifyVisible(instance, full, mesh, sceneInstance.geometryIncomplete),
+        classifyVisible(instance, full, mesh, instance.geometryIncomplete),
       );
-      onProgress?.(index + 1, instances.length);
+      onProgress?.(index - start + 1, total);
       continue;
     }
 
     // ---- pass 2: verification, aiming for per-triangle coverage ------------
     verified++;
-    const sampling = coverageSamples(mesh, options.verifyPoints);
-    const verify = castPass(
-      scene,
-      sceneInstance.index,
-      instance,
-      sampling.samples.map((s) => s.point),
-      verifyDirs,
-      options.epsilon,
-      1,
-    );
+    const sampling = verifySamplesFor(instance.partId, mesh);
+    const verify = castPass(scene, instance, sampling.points, verifyDirs, options.epsilon, 1);
     totalRays += verify.raysCast;
 
     const risks: VisibilityRisk[] = [];
-    if (sceneInstance.geometryIncomplete) risks.push('geometry_incomplete');
+    if (instance.geometryIncomplete) risks.push('geometry_incomplete');
     if (budgetReduced) risks.push('reduced_sampling_budget');
-    if (!sceneInstance.isOccluder && mesh.triangleCount > 0) risks.push('transparent_part');
+    if (instance.isTransparent) risks.push('transparent_part');
 
     if (verify.escapedRays > 0) {
       // The coarse screen missed it but the dense pass found a line of sight.
@@ -231,7 +273,7 @@ export function analyzeVisibility(
       // casting stopped at the first escape, so the counts below are lower
       // bounds and the verdict is deliberately pessimistic.
       const risksHere: VisibilityRisk[] = [];
-      if (sceneInstance.geometryIncomplete) risksHere.push('geometry_incomplete');
+      if (instance.geometryIncomplete) risksHere.push('geometry_incomplete');
       results.set(instance.instanceId, {
         instanceId: instance.instanceId,
         classification: 'LIKELY_VISIBLE',
@@ -242,8 +284,8 @@ export function analyzeVisibility(
         pointsSampled: verify.pointsSampled,
         exposedPoints: verify.exposedPoints,
         earlyStopped: true,
-        trianglesCovered: sampling.coveredTriangles,
-        trianglesTotal: sampling.totalTriangles,
+        trianglesCovered: sampling.covered,
+        trianglesTotal: sampling.total,
         confidence: 0,
         risks: risksHere,
         evidence:
@@ -251,7 +293,7 @@ export function analyzeVisibility(
           `${(screen.raysCast + verify.raysCast).toLocaleString()} rays. It is not visible from most ` +
           `directions, but it can be seen through a gap, so it is treated as visible and left unchanged.`,
       });
-      onProgress?.(index + 1, instances.length);
+      onProgress?.(index - start + 1, total);
       continue;
     }
 
@@ -261,9 +303,9 @@ export function analyzeVisibility(
     const classification: VisibilityClass = blocking.length > 0 ? 'LIKELY_HIDDEN' : 'HIDDEN';
 
     const coverageText =
-      sampling.coveredTriangles >= sampling.totalTriangles
-        ? `every one of the part's ${sampling.totalTriangles.toLocaleString()} surface triangles`
-        : `${sampling.coveredTriangles.toLocaleString()} of the part's ${sampling.totalTriangles.toLocaleString()} surface triangles`;
+      sampling.covered >= sampling.total
+        ? `every one of the part's ${sampling.total.toLocaleString()} surface triangles`
+        : `${sampling.covered.toLocaleString()} of the part's ${sampling.total.toLocaleString()} surface triangles`;
 
     const evidence =
       `No externally visible surface detected. ${verify.pointsSampled.toLocaleString()} points covering ` +
@@ -283,20 +325,20 @@ export function analyzeVisibility(
       pointsSampled: verify.pointsSampled,
       exposedPoints: 0,
       earlyStopped: false,
-      trianglesCovered: sampling.coveredTriangles,
-      trianglesTotal: sampling.totalTriangles,
+      trianglesCovered: sampling.covered,
+      trianglesTotal: sampling.total,
       confidence,
       risks,
       evidence,
     });
-    onProgress?.(index + 1, instances.length);
+    onProgress?.(index - start + 1, total);
   }
 
   return {
     results,
     stats: {
       totalRays,
-      screenedInstances: instances.length,
+      screenedInstances: total,
       verifiedInstances: verified,
       elapsedMs: Date.now() - started,
     },
@@ -310,30 +352,43 @@ interface PassResult {
   exposedPoints: number;
 }
 
+function packPoints(points: readonly { x: number; y: number; z: number }[]): Float64Array {
+  const out = new Float64Array(points.length * 3);
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i]!;
+    out[i * 3] = p.x;
+    out[i * 3 + 1] = p.y;
+    out[i * 3 + 2] = p.z;
+  }
+  return out;
+}
+
 function castPass(
   scene: ModelScene,
-  _instanceIndex: number,
-  instance: PartInstance,
-  localPoints: readonly { x: number; y: number; z: number }[],
+  instance: VisibilityTarget,
+  localPoints: Float64Array,
   directions: Float64Array,
   epsilon: number,
   stopAfterEscapes: number,
 ): PassResult {
-  const m = instance.transformation;
+  const m = instance.matrix;
   const t = instance.position;
   const dirCount = directions.length / 3;
+  const pointCount = localPoints.length / 3;
 
   let raysCast = 0;
   let escapedRays = 0;
   let exposedPoints = 0;
   let pointsSampled = 0;
 
-  for (let p = 0; p < localPoints.length; p++) {
-    const local = localPoints[p]!;
+  for (let p = 0; p < pointCount; p++) {
+    const lx = localPoints[p * 3]!;
+    const ly = localPoints[p * 3 + 1]!;
+    const lz = localPoints[p * 3 + 2]!;
     // Transform the surface point into world space.
-    const wx = m[0]! * local.x + m[1]! * local.y + m[2]! * local.z + t.x;
-    const wy = m[3]! * local.x + m[4]! * local.y + m[5]! * local.z + t.y;
-    const wz = m[6]! * local.x + m[7]! * local.y + m[8]! * local.z + t.z;
+    const wx = m[0]! * lx + m[1]! * ly + m[2]! * lz + t.x;
+    const wy = m[3]! * lx + m[4]! * ly + m[5]! * lz + t.y;
+    const wz = m[6]! * lx + m[7]! * ly + m[8]! * lz + t.z;
     pointsSampled++;
 
     // Rotate the direction lattice per point so different points probe
@@ -351,7 +406,7 @@ function castPass(
       const dx = dx0 * cosP - dz0 * sinP;
       const dz = dx0 * sinP + dz0 * cosP;
 
-      const tMax = scene.escapeDistance({ x: wx, y: wy, z: wz }, { x: dx, y: dy, z: dz });
+      const tMax = scene.escapeDistanceScalar(wx, wy, wz, dx, dy, dz);
       raysCast++;
       if (!scene.occluded(wx, wy, wz, dx, dy, dz, tMax, epsilon)) {
         escapedRays++;
@@ -369,9 +424,9 @@ function castPass(
 }
 
 function classifyVisible(
-  instance: PartInstance,
+  instance: VisibilityTarget,
   pass: PassResult,
-  mesh: PartMesh,
+  mesh: SampleableMesh,
   geometryIncomplete: boolean,
 ): VisibilityResult {
   // Callers only reach here with a pass that ran to completion.

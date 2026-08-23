@@ -20,7 +20,12 @@
     "catalog:build-bundled": "tsx scripts/build-bundled-catalog.ts",
     "colors:build": "tsx scripts/build-color-table.ts",
     "catalog:build-molds": "tsx scripts/build-mold-rules.ts",
-    "parts:bundle": "tsx scripts/bundle-parts-subset.ts"
+    "parts:bundle": "tsx scripts/bundle-parts-subset.ts",
+    "workers:build": "esbuild src/lib/optimizer/visibilityWorker.ts --bundle --platform=node --format=esm --target=node20 --outfile=dist-workers/visibilityWorker.mjs --log-level=warning",
+    "postinstall": "npm run workers:build",
+    "predev": "npm run workers:build",
+    "prebuild": "npm run workers:build",
+    "pretest": "npm run workers:build"
   },
   "dependencies": {
     "next": "16.3.2",

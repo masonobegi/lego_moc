@@ -8,7 +8,16 @@
  */
 
 import type { Vec3 } from '../ldraw/math';
-import type { PartMesh } from '../geometry/partMesh';
+
+/**
+ * The only thing the samplers need from a mesh. Keeping it structural means a
+ * worker thread can rebuild just the triangle buffer instead of a whole
+ * PartMesh with colours and provenance it will never read.
+ */
+export interface SampleableMesh {
+  readonly positions: Float32Array;
+  readonly triangleCount: number;
+}
 
 /**
  * Directions spread evenly over the whole sphere using the Fibonacci lattice.
@@ -52,7 +61,7 @@ function vanDerCorput(index: number): number {
   return bits * 2.3283064365386963e-10;
 }
 
-function pointInTriangle(mesh: PartMesh, tri: number, u: number, v: number): Vec3 {
+function pointInTriangle(mesh: SampleableMesh, tri: number, u: number, v: number): Vec3 {
   const o = tri * 9;
   const p = mesh.positions;
   // Map the unit square to barycentric coordinates.
@@ -67,7 +76,7 @@ function pointInTriangle(mesh: PartMesh, tri: number, u: number, v: number): Vec
   };
 }
 
-function centroid(mesh: PartMesh, tri: number): Vec3 {
+function centroid(mesh: SampleableMesh, tri: number): Vec3 {
   const o = tri * 9;
   const p = mesh.positions;
   return {
@@ -78,7 +87,7 @@ function centroid(mesh: PartMesh, tri: number): Vec3 {
 }
 
 /** Point pulled 85% of the way from the centroid towards vertex `v` (0-2). */
-function nearVertex(mesh: PartMesh, tri: number, v: number): Vec3 {
+function nearVertex(mesh: SampleableMesh, tri: number, v: number): Vec3 {
   const o = tri * 9 + v * 3;
   const p = mesh.positions;
   const c = centroid(mesh, tri);
@@ -90,7 +99,7 @@ function nearVertex(mesh: PartMesh, tri: number, v: number): Vec3 {
   };
 }
 
-function triangleArea(mesh: PartMesh, tri: number): number {
+function triangleArea(mesh: SampleableMesh, tri: number): number {
   const o = tri * 9;
   const p = mesh.positions;
   const ux = p[o + 3]! - p[o]!, uy = p[o + 4]! - p[o + 1]!, uz = p[o + 5]! - p[o + 2]!;
@@ -106,7 +115,7 @@ function triangleArea(mesh: PartMesh, tri: number): number {
  * proportion to triangle area, using stratified cumulative-area selection.
  * Cheap, and good enough to find any substantial exposed region immediately.
  */
-export function areaStratifiedSamples(mesh: PartMesh, count: number): SurfaceSample[] {
+export function areaStratifiedSamples(mesh: SampleableMesh, count: number): SurfaceSample[] {
   if (mesh.triangleCount === 0 || count <= 0) return [];
 
   const cumulative = new Float64Array(mesh.triangleCount);
@@ -153,7 +162,7 @@ export interface VerifySampling {
  * The returned `coveredTriangles` is reported to the user verbatim, so a claim
  * like "every one of the part's 700 triangles was probed" is literally true.
  */
-export function coverageSamples(mesh: PartMesh, pointBudget: number): VerifySampling {
+export function coverageSamples(mesh: SampleableMesh, pointBudget: number): VerifySampling {
   const total = mesh.triangleCount;
   if (total === 0 || pointBudget <= 0) {
     return { samples: [], coveredTriangles: 0, totalTriangles: total };

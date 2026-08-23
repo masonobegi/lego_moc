@@ -65,6 +65,8 @@ export interface VisibilityReport {
   readonly totalRays: number;
   readonly verifiedInstances: number;
   readonly elapsedMs: number;
+  /** Worker threads used. 1 means the analysis ran in-process. */
+  readonly workerCount: number;
   readonly scope: string;
 }
 

@@ -27,11 +27,11 @@ import { alternativeColorsToPrice, findColorCandidates } from '../optimizer/colo
 import { findMoldCandidates, moldPricesToRequest } from '../optimizer/moldOptimizer';
 import type { OptimizationCandidate, RejectedCommand, SafetyLevel } from '../optimizer/types';
 import {
-  analyzeVisibility,
   optionsForModelSize,
   type VisibilityClass,
   type VisibilityResult,
 } from '../optimizer/visibilityEngine';
+import { analyzeVisibilityParallel } from '../optimizer/visibilityParallel';
 import type {
   AnalysisResult,
   AnalysisStage,
@@ -67,6 +67,8 @@ export interface AnalyzeOptions {
   readonly exhaustiveColorSearch: boolean;
   readonly onStage?: (stage: AnalysisStage, detail?: string) => void;
   readonly id?: string;
+  /** Forces the visibility pass in-process. Used by tests that compare paths. */
+  readonly singleThreaded?: boolean;
 }
 
 export interface AnalyzeOutput {
@@ -139,8 +141,11 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
 
   // ---- 4. visibility -----------------------------------------------------
   const visibilityOptions = optionsForModelSize(instances.length);
-  const visibilityAnalysis = mark('visibility', () =>
-    analyzeVisibility(scene, instances, meshes, visibilityOptions),
+  const targets = scene.visibilityTargets(instances);
+  const visibilityAnalysis = await markAsync('visibility', () =>
+    analyzeVisibilityParallel(scene, targets, meshes, visibilityOptions, {
+      forceSingleThread: options.singleThreaded,
+    }),
   );
   const visibility = visibilityAnalysis.results;
 
@@ -320,6 +325,7 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
       totalRays: visibilityAnalysis.stats.totalRays,
       verifiedInstances: visibilityAnalysis.stats.verifiedInstances,
       elapsedMs: visibilityAnalysis.stats.elapsedMs,
+      workerCount: visibilityAnalysis.workerCount,
       scope:
         'Visibility is assessed against the completed model exactly as supplied. Detachable ' +
         'sections, hinged panels and partly built states are not modelled.',
