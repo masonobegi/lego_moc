@@ -302,12 +302,19 @@ test.describe('the changed-parts-only export', () => {
     const xml = readFileSync(await (await xmlDownload).path(), 'utf8');
 
     // Only the increase is expressible, and the file says so plainly.
-    expect(xml).toContain('EXTRA PARTS TO BUY');
+    expect(xml).toContain('CHANGED PARTS ONLY');
     expect(xml).toContain('NOT a complete parts list');
-    expect(xml).toContain('ONLY USE THIS if you have already bought');
-    expect(xml).toContain('use the OPTIMIZED');
+    // The precondition, and where to go instead if it does not hold.
+    expect(xml).toContain('correct only if');
+    expect(xml).toContain('use the OPTIMIZED Wanted List');
+    // Acting on it after ordering costs money and returns nothing.
+    expect(xml).toContain('COSTS you');
+    expect(xml).toContain('BEFORE you order');
     // The delta is its own order, with its own shipping.
     expect(xml).toContain('own BrickLink order');
+    // Provenance, and the demo-price disclosure this file used to lack.
+    expect(xml).toContain('buried-brick.ldr');
+    expect(xml).toContain('DEMO PRICE DATA');
     expect(xml).toContain('<INVENTORY>');
     expect(xml).toContain('<MINQTY>1</MINQTY>');
 

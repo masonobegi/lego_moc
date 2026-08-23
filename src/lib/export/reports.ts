@@ -492,10 +492,11 @@ export function deltaExportPreamble(delta: InventoryDelta, context: DeltaExportC
     `Whole model:      ${delta.totalPieces} pieces`,
     '',
     'MONEY. Three different figures, because they answer different questions:',
-    `  If you have NOT ordered yet, the optimized list costs ${money(
-      delta.estimatedCostDifference,
-    )} more than`,
-    '    the original (a negative number means it is cheaper).',
+    delta.estimatedCostDifference === 0
+      ? '  If you have NOT ordered yet, the optimized list costs the same as the original.'
+      : `  If you have NOT ordered yet, the optimized list is ${money(
+          Math.abs(delta.estimatedCostDifference),
+        )} ${delta.estimatedCostDifference < 0 ? 'CHEAPER' : 'MORE'} than the original.`,
     `  To act on THIS file you spend ${money(delta.additionalSpend)} on the parts below.`,
     `  You will be left with roughly ${money(delta.spareValue)} of parts you no longer need.`,
     '',
