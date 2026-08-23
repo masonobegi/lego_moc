@@ -28,17 +28,41 @@ export interface SerializeOptions {
 
 /**
  * Format a number the way LDraw files conventionally do: integers without a
- * decimal point, fractions without trailing zeros, and no exponent notation
- * (some readers do not accept `1e-7`).
+ * decimal point, fractions without trailing zeros, and never in exponent
+ * notation, because not every LDraw reader accepts `1e-7`.
+ *
+ * The value is emitted at FULL precision, using the shortest decimal string
+ * that parses back to exactly the same double. Rounding to a fixed number of
+ * decimals looked harmless - 1 LDU is 0.4 mm, so six decimals is far below any
+ * physical relevance - but it silently altered real files: rotation matrices in
+ * official models carry values like 0.0871557 (sin 5 degrees), and truncating
+ * those made a regenerated file no longer semantically identical to its
+ * original. Losing information the user did not ask us to change is not
+ * acceptable at any magnitude.
  */
 export function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return '0';
-  if (Number.isInteger(value)) return String(value);
-  // 6 decimals is well beyond LDraw's practical precision (1 LDU = 0.4 mm).
-  let text = value.toFixed(6);
-  text = text.replace(/0+$/, '').replace(/\.$/, '');
-  if (text === '-0') return '0';
-  return text;
+  if (Object.is(value, -0)) return '0';
+  if (Number.isInteger(value)) {
+    // Above 1e21 JavaScript switches to exponent notation even for integers.
+    // Such a coordinate is meaningless in LDraw units, but emitting `1e+21`
+    // would produce a line some readers reject, so expand it.
+    return Math.abs(value) < 1e21 ? String(value) : BigInt(value).toString();
+  }
+
+  const shortest = String(value);
+  if (!shortest.includes('e') && !shortest.includes('E')) return shortest;
+
+  // Exponent form: expand to plain decimal with just enough digits to still
+  // parse back to the identical double.
+  for (let digits = 1; digits <= 100; digits++) {
+    const candidate = value.toFixed(digits);
+    if (Number(candidate) === value) {
+      const trimmed = candidate.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+      return trimmed === '-0' ? '0' : trimmed;
+    }
+  }
+  return value.toFixed(20);
 }
 
 export function formatColor(colorId: number): string {

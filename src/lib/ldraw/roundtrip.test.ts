@@ -4,7 +4,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { parseLDraw } from './parser';
-import { serializeDocument } from './serializer';
+import { formatNumber, serializeDocument } from './serializer';
 import { resolveModel } from './resolve';
 import type { LDrawDocument, PartInstance } from './types';
 
@@ -125,6 +125,45 @@ describe('serializer: semantic round trip when every line is regenerated', () =>
     expect(regenerated).not.toMatch(/e[-+]/i);
     expect(regenerated).toContain('1.5');
     expect(regenerated.split(/\s+/)[3]).toBe('0');
+  });
+
+  describe('formatNumber precision', () => {
+    /**
+     * Regression: the writer used to round to six decimals. That looked
+     * harmless - 1 LDU is 0.4 mm - but real official models carry rotation
+     * matrices built from values like sin(5 degrees) = 0.0871557, and rounding
+     * those made a regenerated file no longer semantically identical to its
+     * original. Seven of 103 Official Model Repository files failed because of
+     * it. Precision the user did not ask us to discard must not be discarded.
+     */
+    const VALUES = [
+      0, 1, -1, 0.5, 1.5,
+      0.0871557, 0.996195, -0.00872654, 0.9271838545667874,
+      1 / 3, Math.PI, Math.SQRT2,
+      1e-7, 1.5e-9, -1e-21, 1e21, 123456789.123456789,
+      -139.550351, -38.7101132,
+    ];
+
+    it.each(VALUES)('%p survives formatting exactly', (value) => {
+      const text = formatNumber(value);
+      expect(Number(text)).toBe(Object.is(value, -0) ? 0 : value);
+    });
+
+    it('never emits exponent notation', () => {
+      for (const value of VALUES) {
+        expect(formatNumber(value)).not.toMatch(/e/i);
+      }
+    });
+
+    it('normalises negative zero', () => {
+      expect(formatNumber(-0)).toBe('0');
+    });
+
+    it('keeps a rotation matrix intact through a regenerate cycle', () => {
+      const source = '1 16 0 0 0 0 0.996195 0.0871557 -1 0 0 0 -0.0871557 0.996195 3700.dat';
+      const once = serializeDocument(parseLDraw(source), { regenerate: true });
+      expect(once).toBe(source);
+    });
   });
 });
 
