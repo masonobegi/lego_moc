@@ -15,7 +15,7 @@ is capped and the sentence says why.
 | Category | Score |
 | --- | ---: |
 | Functionality | 8 |
-| Parser reliability | 9 |
+| Parser reliability | 8 |
 | Optimization accuracy | 8 |
 | False positives | 8 |
 | Cost accuracy | 7 |
@@ -25,12 +25,14 @@ is capped and the sentence says why.
 | UI | 8 |
 | Performance | 7 |
 | Tests | 9 |
-| **Overall** | **8.2** |
+| **Overall** | **8.1** |
 
 Nothing below 7. The two 7s are the honest ones: cost accuracy is limited by a
 BrickLink integration that has never made a live call from this build, and
 performance regressed by three to eight times when the visibility engine got
-correct.
+correct. Parser reliability dropped from 9 to 8 after a defect was found that
+inventories LDraw primitives as bricks in self-contained files - it corrupted
+both validation studies before it was caught.
 
 ---
 
@@ -55,7 +57,7 @@ threshold, so that half of the product contributes very little in practice.
 
 ---
 
-## Parser reliability - 9
+## Parser reliability - 8
 
 Measured on the 103 models of the LDraw Official Model Repository, 116,875
 parts:
@@ -79,8 +81,25 @@ silent:
   resolution, so a part could silently lose geometry and be judged on what was
   left. Now counted, and the part is marked incomplete.
 
-**Why not 10.** No fuzzing campaign. The hostile-input tests are hand-written
-cases, and hand-written cases are only as good as the imagination behind them.
+**A third bug, found later and NOT fixed.** An MPD may inline a part's own
+definition as a `0 FILE 3001.dat` block so the file renders without the parts
+library. `resolveModel` follows the specification - an in-document sub-file wins
+- and descends INTO the part, inventorying the primitives that make it up
+(`4-4edge`, `stud`) as though each were a brick. On a self-contained community
+model that is 100% of the "parts"; on 36 of the 103 official sets it ranges from
+10% to 70%. The blocks declare `0 !LDRAW_ORG Unofficial_Part`, so the
+information to stop at part level is right there and unused.
+
+This corrupted both validation studies until it was caught, and it is worked
+around at the corpus level rather than fixed, because the instruction at the
+time was to measure rather than change the optimizer. It should be fixed in the
+resolver before the tool is pointed at community files in earnest. See
+`docs/MOC_VALIDATION.md` section 3.
+
+**Why not 10.** The bug above, which shipped and affected a third of the
+official-set corpus. Also no fuzzing campaign: the hostile-input tests are
+hand-written cases, and hand-written cases are only as good as the imagination
+behind them.
 
 ---
 
@@ -357,8 +376,8 @@ written before the run. Full data: `docs/validation-results.json`.
 | | |
 | --- | ---: |
 | Median saving | **$0.08** |
-| Median saving, percent | **0.1%** |
-| Mean saving | $1.64 (0.5%) |
+| Median saving, percent | **0.2%** |
+| Mean saving | $1.61 (0.6%) |
 | 25th / 75th percentile | $0.00 / $1.40 |
 | Models saving nothing at all | **41.7%** |
 | Models saving over $5 | 8.7% |
@@ -366,20 +385,27 @@ written before the run. Full data: `docs/validation-results.json`.
 | Models saving over $20 | 1.9% |
 | Models saving over $50 | 0% |
 | Models reaching 10% | **0%** |
-| Best single result | $23.25 on a $783 model (3.0%) |
-| Best percentage | 5.0% (B-wing, $13.46) |
-| Total across the whole corpus | $169 of $21,292 = **0.8%** |
+| Best single result | $23.25 on a $769 model (3.0%) |
+| Best percentage | 5.9% (Space Shuttle Discovery, $20.03) |
+| Total across the whole corpus | $166 of $17,439 = **0.95%** |
 | Savings from color changes | 96.8% |
 
-Correlation of savings with part count is 0.54 - bigger models save more in
+These are the CORRECTED figures, measured after a resolver defect was found that
+inventoried LDraw primitives as though they were bricks - see
+`docs/MOC_VALIDATION.md` section 3. The originally published numbers were
+median $0.08 / 0.1% on a $21,292 corpus; the defect inflated part counts and cost
+denominators on 36 of the 103 models. Re-running on a prepared corpus moved
+individual models substantially and the population result barely at all.
+
+Correlation of savings with part count is 0.39 - bigger models save more in
 absolute terms, which is the one encouraging line in the table - but with
-percentage only 0.29. Even among the 29 models over 1,500 parts the median
-saving is **$2.43**.
+percentage only 0.31. Even among the 24 models over 1,500 parts the median
+saving is **$2.50**.
 
 ### Against the criteria fixed in advance
 
 - **Strong signal** required median ≥10% AND median above $20 on large models.
-  Measured: 0.1% and $2.43. Not close.
+  Measured: 0.2% and $2.50. Not close.
 - **Weak signal** was any of: median below 5%, median absolute below $10, or
   fewer than a quarter of models clearing $10. **All three** are true (0.1%,
   $0.08, 5.8%).
@@ -401,7 +427,7 @@ Across a sample of three large sets, of the pieces it declined to change:
 | Everything else | ~55 | <1% |
 
 **Three quarters of the parts in a LEGO model can be seen.** The median model in
-this corpus has 0.8% of its pieces fully hidden. There is very little buried
+this corpus has 0.72% of its pieces fully hidden. There is very little buried
 plastic, and what is buried is often already a cheap color, because the designer
 had no reason to spend on it either.
 
@@ -433,15 +459,19 @@ result for all 103 would have been lying 96 times.
 Not excuses - the specific things that could change the answer, and how much I
 believe each:
 
-1. **Reused submodels (most promising).** 22% of declined pieces are lines
-   shared between hidden and visible copies. Splitting the submodel would unlock
-   them, at the cost of changing the file's structure and therefore the build
-   instructions. On Cafe Corner alone that is 1,163 pieces. The value is
-   unmeasured, and those particular pieces are mostly already-cheap tan and
-   white, so I would not assume it rescues the number.
-2. **Fan MOCs rather than official sets.** The biggest unknown, and it cuts both
-   ways: MOCs are often display models with more open interiors, which would be
-   worse, not better. This needs measuring, not assuming.
+1. **Reused submodels. MEASURED SINCE, AND THE ANSWER IS NO.** I called this the
+   most promising remaining idea on the strength of a misread label. An oracle
+   over the whole corpus - handing the hidden subset of every genuinely mixed
+   group to the unmodified optimizer - puts the ceiling at **$13.30 across a
+   $17,439 corpus**, nothing at all on 87 of 103 models and over $20 on none.
+   Do not implement it. `docs/MOC_VALIDATION.md` section 6.
+2. **Fan MOCs rather than official sets. PARTIALLY TESTED, no support found.**
+   The population could not be sampled - every source is blocked from this
+   environment - but the five community models obtainable showed a LOWER median
+   percentage saving (0.03%) and a lower hidden-piece share (0.1%) than the
+   official sets. n=5 proves nothing, and there is a theory predicting the
+   opposite of the hypothesis: fan designers buying part by part already feel
+   every expensive colour and have already acted on it.
 3. **Live BrickLink prices.** Real color rarity spreads may be wider than the
    demo dataset's. This would change absolute dollars; it is unlikely to move a
    0.1% median by two orders of magnitude.

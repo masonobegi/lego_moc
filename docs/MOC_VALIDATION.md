@@ -229,8 +229,9 @@ they would.
 
 ## 6. The reused-submodel oracle
 
-*Measured across all 103 official sets. The community corpus is too small and
-too Technic-heavy to add anything.*
+*Measured across all 103 official sets, on the prepared corpus described in
+section 3. The community corpus is too small and too Technic-heavy to add
+anything.*
 
 The optimizer refuses to recolour a line when its submodel is used more than
 once and at least one copy is visible. Splitting such submodels so hidden copies
@@ -242,26 +243,30 @@ validity, safety and availability rules the product ships with. The split itself
 is assumed free, which no real split is.
 
 ```
-Current measured savings:              $169.01   (0.8% of a $21,292 corpus)
-Maximum additional from perfect split:  $13.35
-Theoretical total:                     $182.36   (0.9%)
+Current measured savings:              $165.65   (0.9% of a $17,439 corpus)
+Maximum additional from perfect split:  $13.30
+Theoretical total:                     $178.95   (1.0%)
 ```
 
-- Adds **nothing at all** on 88 of 103 models.
+- Adds **nothing at all** on 87 of 103 models.
 - Adds more than $5 on **one** model.
 - Adds more than $20 on **none**.
 - Median additional saving: **$0.00**.
 - Best case: Apollo Saturn V, $13.45 to $21.79 (3.9% to 6.4%).
+- Pieces in genuinely mixed groups across the whole corpus: **277**.
 
 **Y is trivial. Do not implement submodel splitting.** It moves the corpus from
-0.8% to 0.9% and would change no commercial conclusion.
+0.9% to 1.0% and would change no commercial conclusion.
 
-This also corrects something I reported earlier. I described reused submodels as
-the largest addressable opportunity, citing 1,163 pieces on Cafe Corner. That
-was a misreading: the `mixed_visibility` rejection label fires whenever a
-group's instances have *differing* classifications, including VISIBLE plus
-LIKELY_VISIBLE where nothing is hidden at all. Cafe Corner's genuinely mixed
-count - some copies hidden, some not - is 278 pieces, worth $1.54.
+This also corrects something I reported earlier, twice over. I described reused
+submodels as the largest addressable opportunity, citing 1,163 pieces on Cafe
+Corner. That was a misreading of the `mixed_visibility` rejection label, which
+fires whenever a group's instances have *differing* classifications - including
+VISIBLE plus LIKELY_VISIBLE, where nothing is hidden at all. I then corrected it
+to 278 pieces, which was measured on the contaminated corpus. On clean data Cafe
+Corner has **16** genuinely mixed hidden pieces, worth $1.54. The money was
+right both times; the piece count was wrong both times, and in both cases the
+error made the remaining opportunity look larger than it is.
 
 ---
 

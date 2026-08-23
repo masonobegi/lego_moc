@@ -124,9 +124,18 @@ the difference between that and a checkout price is not a rounding error.
 
 ## The answer
 
-**Weak signal.** All three weak-signal conditions were met: median saving 0.1%,
+**Weak signal.** All three weak-signal conditions were met: median saving 0.2%,
 median absolute saving $0.08, and 5.8% of models clearing $10. No threshold was
 adjusted after the fact.
+
+(Those are the corrected figures. The first run reported 0.1% because a resolver
+defect inventoried LDraw primitives as bricks on 36 of the 103 models; see
+`docs/MOC_VALIDATION.md` section 3. The correction moved individual models a
+long way and the verdict not at all.)
+
+A second population - community-designed MOCs - was commissioned and could not
+be sampled: every source is blocked from the build environment. What could be
+obtained is reported in `docs/MOC_VALIDATION.md`.
 
 The full numbers and what they mean are in `docs/AUDIT.md`, under "Does this
 product create real economic value?". The short version: three quarters of the

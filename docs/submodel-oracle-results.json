@@ -1,32 +1,32 @@
 {
   "summary": {
-    "generatedAt": "2026-08-23T06:42:15.126Z",
+    "generatedAt": "2026-08-23T07:28:10.908Z",
     "corpus": {
-      "directory": "/home/user/gkjohnson/ldraw-parts-library/models",
+      "directory": "/tmp/omr-normalized",
       "modelsAnalyzed": 103
     },
     "priceSource": "demo",
-    "totalOriginalCost": 21291.93,
-    "totalCurrentSavings": 169.01,
-    "totalOracleAdditionalSavings": 13.35,
-    "totalTheoretical": 182.36,
-    "currentSavingsPercentOfCorpus": 0.8,
-    "theoreticalPercentOfCorpus": 0.9,
+    "totalOriginalCost": 17439.4,
+    "totalCurrentSavings": 165.65,
+    "totalOracleAdditionalSavings": 13.3,
+    "totalTheoretical": 178.95,
+    "currentSavingsPercentOfCorpus": 0.9,
+    "theoreticalPercentOfCorpus": 1,
     "medianCurrentSavings": 0.08,
     "medianOracleAdditional": 0,
     "medianTheoreticalTotal": 0.08,
-    "medianTheoreticalPercent": 0.1,
+    "medianTheoreticalPercent": 0.2,
     "modelsWhereOracleAddsOver5": 1,
     "modelsWhereOracleAddsOver20": 0,
-    "modelsWhereOracleAddsNothing": 88,
-    "totalMixedHiddenPieces": 3519,
+    "modelsWhereOracleAddsNothing": 87,
+    "totalMixedHiddenPieces": 277,
     "failures": []
   },
   "rows": [
     {
       "file": "10019 - Rebel Blockade Runner - UCS.mpd",
-      "parts": 1870,
-      "originalCost": 782.9,
+      "parts": 1748,
+      "originalCost": 769.26,
       "currentSavings": 23.25,
       "currentSavingsPercent": 3,
       "mixedPieces": 0,
@@ -35,7 +35,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 23.25,
       "theoreticalTotalPercent": 3,
-      "seconds": 31.2
+      "seconds": 34.1
     },
     {
       "file": "10029 - Lunar Lander.mpd",
@@ -49,7 +49,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.31,
       "theoreticalTotalPercent": 0.2,
-      "seconds": 7.2
+      "seconds": 7
     },
     {
       "file": "10030-1 - Imperial Star Destroyer - UCS.mpd",
@@ -63,7 +63,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 2.96,
       "theoreticalTotalPercent": 0.3,
-      "seconds": 39.9
+      "seconds": 48.5
     },
     {
       "file": "10129-1 - Rebel Snowspeeder - UCS.mpd",
@@ -77,7 +77,7 @@
       "oracleAdditionalPercent": 0.1,
       "theoreticalTotal": 2.4,
       "theoreticalTotalPercent": 1.1,
-      "seconds": 33.9
+      "seconds": 34
     },
     {
       "file": "10134-1 - Y-wing Attack Starfighter - UCS.mpd",
@@ -91,7 +91,7 @@
       "oracleAdditionalPercent": 0.1,
       "theoreticalTotal": 1.05,
       "theoreticalTotalPercent": 0.5,
-      "seconds": 26.5
+      "seconds": 26.3
     },
     {
       "file": "10143-1 - Death Star II.mpd",
@@ -105,7 +105,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 5.51,
       "theoreticalTotalPercent": 1.1,
-      "seconds": 10
+      "seconds": 10.3
     },
     {
       "file": "10156-1 - LEGO Truck.mpd",
@@ -123,31 +123,31 @@
     },
     {
       "file": "10179-1 - Millennium Falcon - UCS.mpd",
-      "parts": 6034,
-      "originalCost": 717.91,
-      "currentSavings": 2.25,
+      "parts": 5260,
+      "originalCost": 674.84,
+      "currentSavings": 2.19,
       "currentSavingsPercent": 0.3,
-      "mixedPieces": 479,
-      "mixedHiddenPieces": 94,
+      "mixedPieces": 118,
+      "mixedHiddenPieces": 37,
       "oracleAdditionalSavings": 0.1,
       "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 2.35,
+      "theoreticalTotal": 2.29,
       "theoreticalTotalPercent": 0.3,
-      "seconds": 49.9
+      "seconds": 40
     },
     {
       "file": "10182-1 - Cafe Corner.mpd",
-      "parts": 3457,
-      "originalCost": 468.63,
+      "parts": 2417,
+      "originalCost": 351.67,
       "currentSavings": 2.03,
-      "currentSavingsPercent": 0.4,
-      "mixedPieces": 1068,
-      "mixedHiddenPieces": 278,
+      "currentSavingsPercent": 0.6,
+      "mixedPieces": 48,
+      "mixedHiddenPieces": 16,
       "oracleAdditionalSavings": 1.54,
-      "oracleAdditionalPercent": 0.3,
+      "oracleAdditionalPercent": 0.4,
       "theoreticalTotal": 3.57,
-      "theoreticalTotalPercent": 0.8,
-      "seconds": 107.5
+      "theoreticalTotalPercent": 1,
+      "seconds": 26.9
     },
     {
       "file": "10212-1 - Imperial Shuttle - UCS.mpd",
@@ -161,7 +161,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 2.7,
       "theoreticalTotalPercent": 0.7,
-      "seconds": 38.2
+      "seconds": 38
     },
     {
       "file": "10213-1 - Shuttle Adventure.mpd",
@@ -175,7 +175,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 6.1,
       "theoreticalTotalPercent": 2.1,
-      "seconds": 22.8
+      "seconds": 21.6
     },
     {
       "file": "10214-1 - Tower Bridge.mpd",
@@ -203,12 +203,12 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 1.35,
       "theoreticalTotalPercent": 0.5,
-      "seconds": 13.7
+      "seconds": 13.9
     },
     {
       "file": "10224 - Town Hall.mpd",
-      "parts": 2829,
-      "originalCost": 566.85,
+      "parts": 2799,
+      "originalCost": 565.09,
       "currentSavings": 1.82,
       "currentSavingsPercent": 0.3,
       "mixedPieces": 10,
@@ -217,21 +217,21 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 1.82,
       "theoreticalTotalPercent": 0.3,
-      "seconds": 32.1
+      "seconds": 32.3
     },
     {
       "file": "10227-1 - B-wing Starfighter.mpd",
-      "parts": 1688,
-      "originalCost": 268.38,
-      "currentSavings": 13.46,
-      "currentSavingsPercent": 5,
-      "mixedPieces": 44,
-      "mixedHiddenPieces": 22,
+      "parts": 1488,
+      "originalCost": 255.76,
+      "currentSavings": 12.23,
+      "currentSavingsPercent": 4.8,
+      "mixedPieces": 4,
+      "mixedHiddenPieces": 2,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 13.46,
-      "theoreticalTotalPercent": 5,
-      "seconds": 34.5
+      "theoreticalTotal": 12.23,
+      "theoreticalTotalPercent": 4.8,
+      "seconds": 36.3
     },
     {
       "file": "10228 - HAUNTED HOUSE.ldr",
@@ -245,7 +245,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 2.43,
       "theoreticalTotalPercent": 0.9,
-      "seconds": 20.7
+      "seconds": 20.5
     },
     {
       "file": "10228 - HAUNTED HOUSE.mpd",
@@ -259,49 +259,49 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 2.43,
       "theoreticalTotalPercent": 0.9,
-      "seconds": 20.5
+      "seconds": 20.6
     },
     {
       "file": "10240-1 - Red Five X-Wing Starfighter.mpd",
-      "parts": 1759,
-      "originalCost": 249.9,
+      "parts": 1559,
+      "originalCost": 233.74,
       "currentSavings": 8.46,
-      "currentSavingsPercent": 3.4,
+      "currentSavingsPercent": 3.6,
       "mixedPieces": 0,
       "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 8.46,
-      "theoreticalTotalPercent": 3.4,
-      "seconds": 44.2
+      "theoreticalTotalPercent": 3.6,
+      "seconds": 36.6
     },
     {
       "file": "10252 - Volkswagen Beetle.mpd",
-      "parts": 1856,
-      "originalCost": 383.88,
-      "currentSavings": 1,
-      "currentSavingsPercent": 0.3,
-      "mixedPieces": 0,
-      "mixedHiddenPieces": 0,
-      "oracleAdditionalSavings": 0,
+      "parts": 1187,
+      "originalCost": 191.32,
+      "currentSavings": 1.08,
+      "currentSavingsPercent": 0.6,
+      "mixedPieces": 2,
+      "mixedHiddenPieces": 1,
+      "oracleAdditionalSavings": 0.03,
       "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 1,
-      "theoreticalTotalPercent": 0.3,
-      "seconds": 9.7
+      "theoreticalTotal": 1.11,
+      "theoreticalTotalPercent": 0.6,
+      "seconds": 10.1
     },
     {
       "file": "10283-1 NASA Space Shuttle Discovery.mpd",
-      "parts": 8149,
-      "originalCost": 1204.59,
-      "currentSavings": 22.02,
-      "currentSavingsPercent": 1.8,
-      "mixedPieces": 3202,
-      "mixedHiddenPieces": 2101,
-      "oracleAdditionalSavings": 0.43,
-      "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 22.45,
-      "theoreticalTotalPercent": 1.9,
-      "seconds": 164.9
+      "parts": 2320,
+      "originalCost": 342.43,
+      "currentSavings": 20.03,
+      "currentSavingsPercent": 5.8,
+      "mixedPieces": 32,
+      "mixedHiddenPieces": 15,
+      "oracleAdditionalSavings": 0.31,
+      "oracleAdditionalPercent": 0.1,
+      "theoreticalTotal": 20.34,
+      "theoreticalTotalPercent": 5.9,
+      "seconds": 90.1
     },
     {
       "file": "1180-1 - Space Port Moon Buggy.mpd",
@@ -343,7 +343,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 1.2
+      "seconds": 1.1
     },
     {
       "file": "1789-1 - Star Hawk II.mpd",
@@ -357,7 +357,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 1.4
+      "seconds": 1.3
     },
     {
       "file": "1793-1 - Space Station Zenon.mpd",
@@ -399,7 +399,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.06,
       "theoreticalTotalPercent": 0.2,
-      "seconds": 3.1
+      "seconds": 3.2
     },
     {
       "file": "21028-1 - New York City.mpd",
@@ -413,7 +413,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.94,
       "theoreticalTotalPercent": 1.2,
-      "seconds": 21.4
+      "seconds": 21.5
     },
     {
       "file": "21041-1 - Great Wall of China.mpd",
@@ -427,21 +427,21 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 1.45,
       "theoreticalTotalPercent": 1.4,
-      "seconds": 9.8
+      "seconds": 9.6
     },
     {
       "file": "21043-1 - San Francisco.mpd",
-      "parts": 904,
-      "originalCost": 105.51,
+      "parts": 567,
+      "originalCost": 69.99,
       "currentSavings": 0.27,
-      "currentSavingsPercent": 0.3,
-      "mixedPieces": 23,
-      "mixedHiddenPieces": 6,
+      "currentSavingsPercent": 0.4,
+      "mixedPieces": 2,
+      "mixedHiddenPieces": 1,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.27,
-      "theoreticalTotalPercent": 0.3,
-      "seconds": 6.4
+      "theoreticalTotalPercent": 0.4,
+      "seconds": 8.6
     },
     {
       "file": "21103 - The DeLorean time machine.ldr",
@@ -455,7 +455,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.2,
       "theoreticalTotalPercent": 0.2,
-      "seconds": 6.5
+      "seconds": 6.2
     },
     {
       "file": "21103 - The DeLorean time machine.mpd",
@@ -469,7 +469,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.2,
       "theoreticalTotalPercent": 0.2,
-      "seconds": 6.7
+      "seconds": 6.3
     },
     {
       "file": "21109 - Exo Suit.mpd",
@@ -483,7 +483,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.34,
       "theoreticalTotalPercent": 0.6,
-      "seconds": 3
+      "seconds": 2.9
     },
     {
       "file": "21303 - WALLE.mpd",
@@ -501,17 +501,17 @@
     },
     {
       "file": "21307 - Caterham Seven 620R.mpd",
-      "parts": 1531,
-      "originalCost": 470.52,
-      "currentSavings": 0.4,
-      "currentSavingsPercent": 0.1,
-      "mixedPieces": 580,
-      "mixedHiddenPieces": 118,
+      "parts": 814,
+      "originalCost": 110.6,
+      "currentSavings": 0.59,
+      "currentSavingsPercent": 0.5,
+      "mixedPieces": 0,
+      "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 0.4,
-      "theoreticalTotalPercent": 0.1,
-      "seconds": 29.4
+      "theoreticalTotal": 0.59,
+      "theoreticalTotalPercent": 0.5,
+      "seconds": 26.3
     },
     {
       "file": "21309-1 - NASA Apollo Saturn V.mpd",
@@ -525,63 +525,63 @@
       "oracleAdditionalPercent": 2.4,
       "theoreticalTotal": 21.79,
       "theoreticalTotalPercent": 6.4,
-      "seconds": 98.5
+      "seconds": 98.1
     },
     {
       "file": "21311 - Voltron - Voltron.mpd",
-      "parts": 4636,
-      "originalCost": 1018.22,
-      "currentSavings": 10.28,
-      "currentSavingsPercent": 1,
-      "mixedPieces": 876,
-      "mixedHiddenPieces": 209,
+      "parts": 2317,
+      "originalCost": 344.95,
+      "currentSavings": 10.24,
+      "currentSavingsPercent": 3,
+      "mixedPieces": 6,
+      "mixedHiddenPieces": 3,
       "oracleAdditionalSavings": 0.2,
-      "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 10.48,
-      "theoreticalTotalPercent": 1,
-      "seconds": 70.2
+      "oracleAdditionalPercent": 0.1,
+      "theoreticalTotal": 10.44,
+      "theoreticalTotalPercent": 3,
+      "seconds": 47.1
     },
     {
       "file": "21318 - Tree House.mpd",
-      "parts": 3549,
-      "originalCost": 635.59,
-      "currentSavings": 2.89,
+      "parts": 3028,
+      "originalCost": 535.2,
+      "currentSavings": 2.81,
       "currentSavingsPercent": 0.5,
-      "mixedPieces": 220,
-      "mixedHiddenPieces": 102,
+      "mixedPieces": 32,
+      "mixedHiddenPieces": 19,
       "oracleAdditionalSavings": 0.69,
       "oracleAdditionalPercent": 0.1,
-      "theoreticalTotal": 3.58,
-      "theoreticalTotalPercent": 0.6,
-      "seconds": 49.2
+      "theoreticalTotal": 3.5,
+      "theoreticalTotalPercent": 0.7,
+      "seconds": 34.1
     },
     {
       "file": "21321 - International Space Station.mpd",
-      "parts": 1387,
-      "originalCost": 247.72,
+      "parts": 863,
+      "originalCost": 99.82,
       "currentSavings": 0.06,
-      "currentSavingsPercent": 0,
-      "mixedPieces": 6,
-      "mixedHiddenPieces": 3,
+      "currentSavingsPercent": 0.1,
+      "mixedPieces": 0,
+      "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.06,
-      "theoreticalTotalPercent": 0,
-      "seconds": 8.4
+      "theoreticalTotalPercent": 0.1,
+      "seconds": 3.2
     },
     {
       "file": "21325 - Medieval Blacksmith.mpd",
-      "parts": 2372,
-      "originalCost": 328.94,
+      "parts": 2128,
+      "originalCost": 309.58,
       "currentSavings": 2.1,
-      "currentSavingsPercent": 0.6,
-      "mixedPieces": 78,
-      "mixedHiddenPieces": 41,
+      "currentSavingsPercent": 0.7,
+      "mixedPieces": 6,
+      "mixedHiddenPieces": 3,
       "oracleAdditionalSavings": 0.09,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 2.19,
       "theoreticalTotalPercent": 0.7,
-      "seconds": 31.2
+      "seconds": 27.9
     },
     {
       "file": "40448 - Vintage Car.mpd",
@@ -599,17 +599,17 @@
     },
     {
       "file": "5542 - Black Thunder.mpd",
-      "parts": 1020,
-      "originalCost": 228.95,
+      "parts": 502,
+      "originalCost": 101.59,
       "currentSavings": 1.44,
-      "currentSavingsPercent": 0.6,
+      "currentSavingsPercent": 1.4,
       "mixedPieces": 0,
       "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 1.44,
-      "theoreticalTotalPercent": 0.6,
-      "seconds": 6.7
+      "theoreticalTotalPercent": 1.4,
+      "seconds": 11.8
     },
     {
       "file": "5571-1 - Giant Truck.mpd",
@@ -623,7 +623,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 3.31,
       "theoreticalTotalPercent": 0.9,
-      "seconds": 20.1
+      "seconds": 20.6
     },
     {
       "file": "5920-1 - Island Racer.mpd",
@@ -641,17 +641,17 @@
     },
     {
       "file": "5934 - Dino Explorer.mpd",
-      "parts": 460,
-      "originalCost": 173.14,
+      "parts": 102,
+      "originalCost": 48.8,
       "currentSavings": 0,
       "currentSavingsPercent": 0,
-      "mixedPieces": 16,
-      "mixedHiddenPieces": 15,
+      "mixedPieces": 0,
+      "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 3.7
+      "seconds": 0.7
     },
     {
       "file": "6066 - Camouflaged Outpost.mpd",
@@ -665,7 +665,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 1.4
+      "seconds": 1.3
     },
     {
       "file": "6071 - Forestmens Crossing.mpd",
@@ -693,7 +693,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.08,
       "theoreticalTotalPercent": 0,
-      "seconds": 3
+      "seconds": 2.9
     },
     {
       "file": "6232-1 - Skeleton Crew.mpd",
@@ -721,12 +721,12 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.06,
       "theoreticalTotalPercent": 0.8,
-      "seconds": 4.2
+      "seconds": 4
     },
     {
       "file": "6245 - Harbor Sentry.mpd",
-      "parts": 86,
-      "originalCost": 47.7,
+      "parts": 31,
+      "originalCost": 17.65,
       "currentSavings": 0,
       "currentSavingsPercent": 0,
       "mixedPieces": 0,
@@ -735,7 +735,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 0.7
+      "seconds": 0.3
     },
     {
       "file": "6246 - Crocodile Cage.mpd",
@@ -795,8 +795,8 @@
     },
     {
       "file": "6279-1 - Skull Island.mpd",
-      "parts": 509,
-      "originalCost": 139.77,
+      "parts": 757,
+      "originalCost": 137.84,
       "currentSavings": 0,
       "currentSavingsPercent": 0,
       "mixedPieces": 0,
@@ -805,35 +805,35 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 3
+      "seconds": 2.9
     },
     {
       "file": "6285 - Black Seas Barracuda.mpd",
-      "parts": 4399,
-      "originalCost": 392.79,
+      "parts": 3102,
+      "originalCost": 254.3,
       "currentSavings": 0.12,
       "currentSavingsPercent": 0,
-      "mixedPieces": 32,
-      "mixedHiddenPieces": 12,
+      "mixedPieces": 0,
+      "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.12,
       "theoreticalTotalPercent": 0,
-      "seconds": 17.4
+      "seconds": 9.7
     },
     {
       "file": "6286 - Skulls Eye Schooner.mpd",
-      "parts": 4236,
-      "originalCost": 450.05,
-      "currentSavings": 0.48,
-      "currentSavingsPercent": 0.1,
-      "mixedPieces": 25,
-      "mixedHiddenPieces": 13,
+      "parts": 3010,
+      "originalCost": 310.48,
+      "currentSavings": 0.51,
+      "currentSavingsPercent": 0.2,
+      "mixedPieces": 0,
+      "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 0.48,
-      "theoreticalTotalPercent": 0.1,
-      "seconds": 28.6
+      "theoreticalTotal": 0.51,
+      "theoreticalTotalPercent": 0.2,
+      "seconds": 11.3
     },
     {
       "file": "6712-1 - Sheriff's Showdown.mpd",
@@ -865,8 +865,8 @@
     },
     {
       "file": "6718 - Raindance Ridge.mpd",
-      "parts": 103,
-      "originalCost": 27.48,
+      "parts": 80,
+      "originalCost": 26.23,
       "currentSavings": 0,
       "currentSavingsPercent": 0,
       "mixedPieces": 0,
@@ -889,21 +889,21 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.03,
       "theoreticalTotalPercent": 0,
-      "seconds": 3.2
+      "seconds": 3.1
     },
     {
       "file": "6761-1 - Bandit's Secret Hide-Out.mpd",
-      "parts": 378,
-      "originalCost": 136.6,
+      "parts": 275,
+      "originalCost": 107.9,
       "currentSavings": 0.3,
-      "currentSavingsPercent": 0.2,
+      "currentSavingsPercent": 0.3,
       "mixedPieces": 0,
       "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.3,
-      "theoreticalTotalPercent": 0.2,
-      "seconds": 5.1
+      "theoreticalTotalPercent": 0.3,
+      "seconds": 5
     },
     {
       "file": "6799-1 - Showdown Canyon - Carriage.mpd",
@@ -917,7 +917,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 0.5
+      "seconds": 0.6
     },
     {
       "file": "6814-1 - Ice Tunnelator.mpd",
@@ -987,7 +987,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 0.5
+      "seconds": 0.4
     },
     {
       "file": "6861-2 - Super Model Building Instruction.mpd",
@@ -1015,7 +1015,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 1.5
+      "seconds": 1.4
     },
     {
       "file": "6879-1 - Blizzard Baron.mpd",
@@ -1085,7 +1085,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 0.8
+      "seconds": 0.7
     },
     {
       "file": "6907 - Sonic Stinger.mpd",
@@ -1113,7 +1113,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.03,
       "theoreticalTotalPercent": 0,
-      "seconds": 4.2
+      "seconds": 4.1
     },
     {
       "file": "6923-1 - Particle Ionizer.mpd",
@@ -1127,7 +1127,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 1.5
+      "seconds": 1.3
     },
     {
       "file": "6955-1 - Space Lock-Up Isolation Base.mpd",
@@ -1141,7 +1141,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 1.6
+      "seconds": 1.5
     },
     {
       "file": "6956-1 - Stellar Recon Voyager.mpd",
@@ -1173,8 +1173,8 @@
     },
     {
       "file": "6959-1 - Lunar Launch Site.mpd",
-      "parts": 460,
-      "originalCost": 202.62,
+      "parts": 353,
+      "originalCost": 143.69,
       "currentSavings": 0,
       "currentSavingsPercent": 0,
       "mixedPieces": 0,
@@ -1183,7 +1183,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 2.2
+      "seconds": 2
     },
     {
       "file": "6969 - Celestial Stinger.mpd",
@@ -1211,7 +1211,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 2.5
+      "seconds": 2.4
     },
     {
       "file": "6977 - Arachnoid Atar Base.mpd",
@@ -1225,7 +1225,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 2.3
+      "seconds": 2.2
     },
     {
       "file": "6983-1 - Ice Station Odyssey.mpd",
@@ -1243,45 +1243,45 @@
     },
     {
       "file": "70814 - Emmets Constructo-Mech.mpd",
-      "parts": 1747,
-      "originalCost": 400.37,
-      "currentSavings": 1.13,
-      "currentSavingsPercent": 0.3,
-      "mixedPieces": 60,
-      "mixedHiddenPieces": 52,
+      "parts": 943,
+      "originalCost": 122.15,
+      "currentSavings": 1.01,
+      "currentSavingsPercent": 0.8,
+      "mixedPieces": 0,
+      "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 1.13,
-      "theoreticalTotalPercent": 0.3,
-      "seconds": 8.8
+      "theoreticalTotal": 1.01,
+      "theoreticalTotalPercent": 0.8,
+      "seconds": 8.7
     },
     {
       "file": "70816 - Bennys Spaceship Spa_kOdSy6E.mpd",
-      "parts": 2464,
-      "originalCost": 357.1,
-      "currentSavings": 0.62,
-      "currentSavingsPercent": 0.2,
-      "mixedPieces": 178,
-      "mixedHiddenPieces": 97,
-      "oracleAdditionalSavings": 0.04,
+      "parts": 1293,
+      "originalCost": 210.75,
+      "currentSavings": 0.54,
+      "currentSavingsPercent": 0.3,
+      "mixedPieces": 10,
+      "mixedHiddenPieces": 5,
+      "oracleAdditionalSavings": 0.08,
       "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 0.66,
-      "theoreticalTotalPercent": 0.2,
-      "seconds": 38
+      "theoreticalTotal": 0.62,
+      "theoreticalTotalPercent": 0.3,
+      "seconds": 10.5
     },
     {
       "file": "7131-1 - Anakin's Podracer.mpd",
-      "parts": 260,
-      "originalCost": 44.93,
+      "parts": 174,
+      "originalCost": 36.09,
       "currentSavings": 0,
       "currentSavingsPercent": 0,
-      "mixedPieces": 22,
-      "mixedHiddenPieces": 12,
+      "mixedPieces": 0,
+      "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 5.1
+      "seconds": 1.2
     },
     {
       "file": "7150-1 - TIE Fighter & Y-wing.mpd",
@@ -1309,7 +1309,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0,
       "theoreticalTotalPercent": 0,
-      "seconds": 5.7
+      "seconds": 5.8
     },
     {
       "file": "7191 - X-wing Fighter - UCS.mpd",
@@ -1323,68 +1323,68 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 2.65,
       "theoreticalTotalPercent": 0.9,
-      "seconds": 24.5
+      "seconds": 24.7
     },
     {
       "file": "7326-1 - Rise of the Sphinx.mpd",
-      "parts": 752,
-      "originalCost": 136.74,
+      "parts": 552,
+      "originalCost": 107.22,
       "currentSavings": 0.56,
-      "currentSavingsPercent": 0.4,
+      "currentSavingsPercent": 0.5,
       "mixedPieces": 0,
       "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.56,
-      "theoreticalTotalPercent": 0.4,
-      "seconds": 4.2
+      "theoreticalTotalPercent": 0.5,
+      "seconds": 5
     },
     {
       "file": "7327-1 - Scorpion Pyramid.mpd",
-      "parts": 1212,
-      "originalCost": 215.46,
+      "parts": 834,
+      "originalCost": 174.9,
       "currentSavings": 0.29,
-      "currentSavingsPercent": 0.1,
-      "mixedPieces": 16,
-      "mixedHiddenPieces": 10,
+      "currentSavingsPercent": 0.2,
+      "mixedPieces": 0,
+      "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.29,
-      "theoreticalTotalPercent": 0.1,
-      "seconds": 6.8
+      "theoreticalTotalPercent": 0.2,
+      "seconds": 6.5
     },
     {
       "file": "7410-1 - Jungle River.mpd",
-      "parts": 171,
-      "originalCost": 41.23,
+      "parts": 88,
+      "originalCost": 22.78,
       "currentSavings": 0.02,
-      "currentSavingsPercent": 0,
+      "currentSavingsPercent": 0.1,
       "mixedPieces": 0,
       "mixedHiddenPieces": 0,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.02,
-      "theoreticalTotalPercent": 0,
-      "seconds": 1.2
+      "theoreticalTotalPercent": 0.1,
+      "seconds": 1.1
     },
     {
       "file": "75053-1 - The Ghost.mpd",
-      "parts": 1112,
-      "originalCost": 181.81,
+      "parts": 912,
+      "originalCost": 158.43,
       "currentSavings": 1.59,
-      "currentSavingsPercent": 0.9,
+      "currentSavingsPercent": 1,
       "mixedPieces": 4,
       "mixedHiddenPieces": 2,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 1.59,
-      "theoreticalTotalPercent": 0.9,
-      "seconds": 8
+      "theoreticalTotalPercent": 1,
+      "seconds": 7.7
     },
     {
       "file": "75060 - Slave I.mpd",
-      "parts": 2054,
-      "originalCost": 383.65,
+      "parts": 2014,
+      "originalCost": 378.95,
       "currentSavings": 2.92,
       "currentSavingsPercent": 0.8,
       "mixedPieces": 2,
@@ -1393,21 +1393,21 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 3,
       "theoreticalTotalPercent": 0.8,
-      "seconds": 19.8
+      "seconds": 20.7
     },
     {
       "file": "75144 - Snowspeeder.mpd",
-      "parts": 2467,
-      "originalCost": 359.8,
-      "currentSavings": 13.19,
-      "currentSavingsPercent": 3.7,
-      "mixedPieces": 298,
-      "mixedHiddenPieces": 163,
+      "parts": 1709,
+      "originalCost": 303.2,
+      "currentSavings": 13.13,
+      "currentSavingsPercent": 4.3,
+      "mixedPieces": 10,
+      "mixedHiddenPieces": 4,
       "oracleAdditionalSavings": 0,
       "oracleAdditionalPercent": 0,
-      "theoreticalTotal": 13.19,
-      "theoreticalTotalPercent": 3.7,
-      "seconds": 65.8
+      "theoreticalTotal": 13.13,
+      "theoreticalTotalPercent": 4.3,
+      "seconds": 57.3
     },
     {
       "file": "75827 - GHOSTBUSTERS HQ .mpd",
@@ -1421,7 +1421,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 2.3,
       "theoreticalTotalPercent": 0.3,
-      "seconds": 28.1
+      "seconds": 26.6
     },
     {
       "file": "7784 - The Batmobile Ult_V1hXfMw.mpd",
@@ -1435,7 +1435,7 @@
       "oracleAdditionalPercent": 0.3,
       "theoreticalTotal": 1.49,
       "theoreticalTotalPercent": 0.9,
-      "seconds": 10.7
+      "seconds": 10.9
     },
     {
       "file": "928-1 - Galaxy Explorer.mpd",
@@ -1449,7 +1449,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.3,
       "theoreticalTotalPercent": 0.2,
-      "seconds": 3.1
+      "seconds": 3.2
     },
     {
       "file": "9476-1 - The Orc Forge.mpd",
@@ -1463,7 +1463,7 @@
       "oracleAdditionalPercent": 0,
       "theoreticalTotal": 0.58,
       "theoreticalTotalPercent": 0.8,
-      "seconds": 3.9
+      "seconds": 4
     }
   ]
 }
