@@ -115,8 +115,13 @@ export class DemoPriceProvider implements SizeAwarePriceProvider {
       quantityAverage: null,
       minPrice: null,
       maxPrice: null,
+      // Demo mode has no marketplace behind it. Rather than invent lot counts
+      // that would make an availability assessment look researched when it is
+      // fabricated, they are left null and the assessment reports "unknown".
       lotCount: null,
       totalQuantity: null,
+      supplyIsLocationFiltered: false,
+      supplyReflectsSoldHistory: false,
       isEstimate: true,
       notes,
     };

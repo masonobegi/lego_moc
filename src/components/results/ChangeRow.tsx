@@ -4,6 +4,11 @@ import { useState } from 'react';
 
 import { LDRAW_COLORS } from '@/lib/ldraw/colors.generated';
 import type { OptimizationCandidate } from '@/lib/optimizer/types';
+import {
+  AVAILABILITY_LABELS,
+  SHIPPING_RISK_LABELS,
+  type ShippingRisk,
+} from '@/lib/pricing/availability';
 import { Swatch } from './Swatch';
 import { VISIBILITY_STYLE, confidenceLabel, money } from './format';
 
@@ -106,6 +111,14 @@ export function ChangeRow({
               {visibility.label}
             </span>
             <span className="tnum">{confidenceLabel(candidate.confidence)} confidence</span>
+            {candidate.shippingRisk !== 'LOW' && (
+              <span
+                data-testid="shipping-risk"
+                className={`rounded-[2px] border px-1.5 py-px ${riskClass(candidate.shippingRisk)}`}
+              >
+                Shipping/availability risk: {SHIPPING_RISK_LABELS[candidate.shippingRisk]}
+              </span>
+            )}
           </div>
         </button>
 
@@ -123,6 +136,20 @@ export function ChangeRow({
           </button>
         </div>
       </div>
+
+      {/*
+        A change can be cheaper on paper and still a bad idea to make: see
+        practicality.ts. When that is the case, say so where the decision is
+        being made rather than burying it in the details.
+      */}
+      {candidate.confidenceCaveat && (
+        <p
+          data-testid="confidence-caveat"
+          className="border-t border-[var(--line)] px-3.5 py-2 text-[0.75rem] leading-relaxed text-[var(--text-dim)]"
+        >
+          {candidate.confidenceCaveat}
+        </p>
+      )}
 
       {conflictActive && !enabled && (
         <p className="border-t border-[var(--line)] bg-[color-mix(in_srgb,var(--warn)_7%,transparent)] px-3.5 py-2 text-[0.75rem] text-[var(--warn)]">
@@ -153,6 +180,14 @@ export function ChangeRow({
               }
             />
             <Detail label="Pieces affected" value={String(candidate.quantity)} />
+            <Detail
+              label={`${candidate.originalColorName} availability`}
+              value={AVAILABILITY_LABELS[candidate.originalAvailability.level]}
+            />
+            <Detail
+              label={`${candidate.replacementColorName} availability`}
+              value={AVAILABILITY_LABELS[candidate.replacementAvailability.level]}
+            />
             <Detail
               label="Unit price"
               value={`${money(candidate.originalUnitPrice, currency)} to ${money(candidate.replacementUnitPrice, currency)}`}
@@ -203,4 +238,20 @@ function Arrow() {
 function colorHexOf(candidate: OptimizationCandidate, side: 'from' | 'to'): string {
   const id = side === 'from' ? candidate.originalColorId : candidate.replacementColorId;
   return COLOR_HEX[id] ?? '#888888';
+}
+
+/**
+ * Risk chips are muted, not alarming. A moderate risk is worth reading, not
+ * worth a red banner - and an unknown one (demo mode, or a source with no
+ * supply data) is an absence of information rather than bad news.
+ */
+function riskClass(risk: ShippingRisk): string {
+  switch (risk) {
+    case 'HIGH':
+      return 'border-[color-mix(in_srgb,var(--bad)_45%,transparent)] text-[var(--bad)]';
+    case 'MODERATE':
+      return 'border-[color-mix(in_srgb,var(--warn)_45%,transparent)] text-[var(--warn)]';
+    default:
+      return 'border-[var(--line-strong)] text-[var(--text-faint)]';
+  }
 }

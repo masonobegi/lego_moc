@@ -93,8 +93,8 @@ export function ChangeList({
           <h2 className="text-[0.95rem] font-semibold">Proposed changes</h2>
           <p className="tnum mt-0.5 text-[0.76rem] text-[var(--text-faint)]">
             {count(filtered.length)} shown &middot; {count(enabledIds.size)} of{' '}
-            {count(candidates.length)} enabled &middot; {money(visibleSavings, currency)} from those
-            shown
+            {count(candidates.length)} enabled &middot; {money(visibleSavings, currency)} estimated
+            part-price saving from those shown
           </p>
         </div>
         <div className="flex flex-wrap gap-1.5">

@@ -21,6 +21,7 @@ import { serializeDocument } from '@/lib/ldraw/serializer';
 import { applyOptimizations } from '@/lib/optimizer/applyOptimizations';
 import { BrickLinkPriceProvider } from '@/lib/pricing/bricklinkProvider';
 import { PriceCache } from '@/lib/pricing/cache';
+import { assessAvailability } from '@/lib/pricing/availability';
 import { DemoPriceProvider } from '@/lib/pricing/demoProvider';
 import { checkContentLength } from '@/lib/security/requestGuards';
 import { LIMITS } from '@/lib/security/limits';
@@ -260,6 +261,11 @@ describe('a mold swap on an inherit-color line is actually applied', () => {
       enabledByDefault: true,
       originalQuote: null,
       replacementQuote: null,
+      originalAvailability: assessAvailability(null, 1),
+      replacementAvailability: assessAvailability(null, 1),
+      shippingRisk: 'UNKNOWN' as const,
+      isHighConfidence: false,
+      confidenceCaveat: null,
     };
 
     const applied = applyOptimizations(document, [candidate], new Set(['mold:test']));
@@ -318,6 +324,11 @@ describe('a mold swap on an inherit-color line is actually applied', () => {
       enabledByDefault: true,
       originalQuote: null,
       replacementQuote: null,
+      originalAvailability: assessAvailability(null, 1),
+      replacementAvailability: assessAvailability(null, 1),
+      shippingRisk: 'UNKNOWN' as const,
+      isHighConfidence: false,
+      confidenceCaveat: null,
     };
     const applied = applyOptimizations(document, [candidate], new Set(['mold:mismatch']));
     expect(applied.appliedCount).toBe(0);

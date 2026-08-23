@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   },
   description:
     'Make expensive LEGO builds cheaper without changing how they look. Analyze an LDraw model, ' +
-    'find pieces that cannot be seen, and buy them in cheaper colors.',
+    'find pieces that cannot be seen, and buy those same pieces in cheaper colors.',
 };
 
 export const viewport: Viewport = {

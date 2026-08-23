@@ -363,9 +363,11 @@ describe('exports', () => {
       'USD',
     );
     const report = buildJsonReport(output.result, savings, enabled);
-    expect(report.originalCost).toBe(2.09);
-    expect(report.optimizedCost).toBe(1.46);
-    expect(report.savings).toBe(0.63);
+    expect(report.originalEstimatedPartCost).toBe(2.09);
+    expect(report.optimizedEstimatedPartCost).toBe(1.46);
+    expect(report.estimatedPartSavings).toBe(0.63);
+    // The report must never let a parts estimate read as an order total.
+    expect(report.costBasis).toMatch(/NOT a delivered order total/);
     expect(report.changes).toHaveLength(1);
     expect(report.priceSource.isDemoData).toBe(true);
     expect(report.priceSource.disclaimer).toMatch(/DEMO PRICE DATA/);

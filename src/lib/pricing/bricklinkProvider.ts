@@ -232,6 +232,8 @@ export class BrickLinkPriceProvider implements PriceProvider {
       maxPrice,
       lotCount,
       totalQuantity,
+      supplyIsLocationFiltered: Boolean(this.options.countryCode || this.options.region),
+      supplyReflectsSoldHistory: this.options.guideType === 'sold',
       isEstimate: true,
       notes,
     };

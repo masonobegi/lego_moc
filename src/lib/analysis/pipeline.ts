@@ -25,7 +25,8 @@ import { isSizeAware, type PartSizeHint } from '../pricing/types';
 import { groupInstancesByCommand, type CommandGroup } from '../optimizer/candidates';
 import { alternativeColorsToPrice, findColorCandidates } from '../optimizer/colorOptimizer';
 import { findMoldCandidates, moldPricesToRequest } from '../optimizer/moldOptimizer';
-import type { OptimizationCandidate, RejectedCommand, SafetyLevel } from '../optimizer/types';
+import { applyPracticality, DEFAULT_PRACTICALITY, type PracticalityOptions } from '../optimizer/practicality';
+import type { CandidateBlocker, OptimizationCandidate, RejectedCommand, SafetyLevel } from '../optimizer/types';
 import {
   optionsForModelSize,
   type VisibilityClass,
@@ -50,6 +51,10 @@ const BLOCKER_LABELS: Record<string, string> = {
   no_valid_alternative_color: 'No alternative color is evidenced for this part',
   no_equivalent_rule: 'No verified equivalent-mold rule for this part',
   rule_confidence_too_low: 'An equivalent-mold rule exists but is below the confidence threshold',
+  saving_below_threshold: 'Hidden and cheaper, but the saving is too small to be worth changing',
+  replacement_poorly_stocked:
+    'Hidden and cheaper, but the replacement color is barely stocked, so buying it would probably ' +
+    'cost more in shipping than the change saves',
   replacement_color_unavailable: 'The equivalent mold is not catalogd in this color',
   replacement_not_cheaper: 'The equivalent mold is not cheaper',
   geometry_unavailable: 'No LDraw geometry available, so visibility could not be assessed',
@@ -71,6 +76,8 @@ export interface AnalyzeOptions {
   readonly singleThreaded?: boolean;
   /** Overrides the submodel-expansion limits. Used by tests that force truncation. */
   readonly resolveOptions?: ResolveOptions;
+  /** Minimum saving worth proposing, and what counts as a high-confidence change. */
+  readonly practicality?: PracticalityOptions;
 }
 
 export interface AnalyzeOutput {
@@ -258,17 +265,30 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
   );
 
   // ---- 8. savings --------------------------------------------------------
+  // Safe and cheaper is not the same as worth making: see practicality.ts.
+  const practicality = options.practicality ?? DEFAULT_PRACTICALITY;
+  const impractical: RejectedCommand[] = [];
   const candidates = mark('savings', () => {
     if (!expansionComplete) return [];
     const all = [...colorOutput.candidates, ...moldOutput.candidates];
-    return resolveConflicts(all);
+    const assessed = applyPracticality(all, practicality);
+    for (const { change, blocker } of assessed.dropped) {
+      impractical.push({
+        commandRef: change.commandRef,
+        partId: change.partId,
+        colorId: change.originalColorId,
+        quantity: change.quantity,
+        blockers: [blocker],
+      });
+    }
+    return resolveConflicts(assessed.candidates);
   });
 
   const currency = firstCurrency(prices) ?? 'USD';
   const originalCost = calculateCost(instances, prices, options.condition, currency);
 
   const rejections = expansionComplete
-    ? summarizeRejections([...colorOutput.rejected, ...moldOutput.rejected])
+    ? summarizeRejections([...colorOutput.rejected, ...moldOutput.rejected, ...impractical])
     : [
         {
           reason: 'expansion_truncated',
@@ -485,11 +505,27 @@ export function computeSavings(
 ): SavingsSummary {
   const enabled = candidates.filter((c) => enabledIds.has(c.id));
   const savings = round2(originalTotal - optimizedTotal);
+  // The part of the saving that comes from changes which are both safe on the
+  // visibility evidence and practical to buy. Summed from the candidates
+  // themselves rather than recomputed from costs, so it always agrees with the
+  // per-change figures shown next to them.
+  const highConfidenceSavings = round2(
+    enabled.filter((c) => c.isHighConfidence).reduce((sum, c) => sum + c.savings, 0),
+  );
+  // Demo mode reports no lot counts at all, so there is nothing to distinguish
+  // a well-stocked replacement from a scarce one.
+  const supplyDataAvailable = candidates.some(
+    (c) => c.replacementAvailability.level !== 'UNKNOWN',
+  );
   return {
     originalCost: round2(originalTotal),
     optimizedCost: round2(optimizedTotal),
     savings,
     savingsPercent: originalTotal > 0 ? round2((savings / originalTotal) * 100) : 0,
+    highConfidenceSavings,
+    highConfidenceSavingsPercent:
+      originalTotal > 0 ? round2((highConfidenceSavings / originalTotal) * 100) : 0,
+    supplyDataAvailable,
     currency,
     candidateCount: candidates.length,
     enabledCount: enabled.length,

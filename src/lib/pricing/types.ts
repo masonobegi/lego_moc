@@ -30,10 +30,27 @@ export interface PriceQuote {
   readonly quantityAverage: number | null;
   readonly minPrice: number | null;
   readonly maxPrice: number | null;
-  /** Number of lots/listings behind the figure, where known. */
+  /**
+   * Number of LOTS behind the figure, where known. A lot is one seller's
+   * listing of one item in one condition - a good proxy for how many stores
+   * carry the part, but not the same number, since one store can list the same
+   * part twice. BrickLink's price-guide response does not expose a store count.
+   */
   readonly lotCount: number | null;
-  /** Total pieces available behind the figure, where known. */
+  /** Total pieces available across those lots, where known. */
   readonly totalQuantity: number | null;
+  /**
+   * True when the supply figures were restricted to sellers who ship to the
+   * configured country or region. When false the counts are worldwide, which is
+   * a much weaker guarantee that you can actually buy the part.
+   */
+  readonly supplyIsLocationFiltered?: boolean;
+  /**
+   * True when the figures come from BrickLink's SOLD guide. Those counts
+   * describe what changed hands over the last six months, not what is on sale
+   * now, so they must never be read as current stock.
+   */
+  readonly supplyReflectsSoldHistory?: boolean;
   /** Always true. There is no such thing as a guaranteed price here. */
   readonly isEstimate: true;
   /** Caveats to show alongside the number. */

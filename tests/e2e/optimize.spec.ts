@@ -197,3 +197,73 @@ test.describe('error handling', () => {
     ).toBeVisible();
   });
 });
+
+/**
+ * The product's answer to "will I actually save money?" is not our estimate -
+ * it is the difference between two BrickLink order totals. These cover the
+ * workflow that gets the user there, and the wording that stops the estimate
+ * being read as a checkout price.
+ */
+test.describe('estimated part cost is never presented as a delivered price', () => {
+  test('the results page separates the two and offers both Wanted Lists', async ({ page }) => {
+    const id = await analyzeFixture(page, 'buried-brick.ldr');
+    await page.goto(`/results/${id}`);
+
+    const disclaimer = page.getByTestId('not-checkout-price');
+    await expect(disclaimer).toBeVisible();
+    await expect(disclaimer).toContainText('not');
+    await expect(disclaimer).toContainText('what an order costs');
+    await expect(disclaimer).toContainText('shipping');
+    await expect(disclaimer).toContainText('minimum order requirements');
+
+    // Both lists are downloadable, and the original is offered first.
+    await expect(page.getByTestId('export-wanted-list-original')).toBeVisible();
+    await expect(page.getByTestId('export-wanted-list')).toBeVisible();
+
+    // And the page never claims a guaranteed saving.
+    await expect(page.getByText(/you will save/i)).toHaveCount(0);
+  });
+
+  test('the verify-on-BrickLink workflow computes savings from the user\'s own figures', async ({
+    page,
+  }) => {
+    const id = await analyzeFixture(page, 'buried-brick.ldr');
+    await page.goto(`/results/${id}`);
+
+    const verify = page.getByTestId('verify-on-bricklink');
+    await expect(verify).toBeVisible();
+    await expect(verify).toContainText('Want to know whether you actually save money after shipping?');
+
+    await page.getByTestId('delivered-original').fill('186.42');
+    await page.getByTestId('delivered-optimized').fill('161.07');
+
+    const comparison = page.getByTestId('delivered-comparison');
+    await expect(comparison).toBeVisible();
+    await expect(comparison).toContainText('$25.35');
+    await expect(comparison).toContainText('cheaper');
+    // Even the user's own BrickLink figures are not called guaranteed.
+    await expect(comparison).toContainText('not a guaranteed price');
+  });
+
+  test('an optimized order that costs more is reported as more expensive', async ({ page }) => {
+    const id = await analyzeFixture(page, 'buried-brick.ldr');
+    await page.goto(`/results/${id}`);
+
+    // Splitting the order across an extra seller really can do this, and the
+    // page must say so rather than showing a negative "saving".
+    await page.getByTestId('delivered-original').fill('100.00');
+    await page.getByTestId('delivered-optimized').fill('112.50');
+
+    const comparison = page.getByTestId('delivered-comparison');
+    await expect(comparison).toContainText('$12.50');
+    await expect(comparison).toContainText('more expensive');
+  });
+});
+
+/** Runs a bundled fixture through the real pipeline and returns the analysis id. */
+async function analyzeFixture(page: import('@playwright/test').Page, fixture: string): Promise<string> {
+  const response = await page.request.post('/api/analyze', { data: { fixture } });
+  expect(response.ok()).toBe(true);
+  const body = (await response.json()) as { result: { id: string } };
+  return body.result.id;
+}

@@ -12,6 +12,20 @@ export default function AboutPage() {
         generic BrickLink price optimizer: it changes the model itself, in the one way that costs
         nothing visually, and leaves everything else alone.
       </p>
+      <p className="mt-4 text-[0.92rem] leading-relaxed text-[var(--text-dim)]">
+        It does exactly one thing: find pieces that cannot be seen from outside the finished model,
+        and buy those same pieces in a cheaper color. It never turns one part into several, never
+        changes how anything connects, and never redesigns anything. That restriction is the point
+        &mdash; it is what lets the tool promise that the finished model looks identical.
+      </p>
+      <p className="mt-4 text-[0.92rem] leading-relaxed text-[var(--text-dim)]">
+        Every price figure it shows is an estimate of what the{' '}
+        <strong className="font-medium text-[var(--text)]">parts</strong> cost. It is not a checkout
+        total, because BrickThrift does not know which sellers BrickLink would pick for your order,
+        what they charge to ship, or what their minimums are. For the real answer it exports your
+        original and optimized parts lists so BrickLink &mdash; which does know &mdash; can price
+        both.
+      </p>
 
       <Section title="The method">
         <p>

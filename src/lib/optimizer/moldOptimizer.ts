@@ -32,7 +32,7 @@ import type { CommandGroup } from './candidates';
 import { consensusVisibility, isHiddenEnough, isMoldRuleAllowed, moldChangeConfidence } from './scoring';
 import type {
   CandidateBlocker,
-  OptimizationCandidate,
+  ProposedChange,
   RejectedCommand,
   SafetyLevel,
 } from './types';
@@ -49,7 +49,7 @@ export interface MoldOptimizerInput {
 }
 
 export interface MoldOptimizerOutput {
-  readonly candidates: OptimizationCandidate[];
+  readonly candidates: ProposedChange[];
   readonly rejected: RejectedCommand[];
 }
 
@@ -73,7 +73,7 @@ export function moldPricesToRequest(
 }
 
 export function findMoldCandidates(input: MoldOptimizerInput): MoldOptimizerOutput {
-  const candidates: OptimizationCandidate[] = [];
+  const candidates: ProposedChange[] = [];
   const rejected: RejectedCommand[] = [];
 
   for (const group of input.groups) {

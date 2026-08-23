@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import type { SavingsSummary } from '@/lib/analysis/types';
 import { count, money } from './format';
+import { VerifyOnBrickLink } from './VerifyOnBrickLink';
 
 interface Props {
   readonly analysisId: string;
@@ -31,9 +32,14 @@ const EXPORTS = [
     body: 'One row per proposed change: step, part, colors, prices, savings, reason, confidence, enabled.',
   },
   {
+    kind: 'wanted-list-original',
+    title: 'Original BrickLink Wanted List (XML)',
+    body: 'The untouched inventory, exactly as you uploaded it. Price this one on BrickLink first.',
+  },
+  {
     kind: 'wanted-list',
-    title: 'BrickLink Wanted List (XML)',
-    body: 'The optimized inventory in BrickLink XML. Lots whose BrickLink id could not be resolved are excluded and listed.',
+    title: 'Optimized BrickLink Wanted List (XML)',
+    body: 'The same inventory with your enabled changes applied. Price this one second and compare the two totals.',
   },
 ] as const;
 
@@ -102,7 +108,7 @@ export function ExportPanel({
             value={`${count(savings.enabledCount)} of ${count(savings.candidateCount)}`}
           />
           <Figure
-            label="Estimated cost"
+            label="Estimated part cost"
             value={money(savings.optimizedCost, savings.currency)}
             accent
           />
@@ -116,11 +122,11 @@ export function ExportPanel({
           ) : (
             <>
               {count(savings.changedPieceCount)} piece
-              {savings.changedPieceCount === 1 ? ' changes' : 's change'} color or mold, saving{' '}
+              {savings.changedPieceCount === 1 ? ' changes' : 's change'} color, an estimated{' '}
               <span className="font-semibold text-[var(--accent)]">
                 {money(savings.savings, savings.currency)}
-              </span>
-              .{' '}
+              </span>{' '}
+              off the parts bill.{' '}
               {savings.changedPieceCount === 1
                 ? 'It is a part with no externally visible surface, so the finished model looks the same.'
                 : 'Every one of them is a part with no externally visible surface, so the finished model looks the same.'}
@@ -164,6 +170,16 @@ export function ExportPanel({
       </ul>
 
       {error && <p className="mt-3 text-[0.8rem] text-[var(--bad)]">{error}</p>}
+
+      <div className="mt-5">
+        <VerifyOnBrickLink
+          analysisId={analysisId}
+          currency={savings.currency}
+          predictedSavings={savings.savings}
+          onExport={(kind) => void download(kind)}
+          busyKind={busy}
+        />
+      </div>
 
       <div className="mt-4 rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] p-3.5">
         <h3 className="text-[0.8rem] font-medium">Taking this back into BrickLink Studio</h3>

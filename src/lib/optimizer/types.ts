@@ -10,6 +10,7 @@
 
 import type { EquivalentPartRule } from '../catalog/types';
 import type { CommandRef } from '../ldraw/types';
+import type { AvailabilityAssessment, ShippingRisk } from '../pricing/availability';
 import type { PriceQuote } from '../pricing/types';
 import type { VisibilityClass } from './visibilityEngine';
 
@@ -56,6 +57,8 @@ export type CandidateBlocker =
   | 'rule_confidence_too_low'
   | 'replacement_color_unavailable'
   | 'replacement_not_cheaper'
+  | 'saving_below_threshold'
+  | 'replacement_poorly_stocked'
   | 'geometry_unavailable';
 
 export interface CandidateVisibility {
@@ -114,7 +117,38 @@ export interface OptimizationCandidate {
   readonly enabledByDefault: boolean;
   readonly originalQuote: PriceQuote | null;
   readonly replacementQuote: PriceQuote | null;
+
+  /** Marketplace supply for the color you would stop buying. */
+  readonly originalAvailability: AvailabilityAssessment;
+  /** Marketplace supply for the color you would start buying. */
+  readonly replacementAvailability: AvailabilityAssessment;
+  /**
+   * How likely this swap is to add a seller - and therefore a shipping charge -
+   * to the order. Judged only on supply; it is not a shipping calculation.
+   */
+  readonly shippingRisk: ShippingRisk;
+  /**
+   * True when the change is both safe to make (high visibility confidence) and
+   * practical to buy (acceptable supply for the replacement). Only these count
+   * toward the high-confidence savings figure.
+   */
+  readonly isHighConfidence: boolean;
+  /** Why this change is not high confidence, when it is not. */
+  readonly confidenceCaveat: string | null;
 }
+
+/**
+ * What the color and mold optimizers produce, before the practicality pass.
+ *
+ * Those two modules answer "is this change safe, and is it cheaper?". Whether a
+ * change is worth MAKING is a separate question - is the saving big enough to
+ * bother with, can you actually buy the replacement - and it is answered in one
+ * place, `practicality.ts`, rather than duplicated in each optimizer.
+ */
+export type ProposedChange = Omit<
+  OptimizationCandidate,
+  'originalAvailability' | 'replacementAvailability' | 'shippingRisk' | 'isHighConfidence' | 'confidenceCaveat'
+>;
 
 /** A command we looked at but produced no candidate for, and why. */
 export interface RejectedCommand {

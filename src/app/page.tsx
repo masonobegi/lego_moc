@@ -18,8 +18,9 @@ export default function HomePage() {
 
           <p className="mt-6 max-w-[62ch] text-[1.03rem] leading-relaxed text-[var(--text-dim)]">
             BrickThrift analyzes your digital model, works out which pieces cannot be seen from
-            outside the finished build, and shows you where a cheaper color buys you exactly the
-            same model. The geometry, the construction and the build steps stay identical.
+            outside the finished build, and shows you where buying those pieces in a cheaper color
+            gets you exactly the same model. Same parts, same positions, same build steps &mdash;
+            only the color of the plastic you cannot see changes.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -66,7 +67,7 @@ export default function HomePage() {
                   ['Color', 'Red', 'Black'],
                   ['Position and orientation', 'x 0, y -24, z 0', 'Identical'],
                   ['Build step', 'Step 3', 'Step 3'],
-                  ['Estimated price', '$0.75', '$0.12'],
+                  ['Estimated part price', '$0.75', '$0.12'],
                 ].map(([label, before, after], index, all) => (
                   <tr key={label} className={index === all.length - 1 ? 'border-t border-[var(--line)]' : ''}>
                     <td className="py-2 pr-6 text-[var(--text-faint)]">{label}</td>
@@ -87,6 +88,12 @@ export default function HomePage() {
             Nothing about the finished model changes: same part, same place, same orientation, same
             build step. The only difference is what color of plastic you buy. Multiply that across
             the hidden interior of a large MOC and it adds up.
+          </p>
+          <p className="mt-3 max-w-[70ch] text-[0.83rem] leading-relaxed text-[var(--text-faint)]">
+            Those are estimated <strong className="font-medium">part</strong> prices, not a checkout
+            total. What you finally pay depends on which sellers have what, shipping, minimum orders
+            and tax &mdash; so BrickThrift exports your original and optimized parts lists side by
+            side and asks BrickLink, which knows all of that, to price both.
           </p>
         </div>
       </section>

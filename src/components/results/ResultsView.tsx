@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { scoreModelValue } from '@/lib/analysis/valueScore';
 import type { AnalysisResult, SavingsSummary } from '@/lib/analysis/types';
 import type { OptimizationCandidate } from '@/lib/optimizer/types';
 import { ModelViewer, type SelectedPart } from '@/components/viewer/ModelViewer';
@@ -24,6 +25,10 @@ export function ResultsView({ result, initialSavings, initialOrderSummary }: Pro
     () => new Set(result.defaultEnabledIds),
   );
   const [savings, setSavings] = useState(initialSavings);
+  const valueScore = useMemo(
+    () => scoreModelValue(savings, (amount) => money(amount, savings.currency)),
+    [savings],
+  );
   const [orderSummary, setOrderSummary] = useState(initialOrderSummary);
   const [recosting, setRecosting] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('optimized');
@@ -175,34 +180,63 @@ export function ResultsView({ result, initialSavings, initialOrderSummary }: Pro
         )}
 
         <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto]">
-          <div className="panel flex flex-wrap items-end gap-x-10 gap-y-5 p-6">
-            <Figure
-              label="Original estimated parts cost"
-              value={money(savings.originalCost, savings.currency)}
-              testId="original-cost"
-            />
-            <Figure
-              label="Optimized"
-              value={money(savings.optimizedCost, savings.currency)}
-              testId="optimized-cost"
-            />
-            <div>
-              <p className="label">
-                Potential savings
-              </p>
-              <p
-                data-testid="savings"
-                className="tnum mt-1.5 flex items-baseline gap-2.5 text-[2rem] font-semibold leading-none text-[var(--accent)]"
-              >
-                <span data-testid="savings-amount">{money(savings.savings, savings.currency)}</span>
-                <span className="text-[1.05rem] font-medium opacity-80">
-                  {percent(savings.savingsPercent)}
-                </span>
-                {recosting && (
-                  <span className="h-3 w-3 animate-spin rounded-full border-[1.5px] border-[var(--line-strong)] border-t-[var(--accent)]" />
-                )}
-              </p>
+          <div className="panel p-6">
+            <div className="flex flex-wrap items-end gap-x-10 gap-y-5">
+              <Figure
+                label="Estimated part cost, as built"
+                value={money(savings.originalCost, savings.currency)}
+                testId="original-cost"
+              />
+              <Figure
+                label="Estimated part cost, optimized"
+                value={money(savings.optimizedCost, savings.currency)}
+                testId="optimized-cost"
+              />
+              <div>
+                <p className="label">Estimated part-price savings</p>
+                <p
+                  data-testid="savings"
+                  className="tnum mt-1.5 flex items-baseline gap-2.5 text-[2rem] font-semibold leading-none text-[var(--accent)]"
+                >
+                  <span data-testid="savings-amount">{money(savings.savings, savings.currency)}</span>
+                  <span className="text-[1.05rem] font-medium opacity-80">
+                    {percent(savings.savingsPercent)}
+                  </span>
+                  {recosting && (
+                    <span className="h-3 w-3 animate-spin rounded-full border-[1.5px] border-[var(--line-strong)] border-t-[var(--accent)]" />
+                  )}
+                </p>
+              </div>
+              {savings.supplyDataAvailable && savings.highConfidenceSavings < savings.savings && (
+                <div>
+                  <p className="label">Of which high confidence</p>
+                  <p
+                    data-testid="high-confidence-savings"
+                    className="tnum mt-1.5 flex items-baseline gap-2.5 text-[1.35rem] font-semibold leading-none"
+                  >
+                    <span>{money(savings.highConfidenceSavings, savings.currency)}</span>
+                    <span className="text-[0.9rem] font-medium text-[var(--text-faint)]">
+                      {percent(savings.highConfidenceSavingsPercent)}
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
+
+            {/*
+              The single most important sentence on this page. Everything above
+              it is a parts-price estimate; none of it is a checkout total, and
+              we do not know which sellers BrickLink would pick.
+            */}
+            <p
+              data-testid="not-checkout-price"
+              className="mt-5 border-t border-[var(--line)] pt-4 text-[0.8rem] leading-relaxed text-[var(--text-dim)]"
+            >
+              This is an estimate of what the <strong className="font-medium">parts</strong> cost, not
+              what an order costs. Final savings may differ based on seller availability, shipping,
+              minimum order requirements, handling fees and taxes. To find out what you would really
+              save, export both Wanted Lists below and price them on BrickLink.
+            </p>
           </div>
 
           <div className="panel flex flex-col justify-center gap-1.5 p-6">
@@ -222,6 +256,30 @@ export function ResultsView({ result, initialSavings, initialOrderSummary }: Pro
           </div>
         </div>
 
+        {/*
+          Says out loud when we found nothing worth doing. A tool that always
+          shows a result implies it always found value; for a model whose
+          designer already used cheap colors inside, it did not.
+        */}
+        <div
+          data-testid="value-score"
+          data-rating={valueScore.rating}
+          className={`mt-4 border-l-2 py-3 pl-4 ${
+            valueScore.worthwhile ? 'border-[var(--accent)]' : 'border-[var(--line-strong)]'
+          }`}
+        >
+          <p
+            className={`text-[0.95rem] font-semibold ${
+              valueScore.worthwhile ? 'text-[var(--accent)]' : 'text-[var(--text-dim)]'
+            }`}
+          >
+            {valueScore.headline}
+          </p>
+          <p className="mt-1 max-w-[70ch] text-[0.8rem] leading-relaxed text-[var(--text-dim)]">
+            {valueScore.detail}
+          </p>
+        </div>
+
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {result.pricing.isDemoData ? (
             <Badge tone="warn" testId="demo-price-badge">
@@ -230,7 +288,7 @@ export function ResultsView({ result, initialSavings, initialOrderSummary }: Pro
           ) : (
             <Badge tone="neutral">{result.pricing.sourceLabel}</Badge>
           )}
-          <Badge tone="neutral">Estimated market parts cost, excludes shipping and tax</Badge>
+          <Badge tone="neutral">Estimated part cost &mdash; not a delivered order total</Badge>
           <Badge tone="neutral">{result.catalog.label}</Badge>
           {result.originalCost.unpricedLots.length > 0 && (
             <Badge tone="warn">

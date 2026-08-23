@@ -4,7 +4,8 @@
 
 import { colorName } from '../ldraw/colors';
 import type { CatalogService } from '../catalog/types';
-import type { AnalysisResult, SavingsSummary } from '../analysis/types';
+import { buildQualityMetrics } from '../analysis/metrics';
+import type { AnalysisResult, OptimizationQualityMetrics, SavingsSummary } from '../analysis/types';
 import type { OptimizationCandidate } from '../optimizer/types';
 import type { CostSummary } from '../pricing/priceEngine';
 import type { PartInstance } from '../ldraw/types';
@@ -27,10 +28,20 @@ export interface OptimizationReport {
   };
   readonly catalogSource: { id: string; label: string; limitations: readonly string[] };
   readonly safetyLevel: string;
-  readonly originalCost: number;
-  readonly optimizedCost: number;
-  readonly savings: number;
+  /**
+   * Estimated PART cost, both figures. Neither is a delivered order total:
+   * they exclude shipping, seller minimums, handling and tax, and they assume
+   * every lot is bought at its typical market price, which no single real order
+   * achieves. See `disclaimer` on priceSource.
+   */
+  readonly originalEstimatedPartCost: number;
+  readonly optimizedEstimatedPartCost: number;
+  readonly estimatedPartSavings: number;
   readonly savingsPercent: number;
+  /** The part of the saving from changes that are both safe AND practical to buy. */
+  readonly highConfidenceEstimatedPartSavings: number;
+  readonly costBasis: string;
+  readonly qualityMetrics: OptimizationQualityMetrics;
   readonly changedPieceCount: number;
   readonly uniqueSubstitutionCount: number;
   readonly unpricedLotCount: number;
@@ -61,6 +72,13 @@ export interface ReportChange {
   readonly confidence: number;
   readonly visibility: string;
   readonly evidence: readonly string[];
+  readonly originalAvailability: string;
+  readonly replacementAvailability: string;
+  readonly replacementLotsListed: number | null;
+  readonly replacementPiecesListed: number | null;
+  readonly shippingRisk: string;
+  readonly isHighConfidence: boolean;
+  readonly confidenceCaveat: string | null;
 }
 
 function toReportChange(candidate: OptimizationCandidate): ReportChange {
@@ -87,6 +105,13 @@ function toReportChange(candidate: OptimizationCandidate): ReportChange {
     confidence: candidate.confidence,
     visibility: candidate.visibility.classification,
     evidence: candidate.evidence,
+    originalAvailability: candidate.originalAvailability.level,
+    replacementAvailability: candidate.replacementAvailability.level,
+    replacementLotsListed: candidate.replacementAvailability.lots,
+    replacementPiecesListed: candidate.replacementAvailability.pieces,
+    shippingRisk: candidate.shippingRisk,
+    isHighConfidence: candidate.isHighConfidence,
+    confidenceCaveat: candidate.confidenceCaveat,
   };
 }
 
@@ -118,10 +143,17 @@ export function buildJsonReport(
       limitations: result.catalog.limitations,
     },
     safetyLevel: result.safetyLevel,
-    originalCost: savings.originalCost,
-    optimizedCost: savings.optimizedCost,
-    savings: savings.savings,
+    originalEstimatedPartCost: savings.originalCost,
+    optimizedEstimatedPartCost: savings.optimizedCost,
+    estimatedPartSavings: savings.savings,
     savingsPercent: savings.savingsPercent,
+    highConfidenceEstimatedPartSavings: savings.highConfidenceSavings,
+    costBasis:
+      'Estimated part cost only. NOT a delivered order total: excludes shipping, seller minimums, ' +
+      'handling and tax, and assumes every lot is bought at its typical market price. Import the ' +
+      'original and optimized Wanted Lists into BrickLink and compare the two order totals to find ' +
+      'out what the change is actually worth.',
+    qualityMetrics: buildQualityMetrics(result, savings),
     changedPieceCount: savings.changedPieceCount,
     uniqueSubstitutionCount: savings.uniqueSubstitutionCount,
     unpricedLotCount: result.originalCost.unpricedLots.length,
@@ -154,6 +186,9 @@ const CSV_COLUMNS = [
   'reason',
   'confidence',
   'visibility',
+  'replacementAvailability',
+  'shippingRisk',
+  'highConfidence',
   'enabled',
 ] as const;
 
@@ -198,6 +233,9 @@ export function buildChangeLogCsv(
         candidate.reason,
         (candidate.confidence * 100).toFixed(2) + '%',
         candidate.visibility.classification,
+        candidate.replacementAvailability.level,
+        candidate.shippingRisk,
+        candidate.isHighConfidence,
         enabledIds.has(candidate.id),
       ]
         .map(csvEscape)

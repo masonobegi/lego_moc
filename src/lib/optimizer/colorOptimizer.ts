@@ -31,7 +31,7 @@ import { colorChangeConfidence, consensusVisibility, isHiddenEnough } from './sc
 import type {
   AlternativeOption,
   CandidateBlocker,
-  OptimizationCandidate,
+  ProposedChange,
   RejectedCommand,
   SafetyLevel,
 } from './types';
@@ -76,7 +76,7 @@ export interface ColorOptimizerInput {
 }
 
 export interface ColorOptimizerOutput {
-  readonly candidates: OptimizationCandidate[];
+  readonly candidates: ProposedChange[];
   readonly rejected: RejectedCommand[];
   readonly hiddenCommandCount: number;
 }
@@ -105,7 +105,7 @@ export function alternativeColorsToPrice(
 }
 
 export function findColorCandidates(input: ColorOptimizerInput): ColorOptimizerOutput {
-  const candidates: OptimizationCandidate[] = [];
+  const candidates: ProposedChange[] = [];
   const rejected: RejectedCommand[] = [];
   let hiddenCommandCount = 0;
 
