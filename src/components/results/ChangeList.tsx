@@ -18,6 +18,8 @@ interface Props {
   readonly onToggle: (id: string, enabled: boolean) => void;
   readonly onSelect: (candidate: OptimizationCandidate) => void;
   readonly onBulk: (action: 'none' | 'safe' | 'reset') => void;
+  /** Disable every change worth less than `amount`. */
+  readonly onDisableBelow: (amount: number) => void;
 }
 
 export function ChangeList({
@@ -28,11 +30,13 @@ export function ChangeList({
   onToggle,
   onSelect,
   onBulk,
+  onDisableBelow,
 }: Props) {
   const [sort, setSort] = useState<SortKey>('savings');
   const [kind, setKind] = useState<KindFilter>('all');
   const [state, setState] = useState<StateFilter>('all');
   const [minConfidence, setMinConfidence] = useState(0);
+  const [minSavings, setMinSavings] = useState(0);
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
@@ -42,6 +46,7 @@ export function ChangeList({
       if (state === 'enabled' && !enabledIds.has(candidate.id)) return false;
       if (state === 'disabled' && enabledIds.has(candidate.id)) return false;
       if (candidate.confidence * 100 < minConfidence) return false;
+      if (candidate.savings < minSavings) return false;
       if (needle.length > 0) {
         const haystack =
           `${candidate.partId} ${candidate.partDescription} ${candidate.originalColorName} ` +
@@ -65,7 +70,7 @@ export function ChangeList({
       }
     });
     return sorted;
-  }, [candidates, enabledIds, kind, minConfidence, query, sort, state]);
+  }, [candidates, enabledIds, kind, minConfidence, minSavings, query, sort, state]);
 
   const visibleSavings = filtered
     .filter((c) => enabledIds.has(c.id))
@@ -99,7 +104,24 @@ export function ChangeList({
         </div>
       </div>
 
-      <div className="grid gap-2.5 border-b border-[var(--line)] px-4 py-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-[var(--line)] px-4 py-2.5">
+        <span className="label">Not worth the bother</span>
+        <div className="flex flex-wrap gap-1.5">
+          {[0.02, 0.05, 0.1, 0.25, 1].map((amount) => (
+            <button
+              key={amount}
+              type="button"
+              onClick={() => onDisableBelow(amount)}
+              title={`Switch off every change that saves less than ${money(amount, currency)}`}
+              className="tnum border border-[var(--line-strong)] px-2 py-1 text-[0.74rem] text-[var(--text-dim)] transition-colors hover:border-[var(--text-faint)] hover:text-[var(--text)]"
+            >
+              Turn off under {money(amount, currency)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-2.5 border-b border-[var(--line)] px-4 py-3 sm:grid-cols-2 lg:grid-cols-5">
         <Field label="Sort by">
           <Select value={sort} onChange={(v) => setSort(v as SortKey)}>
             <option value="savings">Largest savings</option>
@@ -134,7 +156,18 @@ export function ChangeList({
             aria-label="Minimum confidence"
           />
         </Field>
-        <div className="sm:col-span-2 lg:col-span-4">
+        <Field label="Min saving">
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            value={minSavings}
+            onChange={(event) => setMinSavings(Math.max(0, Number(event.target.value) || 0))}
+            aria-label="Minimum saving"
+            className="tnum mt-1 w-full border border-[var(--line)] bg-[var(--panel-2)] px-2.5 py-1.5 text-[0.82rem] outline-none focus:border-[var(--line-strong)]"
+          />
+        </Field>
+        <div className="sm:col-span-2 lg:col-span-5">
           <input
             type="search"
             value={query}

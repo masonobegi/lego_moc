@@ -69,6 +69,21 @@ test.describe('optimize a model end to end', () => {
     await expect(page.getByTestId('savings-amount')).toHaveText('$0.63', { timeout: 30_000 });
     await expect(page.getByTestId('optimized-cost')).toHaveText('$1.46');
 
+    // ---- the review step states what will actually be ordered ------------
+    const order = page.getByTestId('order-summary');
+    await expect(order).toContainText('You are about to order');
+    await expect(order).toContainText('1 of 1');
+
+    // ---- a threshold control clears out changes that are not worth it -----
+    await page.getByRole('button', { name: 'Turn off under $1.00' }).click();
+    await expect(page.getByTestId('savings-amount')).toHaveText('$0.00', { timeout: 30_000 });
+    await expect(order).toContainText('0 of 1');
+    // $0.63 is above the $0.25 threshold, so this one leaves it enabled.
+    await page.getByRole('button', { name: 'Enable safe changes' }).click();
+    await expect(page.getByTestId('savings-amount')).toHaveText('$0.63', { timeout: 30_000 });
+    await page.getByRole('button', { name: 'Turn off under $0.25' }).click();
+    await expect(page.getByTestId('savings-amount')).toHaveText('$0.63');
+
     // ---- download the optimized model -----------------------------------
     const downloadPromise = page.waitForEvent('download');
     await page.getByTestId('export-ldraw').getByRole('button', { name: 'Download' }).click();

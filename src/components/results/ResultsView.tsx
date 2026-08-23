@@ -16,13 +16,15 @@ type ViewMode = 'optimized' | 'original' | 'split';
 interface Props {
   readonly result: AnalysisResult;
   readonly initialSavings: SavingsSummary;
+  readonly initialOrderSummary: { lots: number; pieces: number; unpriced: number };
 }
 
-export function ResultsView({ result, initialSavings }: Props) {
+export function ResultsView({ result, initialSavings, initialOrderSummary }: Props) {
   const [enabledIds, setEnabledIds] = useState<Set<string>>(
     () => new Set(result.defaultEnabledIds),
   );
   const [savings, setSavings] = useState(initialSavings);
+  const [orderSummary, setOrderSummary] = useState(initialOrderSummary);
   const [recosting, setRecosting] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('optimized');
   const [selectedCandidate, setSelectedCandidate] = useState<OptimizationCandidate | null>(null);
@@ -50,10 +52,21 @@ export function ResultsView({ result, initialSavings }: Props) {
         body: JSON.stringify({ enabledIds: [...enabledIds] }),
       })
         .then((response) => (response.ok ? response.json() : Promise.reject(new Error('recost failed'))))
-        .then((body: { savings: SavingsSummary }) => {
-          // Ignore a response that a later toggle has already superseded.
-          if (seq === requestSeq.current) setSavings(body.savings);
-        })
+        .then(
+          (body: {
+            savings: SavingsSummary;
+            optimizedCost: { lotCount: number; pricedPieceCount: number; unpricedLots: unknown[] };
+          }) => {
+            // Ignore a response that a later toggle has already superseded.
+            if (seq !== requestSeq.current) return;
+            setSavings(body.savings);
+            setOrderSummary({
+              lots: body.optimizedCost.lotCount,
+              pieces: body.optimizedCost.pricedPieceCount,
+              unpriced: body.optimizedCost.unpricedLots.length,
+            });
+          },
+        )
         .catch(() => {
           /* Keep the last good figure rather than showing a wrong one. */
         })
@@ -99,6 +112,27 @@ export function ResultsView({ result, initialSavings }: Props) {
       setViewMode('optimized');
     },
     [result.defaultEnabledIds],
+  );
+
+  /**
+   * Switch off every change worth less than `amount`.
+   *
+   * A change that saves two cents is still a change to the model, and a builder
+   * reviewing an order has every right to decide it is not worth having a
+   * different colour in there for that. This is the quickest way to clear them
+   * all out without hunting through the list.
+   */
+  const disableBelow = useCallback(
+    (amount: number) => {
+      setEnabledIds((previous) => {
+        const next = new Set(previous);
+        for (const candidate of result.candidates) {
+          if (candidate.savings < amount) next.delete(candidate.id);
+        }
+        return next;
+      });
+    },
+    [result.candidates],
   );
 
   const highlightInstanceIds = useMemo(
@@ -305,6 +339,7 @@ export function ResultsView({ result, initialSavings }: Props) {
             onToggle={toggle}
             onSelect={onSelectCandidate}
             onBulk={bulk}
+            onDisableBelow={disableBelow}
           />
         </section>
       </div>
@@ -316,6 +351,8 @@ export function ResultsView({ result, initialSavings }: Props) {
             enabledIds={enabledArray}
             isMpd={result.model.isMpd}
             enabledCount={savings.enabledCount}
+            savings={savings}
+            orderSummary={orderSummary}
           />
         </div>
       </div>

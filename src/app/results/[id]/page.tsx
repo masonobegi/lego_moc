@@ -41,5 +41,15 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
     record.result.pricing.currency,
   );
 
-  return <ResultsView result={record.result} initialSavings={savings} />;
+  return (
+    <ResultsView
+      result={record.result}
+      initialSavings={savings}
+      initialOrderSummary={{
+        lots: optimizedCost.lotCount,
+        pieces: optimizedCost.pricedPieceCount,
+        unpriced: optimizedCost.unpricedLots.length,
+      }}
+    />
+  );
 }

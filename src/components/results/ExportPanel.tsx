@@ -2,11 +2,16 @@
 
 import { useState } from 'react';
 
+import type { SavingsSummary } from '@/lib/analysis/types';
+import { count, money } from './format';
+
 interface Props {
   readonly analysisId: string;
   readonly enabledIds: readonly string[];
   readonly isMpd: boolean;
   readonly enabledCount: number;
+  readonly savings: SavingsSummary;
+  readonly orderSummary: { lots: number; pieces: number; unpriced: number } | null;
 }
 
 const EXPORTS = [
@@ -32,7 +37,14 @@ const EXPORTS = [
   },
 ] as const;
 
-export function ExportPanel({ analysisId, enabledIds, isMpd, enabledCount }: Props) {
+export function ExportPanel({
+  analysisId,
+  enabledIds,
+  isMpd,
+  enabledCount,
+  savings,
+  orderSummary,
+}: Props) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,13 +84,61 @@ export function ExportPanel({ analysisId, enabledIds, isMpd, enabledCount }: Pro
 
   return (
     <section className="panel p-5">
-      <h2 className="text-[0.95rem] font-semibold">Downloads</h2>
+      <h2 className="text-[0.95rem] font-semibold">Review and download</h2>
       <p className="mt-1.5 text-[0.79rem] leading-relaxed text-[var(--text-dim)]">
-        Every download reflects the {enabledCount} change{enabledCount === 1 ? '' : 's'} you
-        currently have switched on. Your uploaded file is never modified.
+        Nothing below is decided until you download it. Every file reflects exactly the changes you
+        currently have switched on, and your uploaded model is never modified.
       </p>
 
-      <ul className="mt-4 space-y-2.5">
+      {/* What you are about to order. This is the last checkpoint before the
+          parts list leaves the app, so it states the outcome plainly. */}
+      <div className="mt-4 border border-[var(--line-strong)] p-4" data-testid="order-summary">
+        <p className="label">You are about to order</p>
+        <dl className="tnum mt-3 grid grid-cols-2 gap-x-6 gap-y-2.5 text-[0.83rem] sm:grid-cols-4">
+          <Figure label="Lots" value={orderSummary ? count(orderSummary.lots) : '-'} />
+          <Figure label="Pieces" value={orderSummary ? count(orderSummary.pieces) : '-'} />
+          <Figure
+            label="Changes applied"
+            value={`${count(savings.enabledCount)} of ${count(savings.candidateCount)}`}
+          />
+          <Figure
+            label="Estimated cost"
+            value={money(savings.optimizedCost, savings.currency)}
+            accent
+          />
+        </dl>
+        <p className="mt-3 text-[0.77rem] leading-relaxed text-[var(--text-dim)]">
+          {savings.enabledCount === 0 ? (
+            <>
+              No changes are switched on, so the downloads below are your original model and its
+              original parts list.
+            </>
+          ) : (
+            <>
+              {count(savings.changedPieceCount)} piece
+              {savings.changedPieceCount === 1 ? ' changes' : 's change'} color or mold, saving{' '}
+              <span className="font-semibold text-[var(--accent)]">
+                {money(savings.savings, savings.currency)}
+              </span>
+              .{' '}
+              {savings.changedPieceCount === 1
+                ? 'It is a part with no externally visible surface, so the finished model looks the same.'
+                : 'Every one of them is a part with no externally visible surface, so the finished model looks the same.'}
+            </>
+          )}
+          {orderSummary && orderSummary.unpriced > 0 && (
+            <>
+              {' '}
+              {count(orderSummary.unpriced)} lot{orderSummary.unpriced === 1 ? '' : 's'} could not be
+              priced and {orderSummary.unpriced === 1 ? 'is' : 'are'} excluded from the estimate, but
+              {orderSummary.unpriced === 1 ? ' it is' : ' they are'} still in the model and the
+              wanted list.
+            </>
+          )}
+        </p>
+      </div>
+
+      <ul className="mt-5 space-y-2.5">
         {EXPORTS.map((item) => (
           <li key={item.kind} data-testid={`export-${item.kind}`} className="panel-2 p-3.5">
             <div className="flex items-start justify-between gap-3">
@@ -124,5 +184,16 @@ export function ExportPanel({ analysisId, enabledIds, isMpd, enabledCount }: Pro
         </p>
       </div>
     </section>
+  );
+}
+
+function Figure({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div>
+      <dt className="text-[0.72rem] leading-tight text-[var(--text-faint)]">{label}</dt>
+      <dd className={`mt-1 text-[0.98rem] font-semibold ${accent ? 'text-[var(--accent)]' : ''}`}>
+        {value}
+      </dd>
+    </div>
   );
 }
