@@ -63,7 +63,9 @@ if (!modelsDir || !existsSync(modelsDir)) {
 
 const partsLibraryArg = arg('--parts-library');
 const libraries = [
-  ...(partsLibraryArg ? [partsLibraryArg] : []),
+  // Comma-separated, so a corpus prepared by normalize-inlined-parts.ts can
+  // pass both the real library and its extracted-parts directory.
+  ...(partsLibraryArg ? partsLibraryArg.split(',').map((d) => d.trim()).filter(Boolean) : []),
   path.join(process.cwd(), 'public', 'ldraw-full'),
   path.join(process.cwd(), 'public', 'ldraw'),
 ].filter((dir) => existsSync(dir));
