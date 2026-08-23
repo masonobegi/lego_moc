@@ -38,6 +38,8 @@ export interface PartMesh {
   readonly bounds: Box3;
   /** Sum of triangle areas, used to scale visibility sampling density. */
   readonly surfaceArea: number;
+  /** The part's description, taken from the first line of its .dat file. */
+  readonly description: string | null;
   /** References inside this part that could not be found in the library. */
   readonly missingReferences: readonly string[];
   /** True when a limit stopped expansion and the mesh is incomplete. */
@@ -50,6 +52,7 @@ export const EMPTY_MESH: PartMesh = {
   triangleCount: 0,
   bounds: emptyBox(),
   surfaceArea: 0,
+  description: null,
   missingReferences: [],
   truncated: false,
 };
@@ -59,6 +62,7 @@ interface BuildState {
   colors: number[];
   missing: Set<string>;
   truncated: boolean;
+  description: string | null;
 }
 
 /**
@@ -102,7 +106,9 @@ export class PartMeshLibrary {
   }
 
   private async build(reference: string): Promise<PartMesh> {
-    const state: BuildState = { positions: [], colors: [], missing: new Set(), truncated: false };
+    const state: BuildState = {
+      positions: [], colors: [], missing: new Set(), truncated: false, description: null,
+    };
     await this.expand(reference, IDENTITY_MAT3, { x: 0, y: 0, z: 0 }, COLOR_INHERIT, 0, state, new Set());
 
     const triangleCount = state.colors.length;
@@ -131,6 +137,7 @@ export class PartMeshLibrary {
       triangleCount,
       bounds,
       surfaceArea,
+      description: state.description,
       missingReferences: [...state.missing],
       truncated: state.truncated,
     };
@@ -168,6 +175,16 @@ export class PartMeshLibrary {
     }
 
     const document = parseLDraw(text, { sourceName: reference });
+
+    if (depth === 0 && state.description === null) {
+      // The first line of a .dat file is the part's description, e.g.
+      // "Brick  2 x  4". A leading ~ or = marks an obsolete part or an alias.
+      const first = document.files[0]?.commands.find((c) => c.type !== 'blank');
+      if (first?.type === 'meta' && first.text.length > 0) {
+        state.description = first.text.replace(/\s+/g, ' ').trim();
+      }
+    }
+
     const nextAncestry = new Set(ancestry);
     nextAncestry.add(key);
 

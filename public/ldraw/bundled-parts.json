@@ -1,0 +1,10 @@
+{
+  "generatedFrom": "/home/user/gkjohnson/ldraw-parts-library/complete/ldraw",
+  "seedCount": 119,
+  "fileCount": 367,
+  "approximateBytes": 803649,
+  "missing": [
+    "4085d.dat"
+  ],
+  "notice": "These files are part of the LDraw Parts Library and are redistributed under CC BY 2.0. See CAreadme.txt and CAlicense.txt in this directory, and NOTICE.md in the repository root. Run \"npm run parts:fetch\" to install the complete library."
+}

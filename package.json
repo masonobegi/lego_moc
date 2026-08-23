@@ -18,7 +18,9 @@
     "parts:fetch": "tsx scripts/fetch-ldraw-library.ts",
     "catalog:import": "tsx scripts/catalog-import.ts",
     "catalog:build-bundled": "tsx scripts/build-bundled-catalog.ts",
-    "colors:build": "tsx scripts/build-color-table.ts"
+    "colors:build": "tsx scripts/build-color-table.ts",
+    "catalog:build-molds": "tsx scripts/build-mold-rules.ts",
+    "parts:bundle": "tsx scripts/bundle-parts-subset.ts"
   },
   "dependencies": {
     "next": "16.3.2",

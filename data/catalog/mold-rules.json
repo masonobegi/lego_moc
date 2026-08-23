@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "source": "LDraw Parts Library part descriptions",
+  "description": "One-to-one part substitutions. Every rule is derived from two LDraw part descriptions that are identical apart from the phrase naming the mold difference. Rules are never inferred from names merely looking similar. Rules whose appearanceImpact is not \"none\" are only applied to parts the visibility engine classified as hidden.",
+  "autoApplyThreshold": 0.85,
+  "generatedFrom": "15584 part descriptions",
+  "rules": [
+    {
+      "originalPart": "2362a",
+      "replacementPart": "2362b",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Panel 1 x 2 x 3 with Solid Studs\" / \"Panel 1 x 2 x 3 with Hollow Studs\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "2412a",
+      "replacementPart": "2412b",
+      "type": "mold_variant",
+      "geometryCompatible": true,
+      "confidence": 0.92,
+      "source": "LDraw Parts Library part descriptions: \"Tile 1 x 2 Grille without Groove\" / \"Tile 1 x 2 Grille with Groove\"",
+      "note": "Two molds of the same element. The footprint, height and every connection point are identical; they differ only in a groove along the lower edge. BrickLink sells them as separate items, which is why the price can differ.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "2453a",
+      "replacementPart": "2453b",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Brick 1 x 1 x 5 with Hollow Stud\" / \"Brick 1 x 1 x 5 with Solid Stud\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "2493a",
+      "replacementPart": "2493b",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Window 1 x 4 x 5 with Solid Studs\" / \"Window 1 x 4 x 5 with Hollow Studs\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "3062a",
+      "replacementPart": "3062b",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Brick 1 x 1 Round with Solid Stud\" / \"Brick 1 x 1 Round with Hollow Stud\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "3068a",
+      "replacementPart": "3068b",
+      "type": "mold_variant",
+      "geometryCompatible": true,
+      "confidence": 0.92,
+      "source": "LDraw Parts Library part descriptions: \"Tile 2 x 2 without Groove\" / \"Tile 2 x 2 with Groove\"",
+      "note": "Two molds of the same element. The footprint, height and every connection point are identical; they differ only in a groove along the lower edge. BrickLink sells them as separate items, which is why the price can differ.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "3069a",
+      "replacementPart": "3069b",
+      "type": "mold_variant",
+      "geometryCompatible": true,
+      "confidence": 0.92,
+      "source": "LDraw Parts Library part descriptions: \"Tile 1 x 2 without Groove\" / \"Tile 1 x 2 with Groove\"",
+      "note": "Two molds of the same element. The footprint, height and every connection point are identical; they differ only in a groove along the lower edge. BrickLink sells them as separate items, which is why the price can differ.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "3070a",
+      "replacementPart": "3070b",
+      "type": "mold_variant",
+      "geometryCompatible": true,
+      "confidence": 0.92,
+      "source": "LDraw Parts Library part descriptions: \"Tile 1 x 1 without Groove\" / \"Tile 1 x 1 with Groove\"",
+      "note": "Two molds of the same element. The footprint, height and every connection point are identical; they differ only in a groove along the lower edge. BrickLink sells them as separate items, which is why the price can differ.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "3626a",
+      "replacementPart": "3626c",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Minifig Head with Solid Stud\" / \"Minifig Head with Hollow Stud\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "3684a",
+      "replacementPart": "3684c",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Slope Brick 75 2 x 2 x 3 with Hollow Studs\" / \"Slope Brick 75 2 x 2 x 3 with Solid Studs\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "3794a",
+      "replacementPart": "3794b",
+      "type": "mold_variant",
+      "geometryCompatible": true,
+      "confidence": 0.92,
+      "source": "LDraw Parts Library part descriptions: \"Plate 1 x 2 without Groove with 1 Centre Stud\" / \"Plate 1 x 2 with Groove with 1 Centre Stud\"",
+      "note": "Two molds of the same element. The footprint, height and every connection point are identical; they differ only in a groove along the lower edge. BrickLink sells them as separate items, which is why the price can differ.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "4209a",
+      "replacementPart": "4209b",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Hose Reel 2 x 4 x 2 Holder with Solid Studs\" / \"Hose Reel 2 x 4 x 2 Holder with Hollow Studs\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "4345a",
+      "replacementPart": "4345b",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Container Box 2 x 2 x 2 with Solid Studs\" / \"Container Box 2 x 2 x 2 with Hollow Studs\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "44301a",
+      "replacementPart": "44301b",
+      "type": "mold_variant",
+      "geometryCompatible": true,
+      "confidence": 0.92,
+      "source": "LDraw Parts Library part descriptions: \"Hinge Plate 1 x 2 Locking with Groove with Single Finger on End Vertical\" / \"Hinge Plate 1 x 2 Locking without Groove with Single Finger on End Vertical\"",
+      "note": "Two molds of the same element. The footprint, height and every connection point are identical; they differ only in a groove along the lower edge. BrickLink sells them as separate items, which is why the price can differ.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "44302a",
+      "replacementPart": "44302b",
+      "type": "mold_variant",
+      "geometryCompatible": true,
+      "confidence": 0.92,
+      "source": "LDraw Parts Library part descriptions: \"Hinge Plate 1 x 2 Locking with Dual Finger on End Vertical with Groove on Short Side\" / \"Hinge Plate 1 x 2 Locking with Dual Finger on End Vertical without Groove on Short Side\"",
+      "note": "Two molds of the same element. The footprint, height and every connection point are identical; they differ only in a groove along the lower edge. BrickLink sells them as separate items, which is why the price can differ.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "44375a",
+      "replacementPart": "44375b",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Dish 6 x 6 Inverted with Hollow Studs\" / \"Dish 6 x 6 Inverted with Solid Studs\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "44567a",
+      "replacementPart": "44567b",
+      "type": "mold_variant",
+      "geometryCompatible": true,
+      "confidence": 0.92,
+      "source": "LDraw Parts Library part descriptions: \"Hinge Plate 1 x 2 Locking with Groove with Single Finger On Side Vertical\" / \"Hinge Plate 1 x 2 Locking without Groove with Single Finger On Side Vertical\"",
+      "note": "Two molds of the same element. The footprint, height and every connection point are identical; they differ only in a groove along the lower edge. BrickLink sells them as separate items, which is why the price can differ.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "4864a",
+      "replacementPart": "4864b",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Panel 1 x 2 x 2 with Solid Studs\" / \"Panel 1 x 2 x 2 with Hollow Studs\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    },
+    {
+      "originalPart": "50990a",
+      "replacementPart": "50990b",
+      "type": "functionally_equivalent",
+      "geometryCompatible": false,
+      "confidence": 0.6,
+      "source": "LDraw Parts Library part descriptions: \"Dish 10 x 10 Inverted with Hollow Studs\" / \"Dish 10 x 10 Inverted with Solid Studs\"",
+      "note": "Same element with a different stud type. A hollow stud accepts a bar and a solid one does not, so this is NOT a guaranteed drop-in replacement. Recorded for completeness; its confidence is below the threshold, so it is never applied automatically.",
+      "bidirectional": true,
+      "appearanceImpact": "subtle"
+    }
+  ]
+}
