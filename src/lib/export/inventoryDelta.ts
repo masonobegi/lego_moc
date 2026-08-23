@@ -30,6 +30,7 @@
  */
 
 import { colorName } from '../ldraw/colors';
+import { countLots } from '../ldraw/inventory';
 import type { PartInstance } from '../ldraw/types';
 import type { PriceBook } from '../pricing/priceEngine';
 import type { Condition } from '../pricing/types';
@@ -99,17 +100,6 @@ export interface InventoryDelta {
 
 function round2(value: number): number {
   return Math.round(value * 100) / 100;
-}
-
-function countLots(instances: readonly PartInstance[]): Map<string, { partId: string; colorId: number; quantity: number }> {
-  const counts = new Map<string, { partId: string; colorId: number; quantity: number }>();
-  for (const instance of instances) {
-    const key = `${instance.partId}|${instance.colorId}`;
-    const existing = counts.get(key);
-    if (existing) existing.quantity++;
-    else counts.set(key, { partId: instance.partId, colorId: instance.colorId, quantity: 1 });
-  }
-  return counts;
 }
 
 export interface InventoryDeltaInput {
@@ -193,6 +183,24 @@ export function buildInventoryDelta(input: InventoryDeltaInput): InventoryDelta 
       a.partId.localeCompare(b.partId) ||
       a.colorId - b.colorId,
   );
+
+  // Every substitution this optimizer performs is one-for-one: a color change
+  // rewrites a colour field, and an EquivalentPartRule is documented as a
+  // one-to-one mold swap. So the pieces entering lots must exactly equal the
+  // pieces leaving them, and a mismatch is a bug rather than a legitimate state.
+  //
+  // Refuse to produce the delta at all in that case. This artifact is the one a
+  // user orders from with the least scrutiny, and a parts list that quietly
+  // under- or over-orders is worse than an error message. If a future
+  // substitution is ever NOT one-to-one, this invariant has to be re-derived
+  // rather than relaxed.
+  if (piecesAdded !== piecesRemoved) {
+    throw new Error(
+      `Inventory delta is not piece-conserving: ${piecesAdded} added against ${piecesRemoved} ` +
+        `removed. Every substitution should be one-for-one, so this is a bug in the optimizer, ` +
+        `and emitting the parts list anyway would order the wrong quantities.`,
+    );
+  }
 
   return {
     lots,

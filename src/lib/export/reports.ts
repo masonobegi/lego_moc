@@ -9,6 +9,7 @@ import type { AnalysisResult, OptimizationQualityMetrics, SavingsSummary } from 
 import type { OptimizationCandidate } from '../optimizer/types';
 import type { CostSummary } from '../pricing/priceEngine';
 import type { PartInstance } from '../ldraw/types';
+import { countLots } from '../ldraw/inventory';
 import { DELTA_ACTION_LABELS, type InventoryDelta } from './inventoryDelta';
 
 // ---------------------------------------------------------------------------
@@ -302,13 +303,7 @@ export function buildWantedListXml(
   catalog: CatalogService,
   condition: 'new' | 'used',
 ): WantedListResult {
-  const counts = new Map<string, { partId: string; colorId: number; quantity: number }>();
-  for (const instance of instances) {
-    const key = `${instance.partId}|${instance.colorId}`;
-    const existing = counts.get(key);
-    if (existing) existing.quantity++;
-    else counts.set(key, { partId: instance.partId, colorId: instance.colorId, quantity: 1 });
-  }
+  const counts = countLots(instances);
 
   const lines: string[] = ['<INVENTORY>'];
   const excluded: { partId: string; colorId: number; quantity: number; reason: string }[] = [];
@@ -376,6 +371,19 @@ const DELTA_CSV_COLUMNS = [
  * `action` column spells that out in words rather than leaving the reader to
  * infer it from a minus sign, because this file will be opened out of context.
  */
+export interface DeltaWantedListResult extends WantedListResult {
+  /**
+   * Lots that cancelled out once resolved to BrickLink ids - a mold swap that
+   * BrickLink sells under a single number is no change at all to an order.
+   */
+  readonly nettedToNothing: number;
+  /**
+   * Decreases we could not map to a BrickLink id. They cannot be netted against
+   * the increases, so a quantity in this file may be higher than it needs to be.
+   */
+  readonly unmappedDecreases: number;
+}
+
 export function buildInventoryDeltaCsv(delta: InventoryDelta): string {
   const rows: string[] = [DELTA_CSV_COLUMNS.join(',')];
   for (const lot of delta.lots) {
@@ -407,61 +415,112 @@ export function buildInventoryDeltaCsv(delta: InventoryDelta): string {
 /**
  * The delta as a BrickLink Wanted List.
  *
- * The format cannot express a decrease. There is no negative MINQTY and no
- * "remove" element - a Wanted List says what you want, not what you no longer
- * want. So this file contains ONLY the lots whose quantity went up, and it says
- * so at length in its own header, because a list of parts is exactly the kind of
- * file somebody opens a week later and treats as their order.
+ * Two things make this harder than filtering the delta to its positive rows.
  *
- * The lots that went down are in the CSV. That asymmetry is a property of
- * BrickLink's format, not a choice, and pretending otherwise by silently
- * dropping the decreases would be the dishonest option.
+ * **The format cannot express a decrease.** There is no negative MINQTY and no
+ * removal element - a Wanted List says what you want, not what you no longer
+ * want. So this contains ONLY the lots whose quantity went up. The lots that
+ * went down are in the CSV, and the header says so at length, because a list of
+ * parts is exactly the kind of file somebody opens later and treats as an order.
+ *
+ * **Netting must happen at the BrickLink level, not the LDraw level.** Two
+ * distinct LDraw part ids can map to the SAME BrickLink item - which is exactly
+ * what a mold-variant swap is, since BrickLink often sells both molds under one
+ * number. Filtering LDraw lots to the positive ones would then emit "buy 12 of
+ * 3070b" for a swap that BrickLink considers no change at all, and the user
+ * would order twelve bricks they already have. The same applies to two LDraw
+ * colors mapping to one BrickLink color.
+ *
+ * So the delta is re-aggregated by resolved (BrickLink part, BrickLink color)
+ * and only the entries that are still positive after netting are emitted. That
+ * also guarantees no two ITEM elements share an id/color pair, which BrickLink's
+ * behaviour on is unverified.
  */
 export function buildInventoryDeltaWantedListXml(
   delta: InventoryDelta,
   catalog: CatalogService,
   condition: 'new' | 'used',
-): WantedListResult {
-  const lines: string[] = ['<INVENTORY>'];
+): DeltaWantedListResult {
+  const netted = new Map<
+    string,
+    { brickLinkPartId: string; brickLinkColorId: number; net: number }
+  >();
   const excluded: { partId: string; colorId: number; quantity: number; reason: string }[] = [];
-  let itemCount = 0;
-  let pieceCount = 0;
+  // A lot we could not map whose quantity went DOWN cannot be netted against
+  // anything, so a positive entry it would have cancelled stays in the file.
+  let unmappedDecreases = 0;
 
   for (const lot of delta.lots) {
-    if (lot.difference <= 0) continue;
     const partMapping = catalog.mapPart(lot.partId);
-    if (partMapping.confidence === 'unmapped' || !partMapping.brickLinkPartId) {
-      excluded.push({
-        partId: lot.partId,
-        colorId: lot.colorId,
-        quantity: lot.difference,
-        reason: partMapping.note ?? 'No BrickLink part number could be resolved.',
-      });
-      continue;
-    }
     const colorMapping = catalog.mapColor(lot.colorId);
-    if (colorMapping.brickLinkColorId === null) {
-      excluded.push({
-        partId: lot.partId,
-        colorId: lot.colorId,
-        quantity: lot.difference,
-        reason: `No BrickLink color id is known for LDraw color ${lot.colorId} (${lot.colorName}).`,
-      });
+    const reason =
+      partMapping.confidence === 'unmapped' || !partMapping.brickLinkPartId
+        ? (partMapping.note ?? 'No BrickLink part number could be resolved.')
+        : colorMapping.brickLinkColorId === null
+          ? `No BrickLink color id is known for LDraw color ${lot.colorId} (${lot.colorName}).`
+          : null;
+
+    if (reason !== null) {
+      // Only an increase is something the user would have been told to buy, so
+      // only an increase is an exclusion worth reporting as a gap in the file.
+      if (lot.difference > 0) {
+        excluded.push({
+          partId: lot.partId,
+          colorId: lot.colorId,
+          quantity: lot.difference,
+          reason,
+        });
+      } else {
+        unmappedDecreases++;
+      }
       continue;
     }
+
+    const brickLinkPartId = partMapping.brickLinkPartId!;
+    const brickLinkColorId = colorMapping.brickLinkColorId!;
+    const key = `${brickLinkPartId}|${brickLinkColorId}`;
+    const entry = netted.get(key);
+    if (entry) entry.net += lot.difference;
+    else netted.set(key, { brickLinkPartId, brickLinkColorId, net: lot.difference });
+  }
+
+  const lines: string[] = ['<INVENTORY>'];
+  let itemCount = 0;
+  let pieceCount = 0;
+  let nettedToNothing = 0;
+
+  const ordered = [...netted.values()].sort(
+    (a, b) => a.brickLinkPartId.localeCompare(b.brickLinkPartId) || a.brickLinkColorId - b.brickLinkColorId,
+  );
+
+  for (const entry of ordered) {
+    if (entry.net === 0) {
+      nettedToNothing++;
+      continue;
+    }
+    // Decreases are unrepresentable; they live in the CSV.
+    if (entry.net < 0) continue;
+
     lines.push('    <ITEM>');
     lines.push('        <ITEMTYPE>P</ITEMTYPE>');
-    lines.push(`        <ITEMID>${xmlEscape(partMapping.brickLinkPartId)}</ITEMID>`);
-    lines.push(`        <COLOR>${colorMapping.brickLinkColorId}</COLOR>`);
-    lines.push(`        <MINQTY>${lot.difference}</MINQTY>`);
+    lines.push(`        <ITEMID>${xmlEscape(entry.brickLinkPartId)}</ITEMID>`);
+    lines.push(`        <COLOR>${entry.brickLinkColorId}</COLOR>`);
+    lines.push(`        <MINQTY>${entry.net}</MINQTY>`);
     lines.push(`        <CONDITION>${condition === 'new' ? 'N' : 'U'}</CONDITION>`);
     lines.push('    </ITEM>');
     itemCount++;
-    pieceCount += lot.difference;
+    pieceCount += entry.net;
   }
 
   lines.push('</INVENTORY>');
-  return { xml: lines.join('\n') + '\n', itemCount, pieceCount, excluded };
+  return {
+    xml: lines.join('\n') + '\n',
+    itemCount,
+    pieceCount,
+    excluded,
+    nettedToNothing,
+    unmappedDecreases,
+  };
 }
 
 export function summarizeCostForExport(cost: CostSummary): {

@@ -48,8 +48,8 @@ const EXPORTS = [
   },
   {
     kind: 'changed-parts-wanted-list',
-    title: 'Changed parts only (XML)',
-    body: 'The extra pieces alone, for topping up an order you have already placed. A Wanted List cannot express a removal, so the parts you no longer need are in the CSV above, not here.',
+    title: 'Extra parts to buy (XML)',
+    body: 'The extra pieces alone, for topping up an order you have already placed. A Wanted List cannot express a removal, so the parts you no longer need are in the CSV above, not here. If you have not ordered yet, use the optimized list instead.',
   },
 ] as const;
 

@@ -297,9 +297,12 @@ test.describe('the changed-parts-only export', () => {
     const xml = readFileSync(await (await xmlDownload).path(), 'utf8');
 
     // Only the increase is expressible, and the file says so plainly.
-    expect(xml).toContain('CHANGED PARTS ONLY');
+    expect(xml).toContain('EXTRA PARTS TO BUY');
     expect(xml).toContain('NOT a complete parts list');
-    expect(xml).toContain('Do not order from this file alone');
+    expect(xml).toContain('ONLY USE THIS if you have already bought');
+    expect(xml).toContain('use the OPTIMIZED');
+    // The delta is its own order, with its own shipping.
+    expect(xml).toContain('own BrickLink order');
     expect(xml).toContain('<INVENTORY>');
     expect(xml).toContain('<MINQTY>1</MINQTY>');
 

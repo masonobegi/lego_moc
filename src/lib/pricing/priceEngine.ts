@@ -9,6 +9,7 @@
  */
 
 import type { PartInstance } from '../ldraw/types';
+import { countLots } from '../ldraw/inventory';
 import { priceKey, type Condition, type PriceProvider, type PriceQuote } from './types';
 
 export interface PriceBookStats {
@@ -145,13 +146,7 @@ export function calculateCost(
   condition: Condition,
   currency = 'USD',
 ): CostSummary {
-  const counts = new Map<string, { partId: string; colorId: number; quantity: number }>();
-  for (const instance of instances) {
-    const key = `${instance.partId}|${instance.colorId}`;
-    const existing = counts.get(key);
-    if (existing) existing.quantity++;
-    else counts.set(key, { partId: instance.partId, colorId: instance.colorId, quantity: 1 });
-  }
+  const counts = countLots(instances);
 
   let total = 0;
   let pricedPieces = 0;

@@ -22,6 +22,7 @@ import { buildInventoryDelta, type InventoryDelta } from '@/lib/export/inventory
 import { buildInventoryDeltaCsv, buildInventoryDeltaWantedListXml } from '@/lib/export/reports';
 import { parseLDraw } from '@/lib/ldraw/parser';
 import { resolveModel } from '@/lib/ldraw/resolve';
+import { countLots } from '@/lib/ldraw/inventory';
 import { PriceBook } from '@/lib/pricing/priceEngine';
 import type { OptimizationCandidate } from '@/lib/optimizer/types';
 import { assessAvailability } from '@/lib/pricing/availability';
@@ -365,14 +366,17 @@ describe('the delta Wanted List XML', () => {
   });
 
   it('excludes lots whose BrickLink id cannot be resolved rather than guessing', () => {
+    // One instance of a part with no BrickLink mapping, recolored. Both sides
+    // of the delta are unmappable, so nothing may be emitted and the increase
+    // must be reported as a gap rather than guessed at.
     const odd = parseLDraw(
       '0 Odd\n1 4 0 0 0 1 0 0 0 1 0 0 0 1 not-a-real-part-xyz.dat\n0 STEP\n',
       { sourceName: 'odd.ldr' },
     );
     const oddInstances = resolveModel(odd).instances;
     const oddDelta = buildInventoryDelta({
-      originalInstances: [],
-      optimizedInstances: oddInstances,
+      originalInstances: oddInstances,
+      optimizedInstances: oddInstances.map((i) => ({ ...i, colorId: 0, declaredColorId: 0 })),
       prices,
       condition: 'new',
       currency: 'USD',
@@ -381,6 +385,7 @@ describe('the delta Wanted List XML', () => {
     expect(built.itemCount).toBe(0);
     expect(built.excluded).toHaveLength(1);
     expect(built.excluded[0]!.quantity).toBe(1);
+    expect(built.excluded[0]!.partId).toBe('not-a-real-part-xyz');
   });
 });
 
@@ -390,5 +395,138 @@ describe('the delta never modifies its inputs', () => {
     delta(new Set(recolorAll.map((c) => c.id)));
     const after = instances.map((i) => `${i.partId}|${i.colorId}`).join(',');
     expect(after).toBe(before);
+  });
+});
+
+/**
+ * Findings from an adversarial design review of this feature. Each of these is a
+ * way the export could be wrong while looking entirely plausible.
+ */
+describe('netting happens at the BrickLink level, not the LDraw level', () => {
+  // Two LDraw part ids that BrickLink sells under ONE item number. This is what
+  // a mold-variant swap usually is.
+  const mergingCatalog = {
+    mapPart: (partId: string) =>
+      partId === '3068a' || partId === '3068b'
+        ? { brickLinkPartId: '3068b', confidence: 'verified' as const, note: null }
+        : { brickLinkPartId: partId, confidence: 'identity' as const, note: null },
+    mapColor: (colorId: number) => ({
+      brickLinkColorId: colorId === 4 ? 5 : colorId === 0 ? 11 : 7,
+      note: null,
+    }),
+  } as unknown as Parameters<typeof buildInventoryDeltaWantedListXml>[1];
+
+  const swapDelta: InventoryDelta = {
+    lots: [
+      {
+        partId: '3068a', partDescription: 'Tile 2 x 2', colorId: 4, colorName: 'Red',
+        originalQuantity: 12, optimizedQuantity: 0, difference: -12, action: 'no_longer_needed',
+        unitPrice: 0.1, originalLineTotal: 1.2, optimizedLineTotal: 0, costDifference: -1.2,
+      },
+      {
+        partId: '3068b', partDescription: 'Tile 2 x 2', colorId: 4, colorName: 'Red',
+        originalQuantity: 0, optimizedQuantity: 12, difference: 12, action: 'buy_new',
+        unitPrice: 0.08, originalLineTotal: 0, optimizedLineTotal: 0.96, costDifference: 0.96,
+      },
+    ],
+    piecesAdded: 12, piecesRemoved: 12, pieceCountConserved: true, totalPieces: 100,
+    lotsAdded: 1, lotsRemoved: 1, lotsChanged: 2,
+    estimatedCostDifference: -0.24, unpricedLotCount: 0, currency: 'USD',
+  };
+
+  it('emits nothing when the swap is one item number to BrickLink', () => {
+    // The bug this guards against: telling the user to buy 12 tiles they
+    // already have, because two LDraw ids became one BrickLink id.
+    const result = buildInventoryDeltaWantedListXml(swapDelta, mergingCatalog, 'new');
+    expect(result.itemCount).toBe(0);
+    expect(result.pieceCount).toBe(0);
+    expect(result.nettedToNothing).toBe(1);
+    expect(result.xml).not.toContain('<ITEM>');
+  });
+
+  it('never emits two ITEM elements for the same item and color', () => {
+    const d = delta(new Set(recolorAll.map((c) => c.id)));
+    const result = buildInventoryDeltaWantedListXml(d, catalog, 'new');
+    const keys = [...result.xml.matchAll(/<ITEMID>([^<]*)<\/ITEMID>\s*<COLOR>([^<]*)<\/COLOR>/g)].map(
+      (m) => `${m[1]}|${m[2]}`,
+    );
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('records decreases it could not map, because they could not be offset', () => {
+    const partial = {
+      ...swapDelta,
+      lots: [
+        { ...swapDelta.lots[0]!, partId: 'unmappable-xyz' },
+        swapDelta.lots[1]!,
+      ],
+    };
+    const unmappable = {
+      mapPart: (partId: string) =>
+        partId === 'unmappable-xyz'
+          ? { brickLinkPartId: null, confidence: 'unmapped' as const, note: 'no mapping' }
+          : { brickLinkPartId: '3068b', confidence: 'verified' as const, note: null },
+      mapColor: () => ({ brickLinkColorId: 5, note: null }),
+    } as unknown as Parameters<typeof buildInventoryDeltaWantedListXml>[1];
+
+    const result = buildInventoryDeltaWantedListXml(partial, unmappable, 'new');
+    expect(result.unmappedDecreases).toBe(1);
+    // The increase still stands, and the caller is told the quantity may be high.
+    expect(result.pieceCount).toBe(12);
+  });
+});
+
+describe('the delta reconstructs the optimized Wanted List', () => {
+  it('original plus delta equals optimized, lot for lot', () => {
+    // The strongest single check on the arithmetic: if this holds, the delta
+    // cannot be describing a different order from the full lists.
+    const enabledIds = new Set(recolorAll.map((c) => c.id));
+    const optimizedInstances = applyToInstances(instances, recolorAll, enabledIds);
+    const d = delta(enabledIds);
+
+    const reconstructed = new Map<string, number>();
+    for (const [key, lotCount] of countLots(instances)) reconstructed.set(key, lotCount.quantity);
+    for (const lot of d.lots) {
+      const key = `${lot.partId}|${lot.colorId}`;
+      reconstructed.set(key, (reconstructed.get(key) ?? 0) + lot.difference);
+    }
+    for (const [key, quantity] of reconstructed) {
+      if (quantity === 0) reconstructed.delete(key);
+    }
+
+    const expected = new Map(
+      [...countLots(optimizedInstances)].map(([key, lotCount]) => [key, lotCount.quantity]),
+    );
+    expect([...reconstructed].sort()).toEqual([...expected].sort());
+  });
+});
+
+describe('every quantity in the Wanted List is orderable', () => {
+  it('has no zero or negative MINQTY', () => {
+    const d = delta(new Set(recolorAll.map((c) => c.id)));
+    const result = buildInventoryDeltaWantedListXml(d, catalog, 'new');
+    const quantities = [...result.xml.matchAll(/<MINQTY>([^<]*)<\/MINQTY>/g)].map((m) => Number(m[1]));
+    expect(quantities.length).toBeGreaterThan(0);
+    for (const quantity of quantities) {
+      expect(Number.isInteger(quantity)).toBe(true);
+      expect(quantity).toBeGreaterThanOrEqual(1);
+    }
+  });
+});
+
+describe('a delta that does not conserve pieces', () => {
+  it('refuses to be built rather than ordering the wrong quantities', () => {
+    // Every substitution is one-for-one, so this can only mean a bug. Emitting
+    // a parts list anyway would silently under- or over-order.
+    const oneExtra = [...instances, instances[0]!];
+    expect(() =>
+      buildInventoryDelta({
+        originalInstances: instances,
+        optimizedInstances: oneExtra,
+        prices,
+        condition: 'new',
+        currency: 'USD',
+      }),
+    ).toThrow(/not piece-conserving/);
   });
 });
