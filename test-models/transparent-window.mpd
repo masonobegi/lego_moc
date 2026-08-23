@@ -1,0 +1,43 @@
+0 FILE main.ldr
+0 Transparent Window Test
+0 Name: main.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // Two identical sealed boxes side by side.
+0 //   Box A (at x 0)    - the +X wall is Trans-Clear (LDraw colour 47).
+0 //   Box B (at x -200) - fully opaque.
+0 // Both contain an identical red 2x4 brick.
+0 // EXPECTED: box A's brick is NOT recoloured, because a transparent part does
+0 // not hide what is behind it. Box B's brick IS recoloured. Getting one and
+0 // not the other is the whole point of this fixture.
+
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 glass-box.ldr
+1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+1 16 -200 0 0 1 0 0 0 1 0 0 0 1 solid-box.ldr
+1 4 -200 -24 0 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+0 FILE glass-box.ldr
+0 Box With Trans-Clear Wall
+0 Name: glass-box.ldr
+0 Author: BrickThrift synthetic fixtures
+1 71 0 0 0 1 0 0 0 1 0 0 0 1 3958.dat
+1 71 -50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 47 50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 0 -24 -40 1 0 0 0 1 0 0 0 1 3001.dat
+1 71 0 -24 40 1 0 0 0 1 0 0 0 1 3001.dat
+1 71 0 -32 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP
+
+0 FILE solid-box.ldr
+0 Fully Opaque Box
+0 Name: solid-box.ldr
+0 Author: BrickThrift synthetic fixtures
+1 71 0 0 0 1 0 0 0 1 0 0 0 1 3958.dat
+1 71 -50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 0 -24 -40 1 0 0 0 1 0 0 0 1 3001.dat
+1 71 0 -24 40 1 0 0 0 1 0 0 0 1 3001.dat
+1 71 0 -32 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP

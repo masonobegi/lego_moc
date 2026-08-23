@@ -1,0 +1,27 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+.env
+.env.local
+.env*.local
+
+# Runtime state: analysis results + caches (see docs/ARCHITECTURE.md)
+.brickthrift/
+
+# Full LDraw parts library fetched by `npm run parts:fetch`
+public/ldraw-full/
+data/catalog/rebrickable/
+
+# Test output
+test-results/
+playwright-report/
+coverage/
+
+.DS_Store
+*.log
+.scratch/

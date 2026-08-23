@@ -1,0 +1,58 @@
+0 FILE main.ldr
+0 Repeated Submodel Instances
+0 Name: main.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // pod.ldr is referenced twice: once sealed inside a box, once out in the
+0 // open. Both physical bricks come from the SAME line inside pod.ldr, so
+0 // recolouring that line would recolour the visible one too.
+0 // EXPECTED: pod.ldr is NOT changed.
+0 //
+0 // sealed-pod.ldr is also referenced twice, but both instances are sealed.
+0 // EXPECTED: one candidate covering both, quantity 2, red -> black.
+
+0 // three identical 4x4 boxes with a 2x2 cavity
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 box.ldr
+1 16 -200 0 0 1 0 0 0 1 0 0 0 1 box.ldr
+1 16 -400 0 0 1 0 0 0 1 0 0 0 1 box.ldr
+0 STEP
+
+0 // pod #1: sealed inside the first box
+1 16 0 -24 0 1 0 0 0 1 0 0 0 1 pod.ldr
+0 // both sealed-pod instances: sealed inside the other two boxes
+1 16 -200 -24 0 1 0 0 0 1 0 0 0 1 sealed-pod.ldr
+1 16 -400 -24 0 1 0 0 0 1 0 0 0 1 sealed-pod.ldr
+0 STEP
+
+0 // pod #2: out in the open on a bare plate
+1 71 200 0 0 1 0 0 0 1 0 0 0 1 3031.dat
+1 16 200 -24 0 1 0 0 0 1 0 0 0 1 pod.ldr
+0 STEP
+
+0 FILE box.ldr
+0 Sealed 4x4 Box With 2x2 Cavity
+0 Name: box.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // floor y 0..8, wall ring y -24..0 leaving x,z -20..20 open, ceiling y -32..-24
+1 71 0 0 0 1 0 0 0 1 0 0 0 1 3031.dat
+1 71 -30 -24 0 0 0 1 0 1 0 -1 0 0 3010.dat
+1 71 30 -24 0 0 0 1 0 1 0 -1 0 0 3010.dat
+1 71 0 -24 -30 1 0 0 0 1 0 0 0 1 3004.dat
+1 71 0 -24 30 1 0 0 0 1 0 0 0 1 3004.dat
+1 71 0 -32 0 1 0 0 0 1 0 0 0 1 3031.dat
+0 STEP
+
+0 FILE pod.ldr
+0 Pod
+0 Name: pod.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // Used twice from main.ldr: once hidden, once visible.
+1 4 0 0 0 1 0 0 0 1 0 0 0 1 3003.dat
+0 STEP
+
+0 FILE sealed-pod.ldr
+0 Sealed Pod
+0 Name: sealed-pod.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // Used twice from main.ldr, both times hidden.
+1 4 0 0 0 1 0 0 0 1 0 0 0 1 3003.dat
+0 STEP

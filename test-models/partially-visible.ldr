@@ -1,0 +1,25 @@
+0 Partially Visible Brick
+0 Name: partially-visible.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // The sealed box, but the ceiling is built from a 4x6 plate plus a 1x6 plate
+0 // with a one-stud strip left open at x 20..40, directly over the red target.
+0 // EXPECTED: a small area of the target is directly visible from above, so the
+0 // optimiser must NOT recolour it.
+
+1 71 0 0 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP
+
+1 71 -50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 0 -24 -40 1 0 0 0 1 0 0 0 1 3001.dat
+1 71 0 -24 40 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+0 // ceiling: 4x6 plate covers x -60..20, 1x6 plate covers x 40..60.
+0 // The strip x 20..40 is open, exposing part of the target's top face.
+1 71 -20 -32 0 0 0 1 0 1 0 -1 0 0 3032.dat
+1 71 50 -32 0 0 0 1 0 1 0 -1 0 0 3666.dat
+0 STEP

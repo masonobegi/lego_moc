@@ -1,0 +1,9 @@
+0 Exposed Brick
+0 Name: exposed-brick.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // A red 2x4 brick sitting in the open on a light bluish gray plate.
+0 // EXPECTED: the optimiser must NOT recolour the red brick - it is fully visible.
+
+1 71 0 0 0 1 0 0 0 1 0 0 0 1 3020.dat
+1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP

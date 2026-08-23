@@ -1,0 +1,26 @@
+0 Gap Visible Brick
+0 Name: gap-visible.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // The sealed box, but the +X wall has a one-stud window at z -20..0, aimed
+0 // straight at the red target's +X face. The target is enclosed from every
+0 // other direction.
+0 // EXPECTED: the optimiser must NOT recolour it. A bounding-box or
+0 // "is it surrounded" test would get this wrong; ray sampling does not.
+
+1 71 0 0 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP
+
+0 // -X wall is solid
+1 71 -50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+0 // +X wall: 1x2 brick over z -60..-20, 1x3 brick over z 0..60, window at z -20..0
+1 71 50 -24 -40 0 0 1 0 1 0 -1 0 0 3004.dat
+1 71 50 -24 30 0 0 1 0 1 0 -1 0 0 3622.dat
+1 71 0 -24 -40 1 0 0 0 1 0 0 0 1 3001.dat
+1 71 0 -24 40 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+1 71 0 -32 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP

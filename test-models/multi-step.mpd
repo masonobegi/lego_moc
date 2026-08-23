@@ -1,0 +1,30 @@
+0 FILE multi-step.mpd
+0 Multi Step Buried Brick
+0 Name: multi-step.mpd
+0 Author: BrickThrift synthetic fixtures
+0 // The sealed 6x6 box, built over five 0 STEP boundaries.
+0 // The red target brick is introduced in STEP 3 (step index 2).
+0 // EXPECTED: the optimiser proposes red -> black AND the recoloured brick
+0 // stays on the same line, inside step 3. The build sequence is untouched.
+
+0 // ---- step 1: floor
+1 71 0 0 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP
+
+0 // ---- step 2: two walls
+1 71 -50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 0 -24 -40 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+0 // ---- step 3: the target, later completely enclosed
+1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+0 // ---- step 4: remaining walls
+1 71 50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 0 -24 40 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+0 // ---- step 5: ceiling
+1 71 0 -32 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP

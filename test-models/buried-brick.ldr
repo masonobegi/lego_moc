@@ -1,0 +1,25 @@
+0 Buried Brick
+0 Name: buried-brick.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // A red 2x4 brick sealed inside a 6x6 box of light bluish gray parts.
+0 // EXPECTED: the optimiser identifies the red brick as hidden and proposes
+0 // red -> black. Exterior appearance is unchanged.
+
+0 // floor, y 0..8
+1 71 0 0 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP
+
+0 // wall ring, y -24..0. Tiles x,z -60..60 with no gaps.
+1 71 -50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 0 -24 -40 1 0 0 0 1 0 0 0 1 3001.dat
+1 71 0 -24 40 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+0 // the target: completely enclosed
+1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+0 // ceiling, y -32..-24
+1 71 0 -32 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP

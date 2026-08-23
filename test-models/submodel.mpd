@@ -1,0 +1,40 @@
+0 FILE main.ldr
+0 Nested Submodel Test
+0 Name: main.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // The target brick sits two submodel levels down:
+0 //   main.ldr -> core.ldr -> capsule.ldr -> 3001.dat
+0 // EXPECTED: the parser composes the transforms correctly, the visibility
+0 // engine sees the brick at world (0, -24, 0) sealed inside the box, and the
+0 // optimiser edits the single line inside capsule.ldr.
+
+1 71 0 0 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP
+
+1 71 -50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 50 -24 0 0 0 1 0 1 0 -1 0 0 3009.dat
+1 71 0 -24 -40 1 0 0 0 1 0 0 0 1 3001.dat
+1 71 0 -24 40 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
+
+1 16 0 -24 0 1 0 0 0 1 0 0 0 1 core.ldr
+0 STEP
+
+1 71 0 -32 0 1 0 0 0 1 0 0 0 1 3958.dat
+0 STEP
+
+0 FILE core.ldr
+0 Core
+0 Name: core.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // One more level of indirection, with an identity transform.
+1 16 0 0 0 1 0 0 0 1 0 0 0 1 capsule.ldr
+0 STEP
+
+0 FILE capsule.ldr
+0 Capsule
+0 Name: capsule.ldr
+0 Author: BrickThrift synthetic fixtures
+0 // The single red brick the optimiser should find.
+1 4 0 0 0 1 0 0 0 1 0 0 0 1 3001.dat
+0 STEP
