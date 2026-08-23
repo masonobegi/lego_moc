@@ -36,6 +36,8 @@ import type { PartMesh } from './partMesh';
 
 /** Mirrors VisibilityTarget in the optimizer, kept structural to avoid a cycle. */
 export interface VisibilityTargetRecord {
+  /** Index into the scene's flat instance arrays, for observer-pass queries. */
+  readonly sceneIndex: number;
   readonly instanceId: string;
   readonly partId: string;
   readonly partFile: string;
@@ -451,10 +453,67 @@ export class ModelScene {
   }
 
   /** The per-instance records the visibility engine works from. */
+  /**
+   * World-space bounding box of one instance, written into `out` as
+   * [minX, minY, minZ, maxX, maxY, maxZ]. Reads the flat array so it works on a
+   * scene restored in a worker, where the descriptive `instances` list is empty.
+   */
+  instanceBoundsInto(index: number, out: Float64Array): boolean {
+    const b = index * 6;
+    if (b + 5 >= this.instBounds.length) return false;
+    for (let k = 0; k < 6; k++) out[k] = this.instBounds[b + k]!;
+    return true;
+  }
+
+  /** True when the instance has resolved geometry that can be ray-tested. */
+  instanceHasGeometry(index: number): boolean {
+    return index >= 0 && index < this.instMesh.length && this.instMesh[index]! >= 0;
+  }
+
+  /**
+   * Distance along the ray at which it first hits THIS instance's own
+   * triangles, or Infinity.
+   *
+   * The ray is moved into the part's local space by the instance's inverse
+   * transform. The direction is deliberately NOT renormalised afterwards: the
+   * transform is affine, so leaving the direction unnormalised keeps the ray
+   * parameter `t` identical in both spaces and the returned distance is
+   * directly comparable to a world-space occlusion query.
+   */
+  nearestHitOnInstance(
+    index: number,
+    ox: number, oy: number, oz: number,
+    dx: number, dy: number, dz: number,
+  ): number {
+    const meshIndex = this.instMesh[index] ?? -1;
+    if (meshIndex < 0) return Infinity;
+    const bvh = this.bvhs[meshIndex];
+    if (!bvh) return Infinity;
+
+    const p = index * 3;
+    const rx = ox - this.instPosition[p]!;
+    const ry = oy - this.instPosition[p + 1]!;
+    const rz = oz - this.instPosition[p + 2]!;
+    const m = index * 9;
+    const i0 = this.instInverse[m]!, i1 = this.instInverse[m + 1]!, i2 = this.instInverse[m + 2]!;
+    const i3 = this.instInverse[m + 3]!, i4 = this.instInverse[m + 4]!, i5 = this.instInverse[m + 5]!;
+    const i6 = this.instInverse[m + 6]!, i7 = this.instInverse[m + 7]!, i8 = this.instInverse[m + 8]!;
+
+    const lox = i0 * rx + i1 * ry + i2 * rz;
+    const loy = i3 * rx + i4 * ry + i5 * rz;
+    const loz = i6 * rx + i7 * ry + i8 * rz;
+    const ldx = i0 * dx + i1 * dy + i2 * dz;
+    const ldy = i3 * dx + i4 * dy + i5 * dz;
+    const ldz = i6 * dx + i7 * dy + i8 * dz;
+
+    return bvh.nearestHit(lox, loy, loz, ldx, ldy, ldz, Infinity, 1e-4);
+  }
+
   visibilityTargets(instances: readonly PartInstance[]): VisibilityTargetRecord[] {
     return instances.map((instance, index) => {
       const sceneInstance = this.instances[index]!;
       return {
+        sceneIndex: index,
         instanceId: instance.instanceId,
         partId: instance.partId,
         partFile: instance.partFile,

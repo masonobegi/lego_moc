@@ -15,6 +15,7 @@
  * copied command arrays, so "Reset to original" is always available.
  */
 
+import { referenceToPartId } from '../ldraw/parser';
 import type { LDrawDocument, ModelFile, PartCommand } from '../ldraw/types';
 import { commandRefKey } from '../ldraw/types';
 import type { OptimizationCandidate } from './types';
@@ -84,18 +85,37 @@ export function applyOptimizations(
       skipped.push({ candidateId: candidate.id, reason: 'Target line is not a part reference.' });
       continue;
     }
-    if (command.colorId !== candidate.originalColorId) {
+
+    const isPartSwap = candidate.replacementPartId !== candidate.originalPartId;
+    const isColorChange = candidate.replacementColorId !== candidate.originalColorId;
+
+    // Validate whichever field the change actually depends on.
+    //
+    // A pure mold swap does not touch the color at all, and its line may
+    // legitimately carry color 16 (inherit) - whose EFFECTIVE color is what the
+    // candidate recorded, not what is written on the line. Checking the written
+    // color against the effective one used to make every such change fail this
+    // guard, so it was priced, counted in the savings and then silently dropped
+    // from the export.
+    if (isColorChange && command.colorId !== candidate.originalColorId) {
       skipped.push({
         candidateId: candidate.id,
         reason: `Target line has color ${command.colorId}, expected ${candidate.originalColorId}.`,
       });
       continue;
     }
+    if (isPartSwap && referenceToPartId(command.file) !== candidate.originalPartId) {
+      skipped.push({
+        candidateId: candidate.id,
+        reason:
+          `Target line references ${command.file}, expected part ${candidate.originalPartId}.`,
+      });
+      continue;
+    }
 
-    const newFile =
-      candidate.replacementPartId === candidate.originalPartId
-        ? command.file
-        : replacePartInReference(command.file, candidate.replacementPartId);
+    const newFile = isPartSwap
+      ? replacePartInReference(command.file, candidate.replacementPartId)
+      : command.file;
 
     const replacement: PartCommand = {
       type: 'part',
@@ -103,7 +123,9 @@ export function applyOptimizations(
       // fields. Every other line still emits its original bytes.
       raw: null,
       sourceLine: command.sourceLine,
-      colorId: candidate.replacementColorId,
+      // A pure part swap must leave the color field exactly as written,
+      // including colour 16.
+      colorId: isColorChange ? candidate.replacementColorId : command.colorId,
       position: command.position,
       matrix: command.matrix,
       file: newFile,

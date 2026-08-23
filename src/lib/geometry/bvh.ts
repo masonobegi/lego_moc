@@ -360,6 +360,70 @@ export class TriangleBVH {
     return false;
   }
 
+  /**
+   * Distance to the nearest triangle hit in (epsilon, tMax), or Infinity.
+   *
+   * The boolean `intersectsRay` can stop at the first triangle it touches; this
+   * cannot, because a nearer triangle may still be found in a node visited
+   * later. Front-to-back traversal plus the running best distance keeps that
+   * cheap: once `tBest` is known, any node whose entry distance is beyond it is
+   * skipped entirely.
+   *
+   * Used by the observer pass, which needs to know whether a ray aimed at a
+   * part reaches THAT part before it reaches anything else.
+   */
+  nearestHit(
+    ox: number, oy: number, oz: number,
+    dx: number, dy: number, dz: number,
+    tMax: number,
+    epsilon = 1e-4,
+  ): number {
+    if (this.triangleCount === 0) return Infinity;
+
+    const invDx = 1 / (dx === 0 ? 1e-30 : dx);
+    const invDy = 1 / (dy === 0 ? 1e-30 : dy);
+    const invDz = 1 / (dz === 0 ? 1e-30 : dz);
+
+    const stack = TriangleBVH.scratchStack;
+    const stackT = TriangleBVH.scratchStackT;
+    let sp = 0;
+    stack[sp] = 0;
+    stackT[sp] = epsilon;
+    sp++;
+
+    let tBest = tMax;
+    while (sp > 0) {
+      sp--;
+      const node = stack[sp]!;
+      // A node queued before tBest improved may now be entirely behind the
+      // closest hit found so far.
+      if (stackT[sp]! >= tBest) continue;
+      const count = this.nodeCount[node]!;
+
+      if (count === 0) {
+        const left = this.nodeLeft[node]!;
+        const tLeft = this.entryDistance(left, ox, oy, oz, invDx, invDy, invDz, epsilon, tBest);
+        const tRight = this.entryDistance(left + 1, ox, oy, oz, invDx, invDy, invDz, epsilon, tBest);
+        if (tLeft <= tRight) {
+          if (tRight < Infinity) { stack[sp] = left + 1; stackT[sp] = tRight; sp++; }
+          if (tLeft < Infinity) { stack[sp] = left; stackT[sp] = tLeft; sp++; }
+        } else {
+          if (tLeft < Infinity) { stack[sp] = left; stackT[sp] = tLeft; sp++; }
+          if (tRight < Infinity) { stack[sp] = left + 1; stackT[sp] = tRight; sp++; }
+        }
+        continue;
+      }
+
+      const first = this.nodeLeft[node]!;
+      for (let i = 0; i < count; i++) {
+        const t = this.triIndices[first + i]!;
+        const dist = this.triangleDistance(t, ox, oy, oz, dx, dy, dz, tBest, epsilon);
+        if (dist < tBest) tBest = dist;
+      }
+    }
+    return tBest < tMax ? tBest : Infinity;
+  }
+
   /** Ray entry distance into a node's box, or Infinity when it misses. */
   private entryDistance(
     node: number,
@@ -423,6 +487,41 @@ export class TriangleBVH {
 
     const dist = (e2x * qx + e2y * qy + e2z * qz) * invDet;
     return dist > epsilon && dist < tMax;
+  }
+
+  /** Distance to a triangle along the ray, or Infinity. Double sided. */
+  private triangleDistance(
+    t: number,
+    ox: number, oy: number, oz: number,
+    dx: number, dy: number, dz: number,
+    tMax: number,
+    epsilon: number,
+  ): number {
+    const p = this.positions;
+    const o = t * 9;
+    const ax = p[o]!, ay = p[o + 1]!, az = p[o + 2]!;
+    const e1x = p[o + 3]! - ax, e1y = p[o + 4]! - ay, e1z = p[o + 5]! - az;
+    const e2x = p[o + 6]! - ax, e2y = p[o + 7]! - ay, e2z = p[o + 8]! - az;
+
+    const px = dy * e2z - dz * e2y;
+    const py = dz * e2x - dx * e2z;
+    const pz = dx * e2y - dy * e2x;
+    const det = e1x * px + e1y * py + e1z * pz;
+    if (det > -1e-12 && det < 1e-12) return Infinity;
+
+    const invDet = 1 / det;
+    const tx = ox - ax, ty = oy - ay, tz = oz - az;
+    const u = (tx * px + ty * py + tz * pz) * invDet;
+    if (u < 0 || u > 1) return Infinity;
+
+    const qx = ty * e1z - tz * e1y;
+    const qy = tz * e1x - tx * e1z;
+    const qz = tx * e1y - ty * e1x;
+    const v = (dx * qx + dy * qy + dz * qz) * invDet;
+    if (v < 0 || u + v > 1) return Infinity;
+
+    const dist = (e2x * qx + e2y * qy + e2z * qz) * invDet;
+    return dist > epsilon && dist < tMax ? dist : Infinity;
   }
 
   /** Shared traversal stacks. Single-threaded by construction. */

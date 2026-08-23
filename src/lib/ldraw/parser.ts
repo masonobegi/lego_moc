@@ -306,7 +306,17 @@ export function parseLDraw(source: string, options: ParseOptions = {}): LDrawDoc
     );
   }
 
+  // Warnings are returned to the browser and written to disk, so a file with a
+  // million bad lines must not produce a million warning objects. Everything
+  // past the cap is counted, not kept.
+  const MAX_WARNINGS = 200;
   const warnings: ParseWarning[] = [];
+  let suppressedWarnings = 0;
+  let malformedLineCount = 0;
+  const addWarning = (warning: ParseWarning): void => {
+    if (warnings.length < MAX_WARNINGS) warnings.push(warning);
+    else suppressedWarnings++;
+  };
   const builders: FileBuilder[] = [];
   let current: FileBuilder | null = null;
   let sawNamedFile = false;
@@ -320,7 +330,10 @@ export function parseLDraw(source: string, options: ParseOptions = {}): LDrawDoc
   for (let i = 0; i < rawLines.length; i++) {
     const raw = rawLines[i]!;
     const { command, warning } = parseLine(raw, i + 1);
-    if (warning) warnings.push(warning);
+    if (warning) {
+      if (warning.code === 'malformed_line') malformedLineCount++;
+      addWarning(warning);
+    }
 
     if (command.type === 'meta' && command.keyword === 'FILE') {
       if (builders.length + 1 > LIMITS.maxFiles) {
@@ -337,7 +350,7 @@ export function parseLDraw(source: string, options: ParseOptions = {}): LDrawDoc
 
     if (command.type === 'meta' && command.keyword === 'NOFILE') {
       if (current === null || current.isAnonymous) {
-        warnings.push({
+        addWarning({
           code: 'nofile_without_file',
           message: `Line ${i + 1}: 0 NOFILE appears outside a 0 FILE block. It was preserved but ignored.`,
           line: i + 1,
@@ -384,7 +397,7 @@ export function parseLDraw(source: string, options: ParseOptions = {}): LDrawDoc
     if (!builder.isAnonymous) {
       const key = normalizeReference(name);
       if (seenNames.has(key)) {
-        warnings.push({
+        addWarning({
           code: 'duplicate_file_name',
           message: `Sub-file "${name}" is declared more than once. References resolve to the first declaration.`,
           line: builder.commands[0]?.sourceLine ?? -1,
@@ -406,7 +419,7 @@ export function parseLDraw(source: string, options: ParseOptions = {}): LDrawDoc
 
   const hasContent = files.some((file) => file.commands.some((c) => c.type !== 'blank'));
   if (!hasContent) {
-    warnings.push({
+    addWarning({
       code: 'empty_document',
       message: 'The file contained no LDraw content: every line was blank.',
       line: 0,
@@ -424,6 +437,17 @@ export function parseLDraw(source: string, options: ParseOptions = {}): LDrawDoc
     });
   }
 
+  if (suppressedWarnings > 0) {
+    warnings.push({
+      code: 'truncated',
+      message:
+        `${suppressedWarnings.toLocaleString()} further warnings were suppressed. ` +
+        `The lines they refer to were still preserved unchanged.`,
+      line: -1,
+      file: null,
+    });
+  }
+
   const firstNamed = files.find((f) => !f.isAnonymous);
   const rootFile = firstNamed ? firstNamed.name : files[0]!.name;
 
@@ -434,6 +458,8 @@ export function parseLDraw(source: string, options: ParseOptions = {}): LDrawDoc
     lineEnding,
     trailingNewline,
     warnings,
+    malformedLineCount,
+    suppressedWarningCount: suppressedWarnings,
     sourceName,
   };
 }

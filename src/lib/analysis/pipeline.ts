@@ -16,7 +16,7 @@ import type { PartSource } from '../geometry/partSource';
 import { PartMeshLibrary, type PartMesh } from '../geometry/partMesh';
 import { ModelScene } from '../geometry/scene';
 import { parseLDraw } from '../ldraw/parser';
-import { resolveModel, summarizeModel } from '../ldraw/resolve';
+import { resolveModel, summarizeModel, type ResolveOptions } from '../ldraw/resolve';
 import type { LDrawDocument, PartInstance } from '../ldraw/types';
 import { sanitizeText } from '../security/limits';
 import { buildPriceBook, calculateCost, round2, type PriceBook, type PriceRequest } from '../pricing/priceEngine';
@@ -69,6 +69,8 @@ export interface AnalyzeOptions {
   readonly id?: string;
   /** Forces the visibility pass in-process. Used by tests that compare paths. */
   readonly singleThreaded?: boolean;
+  /** Overrides the submodel-expansion limits. Used by tests that force truncation. */
+  readonly resolveOptions?: ResolveOptions;
 }
 
 export interface AnalyzeOutput {
@@ -105,7 +107,7 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
   const document = mark('parsing', () => parseLDraw(options.source, { sourceName: options.fileName }));
 
   // ---- 2. resolve --------------------------------------------------------
-  const resolved = mark('resolving', () => resolveModel(document));
+  const resolved = mark('resolving', () => resolveModel(document, options.resolveOptions));
   const summary = summarizeModel(resolved);
   const instances = resolved.instances;
 
@@ -219,6 +221,16 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
     }
   }
 
+  /**
+   * A candidate asserts "every physical copy produced by this line is hidden".
+   * That claim is only meaningful if expansion actually enumerated every copy.
+   * When a limit stopped the walk early, some copies were never created and so
+   * were never checked, and a line could be recolored on the strength of the
+   * copies that happened to fit under the cap. So a truncated expansion
+   * produces no candidates at all, and says so.
+   */
+  const expansionComplete = !resolved.truncated;
+
   // ---- 6. colors --------------------------------------------------------
   const colorOutput = mark('colors', () =>
     findColorCandidates({
@@ -247,6 +259,7 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
 
   // ---- 8. savings --------------------------------------------------------
   const candidates = mark('savings', () => {
+    if (!expansionComplete) return [];
     const all = [...colorOutput.candidates, ...moldOutput.candidates];
     return resolveConflicts(all);
   });
@@ -254,7 +267,19 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
   const currency = firstCurrency(prices) ?? 'USD';
   const originalCost = calculateCost(instances, prices, options.condition, currency);
 
-  const rejections = summarizeRejections([...colorOutput.rejected, ...moldOutput.rejected]);
+  const rejections = expansionComplete
+    ? summarizeRejections([...colorOutput.rejected, ...moldOutput.rejected])
+    : [
+        {
+          reason: 'expansion_truncated',
+          label:
+            'Expansion of this model hit a safety limit, so not every copy of every part was ' +
+            'checked. No changes are proposed, because a change can only be safe if every copy ' +
+            'of the line it edits was verified.',
+          commandCount: groups.length,
+          pieceCount: instances.length,
+        },
+      ];
 
   const rootFile = document.files.find((f) => f.name === document.rootFile) ?? document.files[0];
   const title = sanitizeText(rootFile?.description ?? rootFile?.headerName ?? options.fileName, 120);
@@ -306,7 +331,7 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
     },
     parse: {
       warnings: [...document.warnings, ...resolved.warnings],
-      malformedLineCount: document.warnings.filter((w) => w.code === 'malformed_line').length,
+      malformedLineCount: document.malformedLineCount,
       unresolvedSubmodels: resolved.unresolvedSubmodels,
       truncated: resolved.truncated,
       truncationReason: resolved.truncationReason,

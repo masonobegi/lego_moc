@@ -40,6 +40,8 @@ export interface PartMesh {
   readonly surfaceArea: number;
   /** The part's description, taken from the first line of its .dat file. */
   readonly description: string | null;
+  /** Lines inside the part's own files that could not be read. */
+  readonly malformedLines: number;
   /** References inside this part that could not be found in the library. */
   readonly missingReferences: readonly string[];
   /** True when a limit stopped expansion and the mesh is incomplete. */
@@ -53,6 +55,7 @@ export const EMPTY_MESH: PartMesh = {
   bounds: emptyBox(),
   surfaceArea: 0,
   description: null,
+  malformedLines: 0,
   missingReferences: [],
   truncated: false,
 };
@@ -62,6 +65,7 @@ interface BuildState {
   colors: number[];
   missing: Set<string>;
   truncated: boolean;
+  malformedLines: number;
   description: string | null;
 }
 
@@ -107,7 +111,8 @@ export class PartMeshLibrary {
 
   private async build(reference: string): Promise<PartMesh> {
     const state: BuildState = {
-      positions: [], colors: [], missing: new Set(), truncated: false, description: null,
+      positions: [], colors: [], missing: new Set(), truncated: false, malformedLines: 0,
+      description: null,
     };
     await this.expand(reference, IDENTITY_MAT3, { x: 0, y: 0, z: 0 }, COLOR_INHERIT, 0, state, new Set());
 
@@ -138,6 +143,7 @@ export class PartMeshLibrary {
       bounds,
       surfaceArea,
       description: state.description,
+      malformedLines: state.malformedLines,
       missingReferences: [...state.missing],
       truncated: state.truncated,
     };
@@ -223,6 +229,16 @@ export class PartMeshLibrary {
             c[0]!, c[1]!, c[2]!, c[3]!, c[4]!, c[5]!, c[6]!, c[7]!, c[8]!);
           this.pushTriangle(state, matrix, position, resolved,
             c[0]!, c[1]!, c[2]!, c[6]!, c[7]!, c[8]!, c[9]!, c[10]!, c[11]!);
+          continue;
+        }
+        if (command.type === 'malformed') {
+          // A line we could not read inside a PART file may well have been
+          // geometry. Dropping it silently would leave a hole in the occluder
+          // and, worse, would let the part still qualify for the top confidence
+          // tier. Mark the mesh incomplete so the verdict can only ever reach
+          // LIKELY_HIDDEN.
+          state.truncated = true;
+          state.malformedLines++;
           continue;
         }
         // Types 2 and 5 are edge lines - not surfaces. Skipped deliberately.

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { runAnalysis, readFixture } from '@/lib/runtime/analyze';
 import { DEFAULT_SAFETY_LEVEL, SAFETY_LEVELS, type SafetyLevel } from '@/lib/optimizer/types';
+import { checkContentLength } from '@/lib/security/requestGuards';
 import { LIMITS, ModelTooLargeError, UnsupportedFileError } from '@/lib/security/limits';
 
 export const runtime = 'nodejs';
@@ -16,6 +17,9 @@ function parseSafetyLevel(value: unknown): SafetyLevel {
 
 export async function POST(request: Request): Promise<Response> {
   try {
+    const oversized = checkContentLength(request);
+    if (oversized) return oversized;
+
     const contentType = request.headers.get('content-type') ?? '';
     let source: string;
     let fileName: string;

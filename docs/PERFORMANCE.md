@@ -75,10 +75,15 @@ produce much better numbers and mean much less.
 
 | Parts | Triangles | Hidden | Rays | Single-threaded | 4 worker threads | Speedup |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100 | 70,000 | 14% | 446,340 | 1.05 s | 1.07 s | 1.0x |
-| 990 | 693,000 | 44% | 12,831,324 | 31.57 s | 9.73 s | 3.2x |
-| 4,860 | 3,402,000 | 65% | 30,405,480 | 83.84 s | 23.73 s | 3.5x |
-| 9,614 | 6,729,800 | 71% | 31,750,750 | 91.62 s | 30.38 s | 3.0x |
+| 100 | 70,000 | 14% | 543,585 | 1.24 s | 1.33 s | 1.0x |
+| 990 | 693,000 | 44% | 15,359,088 | 38.12 s | 11.44 s | 3.3x |
+| 4,860 | 3,402,000 | 65% | 38,439,508 | 103.42 s | 28.11 s | 3.7x |
+| 9,614 | 6,729,800 | 71% | 41,938,184 | 116.27 s | 31.13 s | 3.7x |
+
+The ray column is identical in both columns of every row, which is the point:
+the parallel and in-process paths cast exactly the same rays and reach exactly
+the same verdicts. When those two numbers disagree, something is wrong - see
+"A bug worth recording" below.
 
 At 100 parts the model is below the parallelism threshold and runs in-process
 on purpose: thread start-up would cost more than it saves.
@@ -88,10 +93,10 @@ on purpose: thread start-up would cost more than it saves.
 Measured against LDraw Official Model Repository files (install them with
 `npm run parts:fetch -- --mirror --models`), with worker threads:
 
-| Model | Parts | Distinct parts | Triangles | Hidden | Total |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| 10182 Cafe Corner | 3,457 | 127 | 912,344 | 1,246 (36%) | 12.2 s |
-| 10179 Millennium Falcon UCS | 6,034 | 273 | 5,170,957 | 630 (10%) | 12.1 s |
+| Model | Parts | Triangles | Hidden | Total |
+| --- | ---: | ---: | ---: | ---: |
+| 10182 Cafe Corner | 3,457 | 912,344 | 1,172 (34%) | 14.5 s |
+| 10179 Millennium Falcon UCS | 6,034 | 5,170,957 | 422 (7%) | 12.1 s |
 
 Real models are considerably faster than the synthetic worst case at the same
 part count, because a real MOC has a smaller hidden fraction and reuses far more
@@ -102,20 +107,58 @@ pipeline end to end with no failures, no part moved and no build step altered:
 
 | Model | Parts | Unresolved parts | Candidates | Saving (demo prices) | Time |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 21309 NASA Apollo Saturn V | 1,845 | 0 | 299 | $46.28 (13.5%) | 12.1 s |
-| 10227 B-wing Starfighter | 1,688 | 5 | 187 | $30.07 (11.2%) | 8.0 s |
-| 21041 Great Wall of China | 552 | 0 | 67 | $8.59 (8.1%) | 7.3 s |
-| 75144 Snowspeeder | 2,467 | 6 | 264 | $26.45 (7.3%) | 11.2 s |
-| 10019 Rebel Blockade Runner | 1,870 | 0 | 85 | $47.65 (6.1%) | 6.1 s |
-| 5571 Giant Truck | 1,769 | 0 | 80 | $11.80 (3.0%) | 5.1 s |
-| 10179 Millennium Falcon UCS | 6,034 | 8 | 203 | $8.51 (1.2%) | 11.6 s |
-| 6285 Black Seas Barracuda | 4,399 | 11 | 5 | $0.17 (0.0%) | 5.2 s |
-| 7181 TIE Interceptor UCS | 694 | 0 | 1 | $0.02 (0.0%) | 2.7 s |
+| 21309 NASA Apollo Saturn V | 1,845 | 0 | 212 | $31.40 (9.2%) | 11.3 s |
+| 10227 B-wing Starfighter | 1,688 | 5 | 107 | $18.76 (7.0%) | 7.8 s |
+| 75144 Snowspeeder | 2,467 | 6 | 180 | $17.28 (4.8%) | 10.5 s |
+| 10019 Rebel Blockade Runner | 1,870 | 0 | 66 | $30.57 (3.9%) | 5.9 s |
+| 21041 Great Wall of China | 552 | 0 | 11 | $2.08 (2.0%) | 3.0 s |
+| 5571 Giant Truck | 1,769 | 0 | 51 | $6.15 (1.6%) | 4.4 s |
+| 6235 Buried Treasure | 31 | 0 | 2 | $0.06 (0.8%) | 0.9 s |
+| 10179 Millennium Falcon UCS | 6,034 | 8 | 102 | $4.83 (0.7%) | 11.9 s |
+| 7181 TIE Interceptor UCS | 694 | 0 | 1 | $0.25 (0.2%) | 2.7 s |
+| 6919 Planetary Prowler | 369 | 1 | 3 | $0.07 (0.1%) | 1.9 s |
+| 6973 Deep Freeze Defender | 544 | 0 | 1 | $0.06 (0.1%) | 2.1 s |
+| 6285 Black Seas Barracuda | 4,399 | 11 | 4 | $0.12 (0.0%) | 5.2 s |
+| 1713 Shipwrecked Pirate | 29 | 0 | 0 | $0.00 (0.0%) | 0.2 s |
+| 6799 Showdown Canyon Carriage | 81 | 0 | 0 | $0.00 (0.0%) | 0.5 s |
+| 6862 Secret Space Voyager | 374 | 0 | 0 | $0.00 (0.0%) | 1.4 s |
 
 The spread is the honest answer to "how much will this save me": it depends
 entirely on how much hidden interior the model has and what colors the designer
-used there. Nothing in the product tries to make that number look better than
-it is.
+used there. Five of these fifteen models save essentially nothing. Nothing in
+the product tries to make that number look better than it is.
+
+These figures are estimated PART prices, not delivered order totals - see
+`docs/ARCHITECTURE.md` and the results page for what that distinction means.
+
+## A bug worth recording
+
+An earlier version of this table showed materially larger savings - 13.5% on
+Apollo Saturn V rather than 9.2%, 11.2% on the B-wing rather than 7.0%. Those
+numbers were wrong, and the reason is worth writing down because it is a hazard
+inherent to the architecture rather than a one-off slip.
+
+The visibility worker is a SEPARATE esbuild bundle (`dist-workers/`). Unlike
+every other module it does not rebuild when its source changes; it rebuilds only
+when one of the `workers:build` npm hooks runs. A fix to the direction sampler
+landed in `sampling.ts`, the bundle was not rebuilt, and from that moment the
+parent process ran the corrected sampler while the worker threads ran the old
+one. Since the parallel path is the default above 600 parts, every real model
+measured in that window was judged by the unfixed code - which sampled fewer
+directions, found fewer escaping rays, and therefore called more parts hidden.
+More "savings", all of them unsafe.
+
+The tell was in the benchmark output the whole time: the single-threaded and
+multi-threaded runs reported different ray counts for the same model. Two code
+paths that are supposed to be identical were not.
+
+Two changes came out of it:
+
+- `analyzeVisibilityParallel` now refuses to use a bundle older than any
+  TypeScript source under `src/lib`, falling back to the in-process path. Slower
+  is always better than divergent. `tests/visibilityParallel.test.ts` covers it.
+- `npm run bench` gained a `prebench` hook, so benchmarks can no longer be taken
+  against a stale bundle.
 
 ### Why 5,000 and 10,000 parts cost nearly the same
 

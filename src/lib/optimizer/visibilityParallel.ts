@@ -12,6 +12,7 @@
  * fails for any reason. Correctness never depends on the workers being there.
  */
 
+import { readdirSync, statSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
 import path from 'node:path';
 import { Worker } from 'node:worker_threads';
@@ -62,6 +63,12 @@ export async function analyzeVisibilityParallel(
 
   const sliceSize = Math.ceil(targets.length / workerCount);
   const workerFile = resolveWorkerFile();
+
+  if (!workerBundleIsCurrent(workerFile)) {
+    // See `workerBundleIsCurrent`. A stale bundle is worse than no bundle.
+    const analysis = analyzeVisibility(scene, targets, meshByPart, options, undefined, parallel.onProgress);
+    return { ...analysis, workerCount: 1 };
+  }
 
   try {
     const outputs = await Promise.all(
@@ -145,8 +152,73 @@ function safeParallelism(): number {
  * point at the right file; otherwise we look for the build output next to this
  * module and, failing that, throw so the caller falls back to single-threaded.
  */
-function resolveWorkerFile(): string {
+export function resolveWorkerFile(): string {
   const override = process.env.VISIBILITY_WORKER_PATH;
   if (override) return override;
   return path.join(process.cwd(), 'dist-workers', 'visibilityWorker.mjs');
+}
+
+/**
+ * Refuse to run a worker bundle that is older than the source it was built
+ * from.
+ *
+ * The worker is a SEPARATE esbuild bundle, so unlike every other module here it
+ * does not rebuild when the source changes - it only rebuilds when one of the
+ * `workers:build` hooks runs. A stale bundle therefore runs OLD visibility code
+ * in the workers while the parent process runs the current code, and because
+ * the parallel path is the default for anything above `PARALLEL_THRESHOLD`
+ * parts, that means real models get judged by code nobody is testing.
+ *
+ * This is not hypothetical: it happened during development. A fix that closed a
+ * blind cone in the direction sampling landed in `sampling.ts`, the bundle was
+ * not rebuilt, and every model over 600 parts was still being analyzed with the
+ * unfixed sampler - the exact failure mode where a visible brick can be
+ * recolored. Silent divergence between two code paths is the worst possible
+ * shape for a bug in a tool whose whole job is not touching visible parts.
+ *
+ * So: if any TypeScript source under `src/lib` is newer than the bundle, the
+ * bundle is not trusted and the analysis runs in-process instead. Slower, but
+ * it is the code that the tests actually exercise. When `src/lib` is not on
+ * disk at all - a deployed standalone build - there is nothing to compare
+ * against and the bundle is used as-is.
+ */
+export function workerBundleIsCurrent(
+  workerFile: string,
+  sourceRoot: string = path.join(process.cwd(), 'src', 'lib'),
+): boolean {
+  if (process.env.VISIBILITY_WORKER_PATH) return true;
+  try {
+    const bundleMtime = statSync(workerFile).mtimeMs;
+    const newest = newestSourceMtime(sourceRoot);
+    if (newest === null) return true;
+    return bundleMtime >= newest;
+  } catch {
+    return false;
+  }
+}
+
+/** Newest mtime of any `.ts` file under `dir`, or null if `dir` is absent. */
+function newestSourceMtime(dir: string): number | null {
+  let entries;
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return null;
+  }
+  let newest = 0;
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      const nested = newestSourceMtime(full);
+      if (nested !== null && nested > newest) newest = nested;
+    } else if (entry.name.endsWith('.ts')) {
+      try {
+        const mtime = statSync(full).mtimeMs;
+        if (mtime > newest) newest = mtime;
+      } catch {
+        // Unreadable file: ignore it rather than disabling the workers.
+      }
+    }
+  }
+  return newest;
 }

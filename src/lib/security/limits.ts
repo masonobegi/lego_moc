@@ -21,6 +21,14 @@ export const LIMITS = {
   maxDepth: 64,
   /** Maximum part instances produced by expansion. */
   maxInstances: 250_000,
+  /**
+   * Maximum sub-file frames visited while expanding.
+   *
+   * Separate from maxInstances because a document made only of submodels
+   * referencing each other produces no instances at all while still expanding
+   * exponentially, so the instance cap never fires.
+   */
+  maxExpansionFrames: 1_000_000,
   /** Maximum number of distinct part `.dat` files resolved from the library. */
   maxUniqueParts: 20_000,
   /** Maximum recursion depth when resolving a part's own sub-file references. */

@@ -4,7 +4,8 @@
  * probably the same" is not good enough - this asserts it is byte-identical.
  */
 
-import { readFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, utimesSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -15,6 +16,7 @@ import { ModelScene } from '@/lib/geometry/scene';
 import { parseLDraw } from '@/lib/ldraw/parser';
 import { resolveModel } from '@/lib/ldraw/resolve';
 import { analyzeVisibility, DEFAULT_VISIBILITY_OPTIONS } from '@/lib/optimizer/visibilityEngine';
+import { resolveWorkerFile, workerBundleIsCurrent } from '@/lib/optimizer/visibilityParallel';
 import { runSlice } from '@/lib/optimizer/visibilityWorker';
 
 const ROOT = process.cwd();
@@ -117,5 +119,76 @@ describe('sliced analysis', () => {
     }
     expect(new Set(seen).size).toBe(targets.length);
     expect(seen).toHaveLength(targets.length);
+  });
+});
+
+/**
+ * The worker is a separate esbuild bundle, so it does not rebuild when the
+ * source does. A stale bundle runs old visibility code in the workers while the
+ * parent runs current code - the two paths silently disagree about which parts
+ * are hidden. Guard against it.
+ *
+ * These use a scratch directory rather than the repo so the assertions do not
+ * depend on whether a build hook happened to run first.
+ */
+describe('stale worker bundles are refused', () => {
+  function scratch(bundleMtime: number, sourceMtime: number) {
+    const dir = mkdtempSync(path.join(tmpdir(), 'bt-worker-'));
+    const bundle = path.join(dir, 'visibilityWorker.mjs');
+    const source = path.join(dir, 'src');
+    mkdirSync(source);
+    writeFileSync(bundle, 'export {};');
+    writeFileSync(path.join(source, 'sampling.ts'), 'export {};');
+    writeFileSync(path.join(source, 'notes.md'), 'not source');
+    utimesSync(bundle, new Date(bundleMtime), new Date(bundleMtime));
+    utimesSync(path.join(source, 'sampling.ts'), new Date(sourceMtime), new Date(sourceMtime));
+    // A non-TypeScript file far in the future must not disable the workers.
+    utimesSync(path.join(source, 'notes.md'), new Date(sourceMtime + 1e6), new Date(sourceMtime + 1e6));
+    return { dir, bundle, source };
+  }
+
+  it('accepts a bundle built after its source', () => {
+    const { bundle, source } = scratch(2_000_000_000_000, 1_999_999_000_000);
+    expect(workerBundleIsCurrent(bundle, source)).toBe(true);
+  });
+
+  it('rejects a bundle older than a source file', () => {
+    const { bundle, source } = scratch(1_999_999_000_000, 2_000_000_000_000);
+    expect(workerBundleIsCurrent(bundle, source)).toBe(false);
+  });
+
+  it('rejects a bundle older than a source file nested in a subdirectory', () => {
+    const { bundle, source } = scratch(2_000_000_000_000, 1_999_999_000_000);
+    const nested = path.join(source, 'geometry');
+    mkdirSync(nested);
+    const deep = path.join(nested, 'scene.ts');
+    writeFileSync(deep, 'export {};');
+    const future = new Date(2_000_001_000_000);
+    utimesSync(deep, future, future);
+    expect(workerBundleIsCurrent(bundle, source)).toBe(false);
+  });
+
+  it('rejects a bundle that is not there at all', () => {
+    const { source } = scratch(2_000_000_000_000, 1_999_999_000_000);
+    expect(workerBundleIsCurrent(path.join(source, '..', 'nope.mjs'), source)).toBe(false);
+  });
+
+  it('uses a bundle as-is when no source tree is on disk to compare against', () => {
+    // A deployed standalone build ships the bundle without `src/`.
+    const { bundle, dir } = scratch(1_000_000_000_000, 2_000_000_000_000);
+    expect(workerBundleIsCurrent(bundle, path.join(dir, 'no-such-src'))).toBe(true);
+  });
+
+  it('trusts an explicitly configured path without checking mtimes', () => {
+    const previous = process.env.VISIBILITY_WORKER_PATH;
+    process.env.VISIBILITY_WORKER_PATH = '/definitely/not/here.mjs';
+    try {
+      // A host that points at a specific file has taken responsibility for it.
+      expect(workerBundleIsCurrent('/definitely/not/here.mjs')).toBe(true);
+      expect(resolveWorkerFile()).toBe('/definitely/not/here.mjs');
+    } finally {
+      if (previous === undefined) delete process.env.VISIBILITY_WORKER_PATH;
+      else process.env.VISIBILITY_WORKER_PATH = previous;
+    }
   });
 });

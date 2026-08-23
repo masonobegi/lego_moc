@@ -55,11 +55,23 @@ export interface ResolveOptions {
   /** Stop after this many instances. Defaults to LIMITS.maxInstances. */
   maxInstances?: number;
   maxDepth?: number;
+  /**
+   * Stop after visiting this many sub-file frames.
+   *
+   * The instance cap alone is not enough. Cycle detection uses the current DFS
+   * PATH, so a sub-file reachable by several routes is legitimately re-expanded
+   * once per route - a diamond-shaped reference graph is exponential in depth.
+   * A document of nothing but submodels referencing each other, containing no
+   * library parts at all, produces no instances and so never trips the instance
+   * cap while expanding forever. This bounds the walk itself.
+   */
+  maxFrames?: number;
 }
 
 export function resolveModel(document: LDrawDocument, options: ResolveOptions = {}): ResolvedModel {
   const maxInstances = options.maxInstances ?? LIMITS.maxInstances;
   const maxDepth = options.maxDepth ?? LIMITS.maxDepth;
+  const maxFrames = options.maxFrames ?? LIMITS.maxExpansionFrames;
 
   const fileIndex = buildFileIndex(document);
   const rootIndex = fileIndex.get(normalizeReference(document.rootFile)) ?? 0;
@@ -86,9 +98,19 @@ export function resolveModel(document: LDrawDocument, options: ResolveOptions = 
     },
   ];
 
+  let framesVisited = 0;
+
   // Iterative DFS. Explicit stack rather than recursion so a deeply nested
   // hostile document cannot blow the JS call stack.
   while (stack.length > 0) {
+    if (++framesVisited > maxFrames) {
+      truncated = true;
+      truncationReason =
+        `Expanding this model's submodel references exceeded ${maxFrames.toLocaleString()} steps. ` +
+        `That usually means submodels reference each other in a way that multiplies out ` +
+        `exponentially. Analysis was stopped at that point.`;
+      break;
+    }
     const frame = stack.pop()!;
     const file: ModelFile | undefined = document.files[frame.fileIndex];
     if (!file) continue;

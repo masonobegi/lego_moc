@@ -20,6 +20,26 @@ export interface SampleableMesh {
 }
 
 /**
+ * The six axis directions, in world space.
+ *
+ * These are cast from every sample point WITHOUT any per-point rotation, so
+ * straight down, straight up and straight along each horizontal axis are
+ * always probed. Those are the directions a display model is actually looked
+ * at from, and guaranteeing them costs six rays per point.
+ */
+export const AXIS_DIRECTIONS: readonly number[] = [
+  0, 1, 0,
+  0, -1, 0,
+  1, 0, 0,
+  -1, 0, 0,
+  0, 0, 1,
+  0, 0, -1,
+];
+
+/** How many leading directions in a set built by `directionSet` are fixed axes. */
+export const FIXED_AXIS_COUNT = AXIS_DIRECTIONS.length / 3;
+
+/**
  * Directions spread evenly over the whole sphere using the Fibonacci lattice.
  *
  * The full sphere, not a normal-oriented hemisphere: LDraw part files are
@@ -27,9 +47,6 @@ export interface SampleableMesh {
  * "outward" normal cannot be trusted. Rays aimed into the part's own solid
  * simply hit its far wall and are counted as blocked, which makes the method
  * self-correcting and removes any dependency on normal orientation.
- *
- * `phase` rotates the lattice per sample point so that different points on the
- * same part do not all probe the same directions.
  */
 export function fibonacciDirections(count: number, phase = 0): Float64Array {
   const out = new Float64Array(count * 3);
@@ -43,6 +60,64 @@ export function fibonacciDirections(count: number, phase = 0): Float64Array {
     out[i * 3 + 2] = Math.sin(theta) * radius;
   }
   return out;
+}
+
+/**
+ * The direction set the visibility engine actually casts: the six axes first,
+ * then a Fibonacci lattice of `count` directions.
+ *
+ * The caller rotates only the lattice portion per sample point (see
+ * `pointRotation`); the axes stay fixed in world space.
+ */
+export function directionSet(count: number): Float64Array {
+  const lattice = fibonacciDirections(count);
+  const out = new Float64Array(AXIS_DIRECTIONS.length + lattice.length);
+  out.set(AXIS_DIRECTIONS, 0);
+  out.set(lattice, AXIS_DIRECTIONS.length);
+  return out;
+}
+
+// Two irrational multipliers from the plastic number, used as independent
+// low-discrepancy sequences over the sample-point index.
+const R2_A = 0.7548776662466927;
+const R2_B = 0.5698402909980532;
+
+/**
+ * Per-sample-point rotation applied to the lattice directions.
+ *
+ * IMPORTANT: this rotates about BOTH Y and X.
+ *
+ * An earlier version rotated about Y only. Y is exactly the axis the Fibonacci
+ * lattice's elevations are defined on, so a Y rotation is a symmetry of the
+ * elevation structure - it changed azimuth and nothing else. Every sample point
+ * of every part in every model therefore probed the same fixed set of
+ * elevations, leaving an unsampled polar cone of half-angle
+ * `arccos(1 - 1/count)` - 14.4 degrees at 32 directions - permanently
+ * unprobed around the vertical axis.
+ *
+ * That is not a theoretical gap. LDraw's Y axis is the model's vertical, which
+ * is the direction a model on a shelf is most often viewed from. A 1x1 brick at
+ * the bottom of a 1-stud shaft four bricks deep - a chimney, a light well, a
+ * recess - is plainly visible looking down the hole, and was classified HIDDEN
+ * with zero escaping rays out of ten thousand. Rotating about a second axis
+ * makes the elevation vary per point and closes the cone.
+ */
+export function pointRotation(pointIndex: number): {
+  cosY: number;
+  sinY: number;
+  cosX: number;
+  sinX: number;
+} {
+  const a = ((pointIndex + 1) * R2_A) % 1;
+  const b = ((pointIndex + 1) * R2_B) % 1;
+  const angleY = a * Math.PI * 2;
+  const angleX = b * Math.PI * 2;
+  return {
+    cosY: Math.cos(angleY),
+    sinY: Math.sin(angleY),
+    cosX: Math.cos(angleX),
+    sinX: Math.sin(angleX),
+  };
 }
 
 export interface SurfaceSample {

@@ -25,6 +25,7 @@
     "postinstall": "npm run workers:build",
     "predev": "npm run workers:build",
     "prebuild": "npm run workers:build",
+    "prebench": "npm run workers:build",
     "pretest": "npm run workers:build",
     "test:all": "npm run test && npm run test:e2e"
   },

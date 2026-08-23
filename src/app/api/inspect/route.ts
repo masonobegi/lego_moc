@@ -4,6 +4,7 @@ import { parseLDraw } from '@/lib/ldraw/parser';
 import { resolveModel, summarizeModel } from '@/lib/ldraw/resolve';
 import { readFixture } from '@/lib/runtime/analyze';
 import { sanitizeText, validateUpload, LIMITS, ModelTooLargeError, UnsupportedFileError } from '@/lib/security/limits';
+import { checkContentLength } from '@/lib/security/requestGuards';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,9 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(request: Request): Promise<Response> {
   try {
+    const oversized = checkContentLength(request);
+    if (oversized) return oversized;
+
     const contentType = request.headers.get('content-type') ?? '';
     let source: string;
     let fileName: string;

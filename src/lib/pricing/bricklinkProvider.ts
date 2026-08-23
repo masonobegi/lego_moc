@@ -107,8 +107,27 @@ export class BrickLinkPriceProvider implements PriceProvider {
     };
   }
 
+  /**
+   * Cache key.
+   *
+   * Part, color and condition are not enough: guide type, currency and store
+   * location all change what the returned number MEANS, and the cache outlives
+   * a configuration change because it is written to disk. Keying on only the
+   * item would serve a EUR "last 6 months sold" figure to a USD "currently for
+   * sale" request.
+   */
+  private cacheKey(partId: string, colorId: number, condition: Condition): string {
+    return [
+      priceKey(partId, colorId, condition),
+      this.options.guideType,
+      this.options.currency,
+      this.options.countryCode ?? '',
+      this.options.region ?? '',
+    ].join('|');
+  }
+
   async getPrice(partId: string, colorId: number, condition: Condition): Promise<PriceQuote | null> {
-    const key = priceKey(partId, colorId, condition);
+    const key = this.cacheKey(partId, colorId, condition);
     const cached = this.options.cache.get(key);
     if (cached) return cached;
 

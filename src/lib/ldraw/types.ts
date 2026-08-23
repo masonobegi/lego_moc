@@ -139,7 +139,12 @@ export interface LDrawDocument {
   readonly lineEnding: '\n' | '\r\n';
   /** Whether the source ended with a line terminator. */
   readonly trailingNewline: boolean;
+  /** Bounded: see MAX_WARNINGS in parser.ts. */
   readonly warnings: ParseWarning[];
+  /** Total malformed lines, counted rather than derived from `warnings`. */
+  readonly malformedLineCount: number;
+  /** Warnings beyond the cap, which are counted but not kept. */
+  readonly suppressedWarningCount: number;
   /** Name the document was loaded under (upload filename or fixture name). */
   readonly sourceName: string;
 }

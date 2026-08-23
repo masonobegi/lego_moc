@@ -6,7 +6,7 @@ Measured on Node v22.22.2, 4 logical cores, 15.7 GB RAM. Worker threads enabled.
 
 | Model | Parts | Distinct | Triangles | Parse | Geometry | Visibility | Optimize | **Total** | Rays | Hidden | Threads |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Synthetic 100 | 100 | 1 | 70,000 | 4 ms | 59 ms | 1001 ms | 5 ms | **1.07 s** | 446,340 | 14 | 1 |
-| Synthetic 1000 | 990 | 1 | 693,000 | 6 ms | 23 ms | 9670 ms | 15 ms | **9.73 s** | 12,831,324 | 432 | 4 |
-| Synthetic 5000 | 4,860 | 1 | 3,402,000 | 23 ms | 47 ms | 23545 ms | 70 ms | **23.73 s** | 30,405,480 | 3,136 | 4 |
-| Synthetic 10000 | 9,614 | 1 | 6,729,800 | 34 ms | 83 ms | 29990 ms | 171 ms | **30.38 s** | 31,750,750 | 6,804 | 4 |
+| Synthetic 100 | 100 | 1 | 70,000 | 3 ms | 49 ms | 1189 ms | 3 ms | **1.25 s** | 543,585 | 14 | 1 |
+| Synthetic 1000 | 990 | 1 | 693,000 | 5 ms | 26 ms | 11213 ms | 14 ms | **11.27 s** | 15,359,088 | 432 | 4 |
+| Synthetic 5000 | 4,860 | 1 | 3,402,000 | 21 ms | 68 ms | 27812 ms | 106 ms | **28.07 s** | 38,439,508 | 3,136 | 4 |
+| Synthetic 10000 | 9,614 | 1 | 6,729,800 | 37 ms | 91 ms | 31097 ms | 136 ms | **31.46 s** | 41,938,184 | 6,804 | 4 |
