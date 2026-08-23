@@ -1,5 +1,5 @@
 /**
- * Optimiser types.
+ * Optimizer types.
  *
  * The unit of change is a COMMAND, not a part instance. One line type 1 inside
  * a submodel used three times produces three physical bricks; editing that line
@@ -46,15 +46,15 @@ export type CandidateKind = 'hidden_color' | 'mold_equivalent';
 export type CandidateBlocker =
   | 'visible'
   | 'mixed_visibility'
-  | 'inherited_colour'
-  | 'sentinel_colour'
+  | 'inherited_color'
+  | 'sentinel_color'
   | 'no_price_for_original'
   | 'no_cheaper_alternative'
   | 'part_not_in_catalog'
-  | 'no_valid_alternative_colour'
+  | 'no_valid_alternative_color'
   | 'no_equivalent_rule'
   | 'rule_confidence_too_low'
-  | 'replacement_colour_unavailable'
+  | 'replacement_color_unavailable'
   | 'replacement_not_cheaper'
   | 'geometry_unavailable';
 
@@ -107,7 +107,7 @@ export interface OptimizationCandidate {
   readonly visibility: CandidateVisibility;
   readonly evidence: readonly string[];
   readonly moldRule: EquivalentPartRule | null;
-  /** Cheaper colours we found but did not pick, best first. */
+  /** Cheaper colors we found but did not pick, best first. */
   readonly alternatives: readonly AlternativeOption[];
   /** Candidates that cannot be enabled at the same time as this one. */
   readonly conflictsWith: readonly string[];

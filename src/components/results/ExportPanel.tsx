@@ -12,23 +12,23 @@ interface Props {
 const EXPORTS = [
   {
     kind: 'ldraw',
-    title: 'Optimised model',
+    title: 'Optimized model',
     body: 'The same file with only the changed lines rewritten. Build steps, submodels and every other line are untouched.',
   },
   {
     kind: 'report',
-    title: 'Optimisation report (JSON)',
+    title: 'Optimization report (JSON)',
     body: 'Costs, savings and every change with its evidence and confidence, including the ones you switched off.',
   },
   {
     kind: 'csv',
     title: 'Change log (CSV)',
-    body: 'One row per proposed change: step, part, colours, prices, savings, reason, confidence, enabled.',
+    body: 'One row per proposed change: step, part, colors, prices, savings, reason, confidence, enabled.',
   },
   {
     kind: 'wanted-list',
     title: 'BrickLink Wanted List (XML)',
-    body: 'The optimised inventory in BrickLink XML. Lots whose BrickLink id could not be resolved are excluded and listed.',
+    body: 'The optimized inventory in BrickLink XML. Lots whose BrickLink id could not be resolved are excluded and listed.',
   },
 ] as const;
 
@@ -108,14 +108,14 @@ export function ExportPanel({ analysisId, enabledIds, isMpd, enabledCount }: Pro
       <div className="mt-4 rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] p-3.5">
         <h3 className="text-[0.8rem] font-medium">Taking this back into BrickLink Studio</h3>
         <ol className="mt-2 space-y-1.5 text-[0.77rem] leading-relaxed text-[var(--text-dim)]">
-          <li>1. Download the optimised model above.</li>
+          <li>1. Download the optimized model above.</li>
           <li>
             2. In Studio: <span className="text-[var(--text)]">File &rarr; Import &rarr; Import Model</span>,
             and choose the downloaded file.
           </li>
           <li>
             3. Your <code className="font-mono">0 STEP</code> boundaries survive the round trip, so
-            Studio&apos;s Instruction Maker produces instructions for the optimised model.
+            Studio&apos;s Instruction Maker produces instructions for the optimized model.
           </li>
         </ol>
         <p className="mt-2.5 text-[0.74rem] leading-relaxed text-[var(--text-faint)]">

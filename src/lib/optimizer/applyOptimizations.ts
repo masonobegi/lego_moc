@@ -1,9 +1,9 @@
 /**
- * Produces the optimised document.
+ * Produces the optimized document.
  *
  * This is where the promise "the exported file really is different" is kept.
  * It edits the SAME line the candidate identified, in place, changing only the
- * colour field and/or the part reference. Nothing is inserted, removed or
+ * color field and/or the part reference. Nothing is inserted, removed or
  * reordered, so:
  *
  *   - `0 STEP` boundaries keep exactly the parts they had;
@@ -87,7 +87,7 @@ export function applyOptimizations(
     if (command.colorId !== candidate.originalColorId) {
       skipped.push({
         candidateId: candidate.id,
-        reason: `Target line has colour ${command.colorId}, expected ${candidate.originalColorId}.`,
+        reason: `Target line has color ${command.colorId}, expected ${candidate.originalColorId}.`,
       });
       continue;
     }

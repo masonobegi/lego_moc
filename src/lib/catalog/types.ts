@@ -1,22 +1,22 @@
 /**
  * Catalog types.
  *
- * The catalog answers three questions the optimiser cannot answer from the
+ * The catalog answers three questions the optimizer cannot answer from the
  * model file alone:
- *   1. Which colours has this part actually been produced in?
- *   2. What is this part called in BrickLink's and Rebrickable's catalogues?
+ *   1. Which colors has this part actually been produced in?
+ *   2. What is this part called in BrickLink's and Rebrickable's catalogs?
  *   3. Which other part is a verified drop-in replacement for this one?
  *
  * Everything is behind an interface so the offline bundled data and the
  * Rebrickable import are interchangeable, and so a future source can be added
- * without touching the optimiser.
+ * without touching the optimizer.
  */
 
 export type CatalogSourceId = 'bundled-omr' | 'rebrickable' | 'bricklink';
 
 export interface ColorEvidence {
   readonly source: CatalogSourceId;
-  /** Official set numbers the part+colour was observed in, where known. */
+  /** Official set numbers the part+color was observed in, where known. */
   readonly sets: readonly string[];
   /** How many times the combination was observed. */
   readonly observations: number;
@@ -28,7 +28,7 @@ export interface ColorAvailability {
 }
 
 /**
- * How much we trust a cross-catalogue id mapping.
+ * How much we trust a cross-catalog id mapping.
  *  verified - from a curated table or a Rebrickable `external_ids` lookup
  *  identity - the LDraw id is a plain number/letter form with no known
  *             divergence, so it is used as-is. True for most ordinary elements.
@@ -56,7 +56,7 @@ export type EquivalenceType = 'mold_variant' | 'superseded' | 'functionally_equi
 
 /**
  * How much swapping in the replacement changes what the model looks like.
- *  none    - physically the same element, catalogued under two numbers
+ *  none    - physically the same element, catalogd under two numbers
  *  subtle  - a small visible difference such as a groove along a tile's edge
  *  unknown - not assessed; such a rule is never applied automatically
  *
@@ -99,9 +99,9 @@ export interface CatalogStatus {
 
 export interface CatalogService {
   readonly status: CatalogStatus;
-  /** Colours the part is known to exist in. `null` means the part is unknown to the catalog. */
+  /** Colors the part is known to exist in. `null` means the part is unknown to the catalog. */
   availableColors(partId: string): readonly ColorAvailability[] | null;
-  /** Whether a specific part+colour combination is known to exist. */
+  /** Whether a specific part+color combination is known to exist. */
   isKnownCombination(partId: string, colorId: number): boolean;
   mapPart(partId: string): CatalogMapping;
   mapColor(colorId: number): ColorMapping;

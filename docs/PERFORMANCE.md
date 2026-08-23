@@ -4,7 +4,7 @@
 
 Analysis is dominated by one thing: casting rays through real part geometry to
 decide what is visible. On a realistic model it is around 90% of the total.
-Parsing, price lookup and the optimisation itself are noise beside it.
+Parsing, price lookup and the optimization itself are noise beside it.
 
 That is not an accident of implementation, it is the shape of the problem. A
 part can only be called hidden after enough rays have failed to escape to make
@@ -49,7 +49,7 @@ depends only on the shared, read-only scene. The BVHs are serialisable, so
 workers receive a built scene rather than rebuilding it, and slices are
 disjoint. `tests/visibilityParallel.test.ts` asserts that the merged result is
 identical to the single-threaded one, verdict by verdict and ray count by ray
-count - which is what makes it acceptable to parallelise something this
+count - which is what makes it acceptable to parallelize something this
 safety-critical.
 
 ## Measurements
@@ -97,6 +97,26 @@ Real models are considerably faster than the synthetic worst case at the same
 part count, because a real MOC has a smaller hidden fraction and reuses far more
 distinct parts.
 
+A wider survey of 15 official sets, spread across the size range, ran the full
+pipeline end to end with no failures, no part moved and no build step altered:
+
+| Model | Parts | Unresolved parts | Candidates | Saving (demo prices) | Time |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 21309 NASA Apollo Saturn V | 1,845 | 0 | 299 | $46.28 (13.5%) | 12.1 s |
+| 10227 B-wing Starfighter | 1,688 | 5 | 187 | $30.07 (11.2%) | 8.0 s |
+| 21041 Great Wall of China | 552 | 0 | 67 | $8.59 (8.1%) | 7.3 s |
+| 75144 Snowspeeder | 2,467 | 6 | 264 | $26.45 (7.3%) | 11.2 s |
+| 10019 Rebel Blockade Runner | 1,870 | 0 | 85 | $47.65 (6.1%) | 6.1 s |
+| 5571 Giant Truck | 1,769 | 0 | 80 | $11.80 (3.0%) | 5.1 s |
+| 10179 Millennium Falcon UCS | 6,034 | 8 | 203 | $8.51 (1.2%) | 11.6 s |
+| 6285 Black Seas Barracuda | 4,399 | 11 | 5 | $0.17 (0.0%) | 5.2 s |
+| 7181 TIE Interceptor UCS | 694 | 0 | 1 | $0.02 (0.0%) | 2.7 s |
+
+The spread is the honest answer to "how much will this save me": it depends
+entirely on how much hidden interior the model has and what colors the designer
+used there. Nothing in the product tries to make that number look better than
+it is.
+
 ### Why 5,000 and 10,000 parts cost nearly the same
 
 The ray budget per part scales down for large models
@@ -132,7 +152,7 @@ megabytes and a few hundred draw calls rather than 6,000 meshes.
 Two consequences worth knowing:
 
 - Toggling a change never refetches geometry. Every candidate's replacement
-  colour is included in the payload up front, and the browser decides per
+  color is included in the payload up front, and the browser decides per
   instance which to display.
 - The viewer caps at 60,000 drawn instances. The analysis always covers the
   whole model; if the cap is reached the viewer says so rather than silently

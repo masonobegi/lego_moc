@@ -17,8 +17,8 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-6 max-w-[62ch] text-[1.03rem] leading-relaxed text-[var(--text-dim)]">
-            BrickThrift analyses your digital model, works out which pieces cannot be seen from
-            outside the finished build, and shows you where a cheaper colour buys you exactly the
+            BrickThrift analyzes your digital model, works out which pieces cannot be seen from
+            outside the finished build, and shows you where a cheaper color buys you exactly the
             same model. The geometry, the construction and the build steps stay identical.
           </p>
 
@@ -27,7 +27,7 @@ export default function HomePage() {
               href="/optimize"
               className="bg-[var(--accent)] px-5 py-2.5 text-[0.9rem] font-semibold text-[#14100a] transition-colors hover:bg-[#eeb552]"
             >
-              Optimise a model
+              Optimize a model
             </Link>
             <Link
               href="/dev"
@@ -63,7 +63,7 @@ export default function HomePage() {
               <tbody className="tnum">
                 {[
                   ['Part', 'Brick 2 x 4', 'Brick 2 x 4'],
-                  ['Colour', 'Red', 'Black'],
+                  ['Color', 'Red', 'Black'],
                   ['Position and orientation', 'x 0, y -24, z 0', 'Identical'],
                   ['Build step', 'Step 3', 'Step 3'],
                   ['Estimated price', '$0.75', '$0.12'],
@@ -85,7 +85,7 @@ export default function HomePage() {
           </div>
           <p className="mt-6 max-w-[70ch] text-[0.88rem] leading-relaxed text-[var(--text-dim)]">
             Nothing about the finished model changes: same part, same place, same orientation, same
-            build step. The only difference is what colour of plastic you buy. Multiply that across
+            build step. The only difference is what color of plastic you buy. Multiply that across
             the hidden interior of a large MOC and it adds up.
           </p>
         </div>
@@ -113,8 +113,8 @@ export default function HomePage() {
             />
             <Step
               n="04"
-              title="Checks the colour exists"
-              body="A cheaper colour is only proposed when catalogue data shows the part has genuinely been produced in it. Cheap and imaginary is not a saving."
+              title="Checks the color exists"
+              body="A cheaper color is only proposed when catalog data shows the part has genuinely been produced in it. Cheap and imaginary is not a saving."
             />
           </div>
         </div>
@@ -129,8 +129,8 @@ export default function HomePage() {
                 Built to be wrong in the safe direction
               </h2>
               <p className="mt-4 text-[0.92rem] leading-relaxed text-[var(--text-dim)]">
-                Recolouring a brick that turns out to be visible ruins a model. Missing a saving
-                costs a few cents. Every judgement call in this tool is made with that asymmetry in
+                Recoloring a brick that turns out to be visible ruins a model. Missing a saving
+                costs a few cents. Every judgment call in this tool is made with that asymmetry in
                 mind.
               </p>
               <ul className="mt-6 space-y-3">
@@ -161,7 +161,7 @@ export default function HomePage() {
                   'It does not redesign your model or change how any parts connect.',
                   'It never replaces one piece with several.',
                   'It does not give you a checkout price. Shipping, seller minimums and tax are not included.',
-                  'It analyses the completed model as supplied - not detachable roofs, hinged panels or half-built states.',
+                  'It analyzes the completed model as supplied - not detachable roofs, hinged panels or half-built states.',
                   'It does not generate instructions. It preserves your build steps so Studio can.',
                 ].map((item) => (
                   <li key={item} className="flex gap-2.5">
@@ -241,7 +241,7 @@ function CutawayDiagram() {
       <div className="mt-4 flex items-start gap-2.5">
         <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-[2px] bg-[#B40000] ring-1 ring-[var(--accent)]" />
         <p className="text-[0.8rem] leading-relaxed text-[var(--text-dim)]">
-          No surface of this brick reaches the outside from any direction. Its colour is
+          No surface of this brick reaches the outside from any direction. Its color is
           load-bearing for your wallet and for nothing else.
         </p>
       </div>

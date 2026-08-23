@@ -2,9 +2,9 @@
  * Price cache.
  *
  * BrickLink allows 5,000 API requests per day and has no bulk price endpoint,
- * so one request is needed per part+colour+condition. A 400-lot model is 400
- * requests, and re-analysing the same model must not spend them again. Caching
- * is a functional requirement, not an optimisation.
+ * so one request is needed per part+color+condition. A 400-lot model is 400
+ * requests, and re-analyzing the same model must not spend them again. Caching
+ * is a functional requirement, not an optimization.
  *
  * Entries are held in memory and mirrored to a JSON file under `.brickthrift/`
  * so a dev-server restart does not throw the day's budget away.

@@ -1,19 +1,19 @@
 /**
- * Optimiser 1: hidden colour substitution.
+ * Optimizer 1: hidden color substitution.
  *
- * For a part that has no externally visible surface, the colour it is moulded
+ * For a part that has no externally visible surface, the color it is moulded
  * in has no effect on the finished model's appearance, so it can be bought in
- * whatever colour is cheapest. This is the core feature of the product.
+ * whatever color is cheapest. This is the core feature of the product.
  *
  * A substitution is only ever proposed when ALL of the following hold:
  *   1. Every physical instance produced by the line is hidden, at the
  *      confidence the chosen safety level demands.
- *   2. The line's colour can actually be rewritten (not colour 16 or 24).
- *   3. The replacement colour is one the part has demonstrably been produced
- *      in, according to the catalog. A colour we cannot evidence is never
+ *   2. The line's color can actually be rewritten (not color 16 or 24).
+ *   3. The replacement color is one the part has demonstrably been produced
+ *      in, according to the catalog. A color we cannot evidence is never
  *      proposed, however cheap the price data says it would be.
  *   4. Transparency class is preserved. A transparent part is only ever swapped
- *      for another transparent colour.
+ *      for another transparent color.
  *   5. Both the original and the replacement have a real price, and the
  *      replacement is genuinely cheaper.
  *
@@ -38,13 +38,13 @@ import type {
 import type { VisibilityResult } from './visibilityEngine';
 
 /**
- * Colours worth evaluating as a cheap replacement.
+ * Colors worth evaluating as a cheap replacement.
  *
- * These are the high-volume production colours that are consistently the
+ * These are the high-volume production colors that are consistently the
  * cheapest and most available on the secondary market. Restricting the search
  * to them bounds the number of price lookups, which matters a great deal in
  * Live Mode where BrickLink allows 5,000 requests a day and has no bulk
- * endpoint. In Demo Mode there is no request cost, so every catalogued colour
+ * endpoint. In Demo Mode there is no request cost, so every catalogd color
  * is evaluated instead.
  */
 export const COMMON_CHEAP_COLORS: readonly number[] = [
@@ -82,7 +82,7 @@ export interface ColorOptimizerOutput {
 }
 
 /**
- * Which colours should be priced so this group can be evaluated.
+ * Which colors should be priced so this group can be evaluated.
  * Called before the price book is built.
  */
 export function alternativeColorsToPrice(
@@ -90,7 +90,7 @@ export function alternativeColorsToPrice(
   catalog: CatalogService,
   exhaustive: boolean,
 ): number[] {
-  if (!group.isRecolourable || group.effectiveColorId === null) return [];
+  if (!group.isRecolorable || group.effectiveColorId === null) return [];
   const known = catalog.availableColors(group.partId);
   if (!known) return [];
 
@@ -131,9 +131,9 @@ export function findColorCandidates(input: ColorOptimizerInput): ColorOptimizerO
       continue;
     }
 
-    if (!group.isRecolourable || group.effectiveColorId === null) {
+    if (!group.isRecolorable || group.effectiveColorId === null) {
       blockers.push(
-        group.declaredColorId === 16 ? 'inherited_colour' : 'sentinel_colour',
+        group.declaredColorId === 16 ? 'inherited_color' : 'sentinel_color',
       );
       rejected.push(reject(group, blockers));
       continue;
@@ -172,7 +172,7 @@ export function findColorCandidates(input: ColorOptimizerInput): ColorOptimizerO
     }
 
     if (options.length === 0) {
-      rejected.push(reject(group, known.length > 1 ? ['no_cheaper_alternative'] : ['no_valid_alternative_colour']));
+      rejected.push(reject(group, known.length > 1 ? ['no_cheaper_alternative'] : ['no_valid_alternative_color']));
       continue;
     }
 
@@ -201,7 +201,7 @@ export function findColorCandidates(input: ColorOptimizerInput): ColorOptimizerO
       );
     }
     evidence.push(
-      `Build step is unchanged: only the colour field of the existing line is rewritten, so the ` +
+      `Build step is unchanged: only the color field of the existing line is rewritten, so the ` +
         `part stays exactly where it is in step ${group.stepIndex + 1} of ${group.parentModel}.`,
     );
 

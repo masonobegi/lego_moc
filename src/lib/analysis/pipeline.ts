@@ -2,7 +2,7 @@
  * The analysis pipeline.
  *
  * Everything the product does runs through here, in the order the UI reports:
- *   parse -> resolve -> geometry -> visibility -> prices -> colours -> molds -> savings
+ *   parse -> resolve -> geometry -> visibility -> prices -> colors -> molds -> savings
  *
  * There is no shortcut and no special case for the built-in fixtures: the /dev
  * page loads a fixture from disk and hands it to this same function that an
@@ -42,15 +42,15 @@ import type {
 const BLOCKER_LABELS: Record<string, string> = {
   visible: 'Visible from outside the finished model',
   mixed_visibility: 'Reused submodel where at least one copy is visible',
-  inherited_colour: 'Drawn in LDraw colour 16, so its colour comes from its parent',
-  sentinel_colour: 'Uses a colour that is not a purchasable element colour',
-  no_price_for_original: 'No price available for the part in its current colour',
-  no_cheaper_alternative: 'Hidden, but no catalogued colour is cheaper',
-  part_not_in_catalog: 'Part is not in the colour catalogue, so no alternative can be evidenced',
-  no_valid_alternative_colour: 'No alternative colour is evidenced for this part',
+  inherited_color: 'Drawn in LDraw color 16, so its color comes from its parent',
+  sentinel_color: 'Uses a color that is not a purchasable element color',
+  no_price_for_original: 'No price available for the part in its current color',
+  no_cheaper_alternative: 'Hidden, but no catalogd color is cheaper',
+  part_not_in_catalog: 'Part is not in the color catalog, so no alternative can be evidenced',
+  no_valid_alternative_color: 'No alternative color is evidenced for this part',
   no_equivalent_rule: 'No verified equivalent-mold rule for this part',
   rule_confidence_too_low: 'An equivalent-mold rule exists but is below the confidence threshold',
-  replacement_colour_unavailable: 'The equivalent mold is not catalogued in this colour',
+  replacement_color_unavailable: 'The equivalent mold is not catalogd in this color',
   replacement_not_cheaper: 'The equivalent mold is not cheaper',
   geometry_unavailable: 'No LDraw geometry available, so visibility could not be assessed',
 };
@@ -63,7 +63,7 @@ export interface AnalyzeOptions {
   readonly priceProvider: PriceProvider;
   readonly condition: Condition;
   readonly safetyLevel: SafetyLevel;
-  /** Demo mode has no per-request cost, so every catalogued colour is evaluated. */
+  /** Demo mode has no per-request cost, so every catalogd color is evaluated. */
   readonly exhaustiveColorSearch: boolean;
   readonly onStage?: (stage: AnalysisStage, detail?: string) => void;
   readonly id?: string;
@@ -184,7 +184,7 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
   };
   for (const instance of instances) addRequest(instance.partId, instance.colorId);
 
-  // Alternative colours, but only for commands that are actually hidden -
+  // Alternative colors, but only for commands that are actually hidden -
   // there is no point pricing alternatives for a brick we will never change.
   const hiddenGroups = groups.filter((group) =>
     group.instances.every((instance) => {
@@ -219,7 +219,7 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
     }
   }
 
-  // ---- 6. colours --------------------------------------------------------
+  // ---- 6. colors --------------------------------------------------------
   const colorOutput = mark('colors', () =>
     findColorCandidates({
       groups,
@@ -328,7 +328,7 @@ export async function analyzeModel(options: AnalyzeOptions): Promise<AnalyzeOutp
       workerCount: visibilityAnalysis.workerCount,
       scope:
         'Visibility is assessed against the completed model exactly as supplied. Detachable ' +
-        'sections, hinged panels and partly built states are not modelled.',
+        'sections, hinged panels and partly built states are not modeled.',
     },
     pricing: {
       sourceId: options.priceProvider.id,
@@ -420,7 +420,7 @@ function firstCurrency(prices: PriceBook): string | null {
 }
 
 /**
- * Apply the enabled changes to the flattened instance list, so the optimised
+ * Apply the enabled changes to the flattened instance list, so the optimized
  * cost is calculated exactly the same way the original one was rather than by
  * subtracting savings (which would drift by a cent or two through rounding).
  */

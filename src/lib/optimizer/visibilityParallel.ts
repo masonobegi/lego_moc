@@ -5,7 +5,7 @@
  * is embarrassingly parallel: each part's verdict depends only on the shared,
  * read-only scene. Slices are disjoint and the engine is deterministic, so the
  * merged result is byte-identical to the single-threaded path, which is what
- * makes it safe to parallelise something this safety-critical.
+ * makes it safe to parallelize something this safety-critical.
  *
  * Falls back to running in-process when there is only one usable core, when the
  * model is small enough that thread start-up would dominate, or if a worker

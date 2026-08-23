@@ -85,7 +85,7 @@ export async function POST(request: Request): Promise<Response> {
           send({ type: 'done', ...response });
         } catch (streamError) {
           const message =
-            streamError instanceof Error ? streamError.message : 'The model could not be analysed.';
+            streamError instanceof Error ? streamError.message : 'The model could not be analyzed.';
           send({ type: 'error', error: message });
         } finally {
           controller.close();
@@ -110,7 +110,7 @@ export async function POST(request: Request): Promise<Response> {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[analyze] failed:', error);
     return NextResponse.json(
-      { error: `The model could not be analysed: ${message}` },
+      { error: `The model could not be analyzed: ${message}` },
       { status: 500 },
     );
   }

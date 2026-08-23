@@ -2,15 +2,15 @@ import type { Metadata } from 'next';
 
 import { AnalyzeForm } from '@/components/AnalyzeForm';
 
-export const metadata: Metadata = { title: 'Optimise a model' };
+export const metadata: Metadata = { title: 'Optimize a model' };
 
 export default function OptimizePage() {
   return (
     <div className="mx-auto max-w-[1100px] px-5 py-14">
-      <h1 className="text-[1.9rem] font-semibold tracking-tight">Optimise a model</h1>
+      <h1 className="text-[1.9rem] font-semibold tracking-tight">Optimize a model</h1>
       <p className="mt-3 max-w-[64ch] text-[0.95rem] leading-relaxed text-[var(--text-dim)]">
-        Your file is parsed and analysed on the server that is running this app. It is never
-        modified: the optimised model is produced as a separate download.
+        Your file is parsed and analyzed on the server that is running this app. It is never
+        modified: the optimized model is produced as a separate download.
       </p>
 
       <div className="mt-9 grid gap-8 lg:grid-cols-[1.35fr_1fr]">
@@ -45,11 +45,11 @@ export default function OptimizePage() {
               {[
                 'An interactive 3D view of the model, with each proposed change highlighted in place.',
                 'A change list you can switch on and off one at a time, with the cost updating as you go.',
-                'An optimised .ldr or .mpd that keeps your build steps and submodels intact.',
+                'An optimized .ldr or .mpd that keeps your build steps and submodels intact.',
                 'A JSON report, a CSV change log and a BrickLink Wanted List.',
               ].map((item) => (
                 <li key={item} className="flex gap-2.5">
-                  <span className="mt-[0.55em] h-[3px] w-[3px] shrink-0 bg-[var(--accent)]" />
+                  <span className="mt-[0.6em] h-[3px] w-[3px] shrink-0 bg-[var(--text-faint)]" />
                   {item}
                 </li>
               ))}

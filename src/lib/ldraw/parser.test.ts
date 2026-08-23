@@ -5,7 +5,7 @@ import type { MetaCommand, PartCommand } from './types';
 
 describe('parseLDraw: line types', () => {
   it('parses a part reference with the documented field order', () => {
-    // 1 <colour> x y z a b c d e f g h i <file>
+    // 1 <color> x y z a b c d e f g h i <file>
     const document = parseLDraw('1 4 10 20 30 1 2 3 4 5 6 7 8 9 3001.dat');
     const command = document.files[0]!.commands[0] as PartCommand;
     expect(command.type).toBe('part');
@@ -51,7 +51,7 @@ describe('parseLDraw: line types', () => {
     expect(command.raw).toBe('0 STEP');
   });
 
-  it('parses direct colours in both documented spellings', () => {
+  it('parses direct colors in both documented spellings', () => {
     expect(parseColorToken('0x2FF0000')).toBe(DIRECT_COLOR_BASE + 0xff0000);
     expect(parseColorToken('#00FF00')).toBe(DIRECT_COLOR_BASE + 0x00ff00);
     expect(parseColorToken('16')).toBe(16);
@@ -66,7 +66,7 @@ describe('parseLDraw: malformed input', () => {
       '1 4 0 0 0 1 0 0 0 1 0 0 3001.dat',
       '9 not a real line type',
       '3 16 0 0 0 1 0 0 0 x 0',
-      '1 notacolour 0 0 0 1 0 0 0 1 0 0 0 1 3001.dat',
+      '1 notacolor 0 0 0 1 0 0 0 1 0 0 0 1 3001.dat',
     ].join('\n');
     const document = parseLDraw(source);
     expect(document.files[0]!.commands).toHaveLength(5);
@@ -150,7 +150,7 @@ describe('parseLDraw: MPD', () => {
   });
 });
 
-describe('reference normalisation', () => {
+describe('reference normalization', () => {
   it('is case-insensitive and treats backslash as a separator', () => {
     expect(normalizeReference('S\\3001S01.DAT')).toBe('s/3001s01.dat');
     expect(referenceToPartId('3001.DAT')).toBe('3001');

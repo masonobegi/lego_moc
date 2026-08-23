@@ -1,6 +1,6 @@
 /**
  * The parallel visibility path must be indistinguishable from the in-process
- * one. Visibility decides whether a brick gets recoloured, so "it is faster and
+ * one. Visibility decides whether a brick gets recolored, so "it is faster and
  * probably the same" is not good enough - this asserts it is byte-identical.
  */
 

@@ -165,7 +165,7 @@ export function ChangeRow({
           {candidate.alternatives.length > 0 && (
             <div className="mt-3.5">
               <p className="text-[0.73rem] uppercase tracking-wide text-[var(--text-faint)]">
-                Other cheaper colours found
+                Other cheaper colors found
               </p>
               <ul className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-[0.76rem] text-[var(--text-dim)]">
                 {candidate.alternatives.map((alt) => (
@@ -196,7 +196,7 @@ function Arrow() {
 }
 
 /**
- * The candidate carries colour ids; the swatch needs a hex. The colour table is
+ * The candidate carries color ids; the swatch needs a hex. The color table is
  * small and static, so it is resolved on the client rather than fattening every
  * candidate in the payload.
  */

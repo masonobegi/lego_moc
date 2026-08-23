@@ -7,8 +7,8 @@
  *
  * The repository already ships the ~0.8 MB subset of parts the built-in
  * fixtures need (public/ldraw), so the app works before this is ever run. Run
- * this before analysing a real MOC: without it, parts outside the subset have
- * no geometry, and a part with no geometry can never be optimised.
+ * this before analyzing a real MOC: without it, parts outside the subset have
+ * no geometry, and a part with no geometry can never be optimized.
  *
  * LICENCE: the LDraw Parts Library is licensed CC BY 2.0. Attribution to
  * LDraw.org and the individual part authors is required, and their headers are

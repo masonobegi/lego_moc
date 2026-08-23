@@ -1,7 +1,7 @@
 /**
  * Filesystem-backed PartSource. Server-only.
  *
- * Two behaviours worth knowing about:
+ * Two behaviors worth knowing about:
  *  - Lookups are case-insensitive. The library mixes `.dat` and `.DAT` and
  *    references do not reliably match the on-disk case, so each root directory
  *    is indexed once (lazily) into a lowercase map.

@@ -34,7 +34,7 @@ export async function GET(
   }
 
   // Every candidate's replacement is included, enabled or not, so the browser
-  // can switch between original and optimised instantly without refetching
+  // can switch between original and optimized instantly without refetching
   // megabytes of geometry each time a checkbox moves.
   const cacheKey = id;
   const cached = cache.get(cacheKey);
@@ -48,7 +48,7 @@ export async function GET(
   for (const instance of instances) {
     if (!seen.has(instance.partId)) seen.set(instance.partId, instance.partFile);
   }
-  // The optimiser may swap in a part the original model never used.
+  // The optimizer may swap in a part the original model never used.
   for (const candidate of record.result.candidates) {
     if (!seen.has(candidate.replacementPartId)) {
       seen.set(candidate.replacementPartId, `${candidate.replacementPartId}.dat`);

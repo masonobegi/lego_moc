@@ -76,7 +76,7 @@ export function AnalysisDetails({ result }: { result: AnalysisResult }) {
           <p className="mt-4 rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] p-3 text-[0.75rem] leading-relaxed text-[var(--text-faint)]">
             &ldquo;Reused submodel where at least one copy is visible&rdquo; is usually the biggest
             missed opportunity in a real model. Those parts are genuinely hidden, but they share a
-            line with a copy that is not, and changing that line would recolour the visible one.
+            line with a copy that is not, and changing that line would recolor the visible one.
             Splitting the submodel would fix it - and would change your build instructions, so this
             version does not do it.
           </p>
@@ -89,7 +89,7 @@ export function AnalysisDetails({ result }: { result: AnalysisResult }) {
           <Row label="File" value={result.model.fileName} />
           <Row label="Format" value={result.model.isMpd ? 'MPD (multi-part)' : 'LDR (single file)'} />
           <Row label="Parts" value={count(result.model.partCount)} />
-          <Row label="Unique part/colour lots" value={count(result.model.uniqueLotCount)} />
+          <Row label="Unique part/color lots" value={count(result.model.uniqueLotCount)} />
           <Row label="Build steps" value={count(result.model.stepCount)} />
           <Row label="Submodels" value={count(result.model.submodelCount)} />
           <Row label="Distinct parts with geometry" value={count(result.geometry.distinctPartCount)} />
@@ -169,10 +169,10 @@ export function AnalysisDetails({ result }: { result: AnalysisResult }) {
         </div>
 
         <div className="mt-4 border-t border-[var(--line)] pt-4">
-          <p className="text-[0.8rem] font-medium">Catalogue: {result.catalog.label}</p>
+          <p className="text-[0.8rem] font-medium">Catalog: {result.catalog.label}</p>
           <p className="mt-1.5 text-[0.77rem] leading-relaxed text-[var(--text-dim)]">
             {count(result.catalog.partCount)} parts, {count(result.catalog.pairCount)} verified
-            part/colour combinations, {count(result.catalog.moldRuleCount)} equivalent-mold rules.
+            part/color combinations, {count(result.catalog.moldRuleCount)} equivalent-mold rules.
           </p>
           <ul className="mt-2 space-y-1.5">
             {result.catalog.limitations.map((limitation) => (

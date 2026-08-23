@@ -1,7 +1,7 @@
 /**
  * Groups part instances by the command that produced them.
  *
- * This is the structure everything else in the optimiser is built on. A group
+ * This is the structure everything else in the optimizer is built on. A group
  * is the smallest thing that can be changed: one line type 1. If that line sits
  * inside a submodel referenced four times, the group has four instances and a
  * quantity of four, and the change applies to all of them or to none.
@@ -16,21 +16,21 @@ export interface CommandGroup {
   readonly commandRef: CommandRef;
   readonly partId: string;
   readonly partFile: string;
-  /** Colour as written on the line. */
+  /** Color as written on the line. */
   readonly declaredColorId: number;
   /**
-   * Effective colour, when every instance resolves to the same one.
-   * `null` when the line uses colour 16 and different parents give different
-   * results - such a line cannot be recoloured in place.
+   * Effective color, when every instance resolves to the same one.
+   * `null` when the line uses color 16 and different parents give different
+   * results - such a line cannot be recolored in place.
    */
   readonly effectiveColorId: number | null;
   readonly instances: readonly PartInstance[];
   readonly quantity: number;
   readonly parentModel: string;
   readonly stepIndex: number;
-  /** True when the line's colour can be rewritten at all. */
-  readonly isRecolourable: boolean;
-  readonly notRecolourableReason: string | null;
+  /** True when the line's color can be rewritten at all. */
+  readonly isRecolorable: boolean;
+  readonly notRecolorableReason: string | null;
 }
 
 export function groupInstancesByCommand(instances: readonly PartInstance[]): CommandGroup[] {
@@ -48,25 +48,25 @@ export function groupInstancesByCommand(instances: readonly PartInstance[]): Com
     const colors = new Set(list.map((i) => i.colorId));
     const effectiveColorId = colors.size === 1 ? first.colorId : null;
 
-    let isRecolourable = true;
+    let isRecolorable = true;
     let reason: string | null = null;
 
     if (first.declaredColorId === COLOR_INHERIT) {
-      isRecolourable = false;
+      isRecolorable = false;
       reason =
-        'This part is drawn in colour 16, meaning it takes its colour from whatever references it. ' +
-        'Rewriting it here would change the colour of the submodel as a whole.';
+        'This part is drawn in color 16, meaning it takes its color from whatever references it. ' +
+        'Rewriting it here would change the color of the submodel as a whole.';
     } else if (first.declaredColorId === COLOR_EDGE) {
-      isRecolourable = false;
-      reason = 'This part uses LDraw colour 24 (edge colour), which is not a purchasable colour.';
+      isRecolorable = false;
+      reason = 'This part uses LDraw color 24 (edge color), which is not a purchasable color.';
     } else if (!isSubstitutableColor(first.declaredColorId)) {
-      isRecolourable = false;
-      reason = `LDraw colour ${first.declaredColorId} is a direct colour or is not in the official palette, so no equivalent element exists to buy.`;
+      isRecolorable = false;
+      reason = `LDraw color ${first.declaredColorId} is a direct color or is not in the official palette, so no equivalent element exists to buy.`;
     } else if (effectiveColorId === null) {
-      isRecolourable = false;
+      isRecolorable = false;
       reason =
-        'The instances produced by this line do not all end up the same colour, so a single ' +
-        'replacement colour would not be correct for all of them.';
+        'The instances produced by this line do not all end up the same color, so a single ' +
+        'replacement color would not be correct for all of them.';
     }
 
     out.push({
@@ -80,8 +80,8 @@ export function groupInstancesByCommand(instances: readonly PartInstance[]): Com
       quantity: list.length,
       parentModel: first.parentModel,
       stepIndex: first.stepIndex,
-      isRecolourable,
-      notRecolourableReason: reason,
+      isRecolorable,
+      notRecolorableReason: reason,
     });
   }
 

@@ -3,15 +3,15 @@
  *
  * These are the tests that matter most. They assert the SAFETY properties the
  * product depends on:
- *   - a visible part is never recoloured;
- *   - a part visible only through a gap is never recoloured;
- *   - a part behind glass is never recoloured;
+ *   - a visible part is never recolored;
+ *   - a part visible only through a gap is never recolored;
+ *   - a part behind glass is never recolored;
  *   - a reused submodel is only changed when every copy of it is hidden;
  *   - a change never moves a part out of its build step;
  *   - the exported file differs from the input by exactly the changed lines.
  *
  * Nothing here is stubbed. Fixtures go through the same parser, geometry
- * resolver, visibility engine, price engine, optimiser and serializer that an
+ * resolver, visibility engine, price engine, optimizer and serializer that an
  * upload does.
  */
 
@@ -77,7 +77,7 @@ async function analyzeCached(name: string): Promise<AnalyzeOutput> {
   return output;
 }
 
-describe('optimiser safety: a visible part is never changed', () => {
+describe('optimizer safety: a visible part is never changed', () => {
   it('exposed-brick.ldr proposes nothing', async () => {
     const { result } = await analyzeCached('exposed-brick.ldr');
     expect(result.candidates).toHaveLength(0);
@@ -104,7 +104,7 @@ describe('optimiser safety: a visible part is never changed', () => {
   });
 });
 
-describe('optimiser: a hidden part is changed', () => {
+describe('optimizer: a hidden part is changed', () => {
   it('buried-brick.ldr proposes red to black with the documented saving', async () => {
     const { result } = await analyzeCached('buried-brick.ldr');
     expect(result.candidates).toHaveLength(1);
@@ -154,7 +154,7 @@ describe('optimiser: a hidden part is changed', () => {
   });
 });
 
-describe('optimiser: build steps are preserved', () => {
+describe('optimizer: build steps are preserved', () => {
   it('multi-step.mpd changes the part introduced in step 3 and leaves it there', async () => {
     const output = await analyzeCached('multi-step.mpd');
     expect(output.result.candidates).toHaveLength(1);
@@ -197,7 +197,7 @@ describe('optimiser: build steps are preserved', () => {
   });
 });
 
-describe('optimiser: nested submodels', () => {
+describe('optimizer: nested submodels', () => {
   it('submodel.mpd finds the brick two levels down and edits that file', async () => {
     const output = await analyzeCached('submodel.mpd');
     expect(output.result.candidates).toHaveLength(1);
@@ -213,7 +213,7 @@ describe('optimiser: nested submodels', () => {
   });
 });
 
-describe('optimiser: a reused submodel is only changed when every copy is hidden', () => {
+describe('optimizer: a reused submodel is only changed when every copy is hidden', () => {
   it('multiple-instances.mpd changes sealed-pod but not pod', async () => {
     const { result } = await analyzeCached('multiple-instances.mpd');
     expect(result.candidates).toHaveLength(1);
@@ -232,7 +232,7 @@ describe('optimiser: a reused submodel is only changed when every copy is hidden
     expect(mixed!.pieceCount).toBe(2);
   });
 
-  it('changing sealed-pod recolours both of its instances', async () => {
+  it('changing sealed-pod recolors both of its instances', async () => {
     const output = await analyzeCached('multiple-instances.mpd');
     const applied = applyOptimizations(
       output.document,
@@ -248,7 +248,7 @@ describe('optimiser: a reused submodel is only changed when every copy is hidden
   });
 });
 
-describe('optimiser: transparency', () => {
+describe('optimizer: transparency', () => {
   it('transparent-window.mpd changes only the brick in the opaque box', async () => {
     const { result, instances } = await analyzeCached('transparent-window.mpd');
     expect(result.candidates).toHaveLength(1);
@@ -268,15 +268,15 @@ describe('optimiser: transparency', () => {
   });
 });
 
-describe('optimiser: colour validity', () => {
-  it('only proposes colours the catalogue can evidence', async () => {
+describe('optimizer: color validity', () => {
+  it('only proposes colors the catalog can evidence', async () => {
     const { result } = await analyzeCached('buried-brick.ldr');
     for (const candidate of result.candidates) {
       expect(catalog.isKnownCombination(candidate.replacementPartId, candidate.replacementColorId)).toBe(true);
     }
   });
 
-  it('never proposes a more expensive colour', async () => {
+  it('never proposes a more expensive color', async () => {
     for (const fixture of ['buried-brick.ldr', 'multi-step.mpd', 'multiple-instances.mpd']) {
       const { result } = await analyzeCached(fixture);
       for (const candidate of result.candidates) {
@@ -286,7 +286,7 @@ describe('optimiser: colour validity', () => {
     }
   });
 
-  it('picks the cheapest valid colour, not merely a cheaper one', async () => {
+  it('picks the cheapest valid color, not merely a cheaper one', async () => {
     const { result, prices } = await analyzeCached('buried-brick.ldr');
     const candidate = result.candidates[0]!;
     const options = catalog.availableColors(candidate.partId)!;
@@ -344,7 +344,7 @@ describe('exports', () => {
       priceSourceLabel: 'demo',
     });
     expect(exported.fileName).toBe('multi-step-optimized.mpd');
-    expect(exported.text).toContain('0 // Optimised by BrickThrift.');
+    expect(exported.text).toContain('0 // Optimized by BrickThrift.');
   });
 
   it('produces a JSON report whose totals match the analysis', async () => {

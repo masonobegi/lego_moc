@@ -161,19 +161,19 @@ export function DevConsole() {
                     : `bundled subset (${count(status.partsLibrary.bundledEntries)} entries)`
                 }
               />
-              <Row label="Colours" value={`${count(status.colors.count)} from ${status.colors.source}`} />
-              <Row label="Catalogue" value={status.catalog.label} />
+              <Row label="Colors" value={`${count(status.colors.count)} from ${status.colors.source}`} />
+              <Row label="Catalog" value={status.catalog.label} />
               <Row
-                label="Catalogue size"
+                label="Catalog size"
                 value={`${count(status.catalog.partCount)} parts, ${count(status.catalog.pairCount)} pairs`}
               />
               <Row label="Mold rules" value={count(status.catalog.moldRuleCount)} />
-              <Row label="Colour mappings" value={count(status.colorMappingEntries)} />
+              <Row label="Color mappings" value={count(status.colorMappingEntries)} />
             </dl>
             {!status.partsLibrary.usingFullLibrary && (
               <p className="mt-3 rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] p-2.5 text-[0.73rem] leading-relaxed text-[var(--text-faint)]">
                 Only the bundled part subset is installed. That covers the fixtures and common
-                elements; run <code className="font-mono">npm run parts:fetch</code> before analysing
+                elements; run <code className="font-mono">npm run parts:fetch</code> before analyzing
                 a real MOC.
               </p>
             )}

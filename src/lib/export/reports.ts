@@ -215,7 +215,7 @@ export interface WantedListResult {
   readonly xml: string;
   readonly itemCount: number;
   readonly pieceCount: number;
-  /** Lots left out because no BrickLink id or colour could be resolved. */
+  /** Lots left out because no BrickLink id or color could be resolved. */
   readonly excluded: readonly { partId: string; colorId: number; quantity: number; reason: string }[];
 }
 
@@ -234,7 +234,7 @@ export function xmlEscape(value: string): string {
  * Structure per docs/RESEARCH.md section 11:
  *   <INVENTORY><ITEM><ITEMTYPE>P</ITEMTYPE><ITEMID/><COLOR/><MINQTY/><CONDITION/></ITEM></INVENTORY>
  *
- * ITEMID is the BrickLink part number and COLOR the BrickLink colour id, both
+ * ITEMID is the BrickLink part number and COLOR the BrickLink color id, both
  * of which differ from LDraw's. Any lot whose ids cannot be resolved with
  * confidence is EXCLUDED and reported rather than guessed, because a wrong id
  * would silently order the wrong brick.
@@ -271,7 +271,7 @@ export function buildWantedListXml(
     if (colorMapping.brickLinkColorId === null) {
       excluded.push({
         ...lot,
-        reason: `No BrickLink colour id is known for LDraw colour ${lot.colorId} (${colorName(lot.colorId)}).`,
+        reason: `No BrickLink color id is known for LDraw color ${lot.colorId} (${colorName(lot.colorId)}).`,
       });
       continue;
     }

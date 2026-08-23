@@ -77,7 +77,7 @@ export async function POST(
       `  ${wanted.itemCount} lots, ${wanted.pieceCount} pieces.\n` +
       (wanted.excluded.length > 0
         ? `  ${wanted.excluded.length} lot(s) were EXCLUDED because their BrickLink part number or\n` +
-          `  colour could not be resolved with confidence. They are listed in the JSON report.\n` +
+          `  color could not be resolved with confidence. They are listed in the JSON report.\n` +
           `  Excluded: ${escapeComment(
             wanted.excluded
               .slice(0, 20)

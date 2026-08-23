@@ -2,7 +2,7 @@
 
 Hand-built LDraw fixtures with known expected outcomes. Every one of them goes
 through the same parser, geometry resolver, visibility engine, price engine,
-optimiser and serializer that a real uploaded model does - nothing about them is
+optimizer and serializer that a real uploaded model does - nothing about them is
 special-cased anywhere in the code.
 
 ## Coordinate conventions used here
@@ -34,7 +34,7 @@ ceiling plates seal top and bottom, so the target has no path to the outside.
 
 ## The fixtures
 
-| File | What it is | Expected optimiser behaviour |
+| File | What it is | Expected optimizer behavior |
 | --- | --- | --- |
 | `exposed-brick.ldr` | A red 2x4 brick sitting on a plate, in the open | **No change.** Obviously visible. |
 | `buried-brick.ldr` | The sealed box above, red target inside | **Change** red -> black. |
@@ -46,12 +46,12 @@ ceiling plates seal top and bottom, so the target has no path to the outside.
 | `transparent-window.mpd` | Sealed box whose +X wall is trans-clear | **No change.** Transparent parts do not occlude. |
 
 `multiple-instances.mpd` is the important one. A submodel referenced N times is
-still a single line in the file, so a colour change applies to all N physical
-parts at once. The optimiser only proposes the change when **every** instance
+still a single line in the file, so a color change applies to all N physical
+parts at once. The optimizer only proposes the change when **every** instance
 sharing that line is hidden.
 
-## Licence
+## License
 
 These files are original work, part of this repository, and are covered by the
-repository's licence. They are not derived from the LDraw Official Model
+repository's license. They are not derived from the LDraw Official Model
 Repository or from any LEGO set.

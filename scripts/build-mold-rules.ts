@@ -1,6 +1,6 @@
 /**
  * Builds data/catalog/mold-rules.json - the curated one-to-one part
- * substitutions the mold optimiser is allowed to consider.
+ * substitutions the mold optimizer is allowed to consider.
  *
  * Usage:  npm run catalog:build-molds -- /path/to/ldraw/parts
  *
@@ -9,7 +9,7 @@
  * Rules are derived from the LDraw Parts Library's own part DESCRIPTIONS,
  * which is an authoritative, checkable source: LDraw names the two molds of
  * a tile "Tile 2 x 2 without Groove" (3068a) and "Tile 2 x 2 with Groove"
- * (3068b). BrickLink catalogues those as two separate purchasable items of the
+ * (3068b). BrickLink catalogs those as two separate purchasable items of the
  * same element, which is exactly what makes the substitution worth money.
  *
  * Nothing here is inferred from names merely being similar. A pair is emitted
@@ -58,7 +58,7 @@ function readDescriptions(partsDir: string): Map<string, string> {
     }
     if (!first.startsWith('0 ')) continue;
     const description = normalizeDescription(first.slice(2));
-    // ~ = obsolete/moved, = = alias of another part, _ = physical colour variant.
+    // ~ = obsolete/moved, = = alias of another part, _ = physical color variant.
     if (/^[~=_]/.test(description)) continue;
     out.set(filename.slice(0, -4).toLowerCase(), description);
   }

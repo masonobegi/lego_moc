@@ -4,7 +4,7 @@ Measured on Node v22.22.2, 4 logical cores, 15.7 GB RAM. Worker threads enabled.
 
 ### Synthetic models
 
-| Model | Parts | Distinct | Triangles | Parse | Geometry | Visibility | Optimise | **Total** | Rays | Hidden | Threads |
+| Model | Parts | Distinct | Triangles | Parse | Geometry | Visibility | Optimize | **Total** | Rays | Hidden | Threads |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Synthetic 100 | 100 | 1 | 70,000 | 4 ms | 59 ms | 1001 ms | 5 ms | **1.07 s** | 446,340 | 14 | 1 |
 | Synthetic 1000 | 990 | 1 | 693,000 | 6 ms | 23 ms | 9670 ms | 15 ms | **9.73 s** | 12,831,324 | 432 | 4 |

@@ -1,7 +1,7 @@
 /**
  * LDraw part id  <->  BrickLink / Rebrickable / LEGO design id.
  *
- * There is no free, official, complete crosswalk between the catalogues
+ * There is no free, official, complete crosswalk between the catalogs
  * (docs/RESEARCH.md section 10). For the large majority of ordinary elements
  * the three agree - `3001` is Brick 2 x 4 everywhere - but they diverge for:
  *
@@ -98,12 +98,12 @@ export function mapPartId(partId: string, external?: ExternalIdTable): CatalogMa
   }
 
   if (UNOFFICIAL_ID.test(id)) {
-    return unmapped('Unofficial LDraw part; there is no matching BrickLink catalogue entry.');
+    return unmapped('Unofficial LDraw part; there is no matching BrickLink catalog entry.');
   }
   if (PRINTED_ID.test(id)) {
     return unmapped(
       'Printed part. LDraw and BrickLink number printed decorations differently, so the id cannot ' +
-        'be mapped reliably without a catalogue lookup. Run "npm run catalog:import" with a ' +
+        'be mapped reliably without a catalog lookup. Run "npm run catalog:import" with a ' +
         'Rebrickable API key to resolve these.',
     );
   }
@@ -125,7 +125,7 @@ export function mapPartId(partId: string, external?: ExternalIdTable): CatalogMa
       confidence: 'identity',
       note:
         'LDraw, BrickLink and Rebrickable use the same number for this element. Verified for ' +
-        'ordinary elements; not confirmed against a live catalogue.',
+        'ordinary elements; not confirmed against a live catalog.',
     };
   }
   return unmapped(`Unrecognised LDraw part id format "${partId}".`);

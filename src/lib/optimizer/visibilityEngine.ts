@@ -1,7 +1,7 @@
 /**
  * Visibility engine.
  *
- * Question it answers: **would changing this part's colour change what the
+ * Question it answers: **would changing this part's color change what the
  * finished model looks like from the outside?**
  *
  * Method
@@ -34,10 +34,10 @@
  * - A part whose own geometry could not be fully resolved can never reach
  *   HIDDEN, only LIKELY_HIDDEN.
  * - Any escaping ray at all disqualifies a part from HIDDEN.
- * - Missing parts do not occlude, so an unresolved neighbour makes candidates
+ * - Missing parts do not occlude, so an unresolved neighbor makes candidates
  *   look MORE visible, never less.
  *
- * Scope, stated plainly: this analyses the completed model exactly as supplied.
+ * Scope, stated plainly: this analyzes the completed model exactly as supplied.
  * It does not model detachable roofs, hinged panels opening, or how the model
  * looks mid-build.
  */

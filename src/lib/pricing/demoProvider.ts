@@ -70,7 +70,7 @@ export class DemoPriceProvider implements SizeAwarePriceProvider {
 
       if (base !== undefined) {
         newPrice = round2(base * factor);
-        detail = 'demo dataset, base price x colour factor';
+        detail = 'demo dataset, base price x color factor';
       } else {
         const hint = this.sizeHints.get(id);
         if (!hint) {
@@ -78,7 +78,7 @@ export class DemoPriceProvider implements SizeAwarePriceProvider {
           return null;
         }
         newPrice = round2(volumeDerivedBasePrice(hint.volume) * factor);
-        detail = 'demo dataset, size-derived estimate x colour factor';
+        detail = 'demo dataset, size-derived estimate x color factor';
         notes.push(
           `No demo table entry for part ${partId}; the base price was derived from the part's own ` +
             `bounding-box volume (${Math.round(hint.volume).toLocaleString()} cubic LDU).`,
@@ -86,7 +86,7 @@ export class DemoPriceProvider implements SizeAwarePriceProvider {
       }
       if (!factorKnown) {
         notes.push(
-          `No demo colour factor for LDraw colour ${colorId}; the default factor of ` +
+          `No demo color factor for LDraw color ${colorId}; the default factor of ` +
             `${DEMO_DEFAULT_COLOR_FACTOR} was used.`,
         );
       }
@@ -95,7 +95,7 @@ export class DemoPriceProvider implements SizeAwarePriceProvider {
     const unitPrice = condition === 'used' ? round2(newPrice * DEMO_USED_DISCOUNT) : newPrice;
     if (condition === 'used') {
       notes.push(
-        `Used prices in the demo dataset are modelled as ${Math.round(DEMO_USED_DISCOUNT * 100)}% of new.`,
+        `Used prices in the demo dataset are modeled as ${Math.round(DEMO_USED_DISCOUNT * 100)}% of new.`,
       );
     }
 

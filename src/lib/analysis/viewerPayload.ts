@@ -15,7 +15,7 @@
  *   [bytes]      header JSON, UTF-8
  *   [bytes]      part triangle positions, Float32, in header order
  *   [bytes]      instance transforms, Float32, 12 per instance (3x3 then xyz)
- *   [bytes]      instance colour ids, Int32
+ *   [bytes]      instance color ids, Int32
  *   [bytes]      instance part indices, Int32
  */
 
@@ -47,9 +47,9 @@ export interface ViewerHeader {
     s: number;
     /** sub-file name */
     m: string;
-    /** colour name */
+    /** color name */
     cn: string;
-    /** colour hex */
+    /** color hex */
     ch: string;
     /** alpha 0-255 */
     ca: number;
@@ -57,11 +57,11 @@ export interface ViewerHeader {
     v: VisibilityClass | null;
     /** candidate id affecting this instance, when any */
     c: string | null;
-    /** optimised colour hex, when a candidate applies */
+    /** optimized color hex, when a candidate applies */
     oh: string | null;
-    /** optimised colour name */
+    /** optimized color name */
     on: string | null;
-    /** optimised part id */
+    /** optimized part id */
     op: string | null;
   }[];
   /** Instances omitted because the model exceeded the viewer budget. */
@@ -177,7 +177,7 @@ export function buildViewerPayload(input: ViewerPayloadInput): Uint8Array {
         p: instance.partId,
         s: instance.stepIndex,
         m: instance.parentModel,
-        cn: color?.name ?? `Colour ${instance.colorId}`,
+        cn: color?.name ?? `Color ${instance.colorId}`,
         ch: colorHex(instance.colorId),
         ca: color?.alpha ?? 255,
         v: input.visibility.get(instance.instanceId) ?? null,

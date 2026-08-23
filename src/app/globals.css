@@ -5,9 +5,9 @@
  *
  * Reference points are precision tools, not consumer apps: hairline rules,
  * near-square corners, a tight neutral palette, tabular figures for anything
- * numeric. No gradients, no glass, no glow, no decorative colour. Exactly one
+ * numeric. No gradients, no glass, no glow, no decorative color. Exactly one
  * accent, used only for money saved, so the number the product exists to
- * produce is the only coloured thing on the page.
+ * produce is the only colored thing on the page.
  */
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',

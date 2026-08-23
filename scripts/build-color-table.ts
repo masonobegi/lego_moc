@@ -4,7 +4,7 @@
  * Run with:  npm run colors:build [-- path/to/LDConfig.ldr]
  *
  * The generated file is committed so the app never depends on the parts library
- * being present just to name a colour. LDConfig.ldr is part of the LDraw Parts
+ * being present just to name a color. LDConfig.ldr is part of the LDraw Parts
  * Library and is licensed CC BY 2.0; see public/ldraw/CAreadme.txt and NOTICE.md.
  */
 
@@ -48,7 +48,7 @@ function parseLDConfig(text: string): Parsed[] {
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.trim();
 
-    // LDConfig annotates each colour with a "// LEGOID <n> - <name>" comment
+    // LDConfig annotates each color with a "// LEGOID <n> - <name>" comment
     // on the preceding line.
     const legoMatch = /^0\s+\/\/\s*LEGOID\s+(\d+)/i.exec(line);
     if (legoMatch) {
@@ -106,7 +106,7 @@ const input = findInput();
 const text = readFileSync(input, 'utf8');
 const colors = parseLDConfig(text);
 if (colors.length < 50) {
-  throw new Error(`Only parsed ${colors.length} colours from ${input}; that looks wrong.`);
+  throw new Error(`Only parsed ${colors.length} colors from ${input}; that looks wrong.`);
 }
 
 const versionMatch = /^0\s+!LDRAW_ORG\s+Configuration\s+(.*)$/im.exec(text);
@@ -129,5 +129,5 @@ export const LDRAW_COLORS: readonly LDrawColor[] = ${JSON.stringify(colors, null
 
 const outPath = 'src/lib/ldraw/colors.generated.ts';
 writeFileSync(outPath, out);
-console.log(`Wrote ${colors.length} colours to ${outPath} from ${input}`);
-console.log(`Transparent colours: ${colors.filter((c) => c.alpha < 255).length}`);
+console.log(`Wrote ${colors.length} colors to ${outPath} from ${input}`);
+console.log(`Transparent colors: ${colors.filter((c) => c.alpha < 255).length}`);

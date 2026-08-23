@@ -155,7 +155,7 @@ describe('serializer: semantic round trip when every line is regenerated', () =>
       }
     });
 
-    it('normalises negative zero', () => {
+    it('normalizes negative zero', () => {
       expect(formatNumber(-0)).toBe('0');
     });
 

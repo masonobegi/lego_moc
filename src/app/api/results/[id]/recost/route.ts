@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
- * Recompute the optimised cost for an arbitrary set of enabled changes.
+ * Recompute the optimized cost for an arbitrary set of enabled changes.
  *
  * The cost is recomputed by applying the changes to the flattened part list and
  * running exactly the same costing function the original total came from,

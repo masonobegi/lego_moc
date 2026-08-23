@@ -3,7 +3,7 @@
  * analysis, without re-running the expensive parts.
  *
  * Parsing and resolving a large MPD takes tens of milliseconds, so it is
- * cheaper and far simpler to redo it than to serialise the object graph. The
+ * cheaper and far simpler to redo it than to serialize the object graph. The
  * visibility pass and the price lookups - the expensive parts - are NOT redone:
  * their results were stored.
  */

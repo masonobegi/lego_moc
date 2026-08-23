@@ -3,19 +3,19 @@
  * ===============
  *
  * These numbers are NOT real marketplace prices. They are a deterministic,
- * synthetic dataset that exists so the whole optimiser can be exercised with no
- * API credentials at all. They are labelled `DEMO PRICE DATA` everywhere they
+ * synthetic dataset that exists so the whole optimizer can be exercised with no
+ * API credentials at all. They are labeled `DEMO PRICE DATA` everywhere they
  * are shown and every quote derived from them carries `source: 'demo'`.
  *
- * They are shaped to make the optimiser's behaviour easy to see and to test:
- *   - Red is deliberately the most expensive common colour.
+ * They are shaped to make the optimizer's behavior easy to see and to test:
+ *   - Red is deliberately the most expensive common color.
  *   - Black is deliberately the cheapest.
  *   - Blue sits in between.
  *   - Superseded molds (3068a, 3069a, 3070a, 2412a) are priced well above the
  *     current mold, which is the usual real-world direction and gives the mold
- *     optimiser something to find.
+ *     optimizer something to find.
  *
- * A price is `basePrice[part] * colorFactor[colour]`, rounded to cents, with a
+ * A price is `basePrice[part] * colorFactor[color]`, rounded to cents, with a
  * small table of exact overrides. Parts with no base price fall back to a
  * volume-derived estimate (see demoProvider.ts) rather than to an invented
  * constant, and the quote says which of the two produced it.
@@ -55,7 +55,7 @@ export const DEMO_BASE_PRICES: ReadonlyMap<string, number> = new Map([
 ]);
 
 /**
- * Colour price multipliers. Red is deliberately expensive and black
+ * Color price multipliers. Red is deliberately expensive and black
  * deliberately cheap, per the product brief's worked example.
  *
  * The blue factor is 1.27 rather than a rounder number so that
@@ -63,7 +63,7 @@ export const DEMO_BASE_PRICES: ReadonlyMap<string, number> = new Map([
  */
 export const DEMO_COLOR_FACTORS: ReadonlyMap<number, number> = new Map([
   [0, 0.80],    // Black            - cheapest
-  [71, 1.00],   // Light Bluish Gray - the reference colour
+  [71, 1.00],   // Light Bluish Gray - the reference color
   [72, 1.10],   // Dark Bluish Gray
   [1, 1.27],    // Blue             - moderate
   [15, 1.45],   // White
@@ -72,7 +72,7 @@ export const DEMO_COLOR_FACTORS: ReadonlyMap<number, number> = new Map([
   [14, 1.85],   // Yellow
   [2, 2.05],    // Green
   [25, 2.20],   // Orange
-  [7, 2.40],    // Light Gray (old mould colour, long retired)
+  [7, 2.40],    // Light Gray (old mould color, long retired)
   [8, 2.55],    // Dark Gray (old)
   [288, 2.90],  // Dark Green
   [320, 3.60],  // Dark Red
@@ -110,7 +110,7 @@ export const DEMO_COLOR_FACTORS: ReadonlyMap<number, number> = new Map([
   [80, 5.20],   // Metallic Silver
 ]);
 
-/** The default multiplier for a colour with no factor of its own. */
+/** The default multiplier for a color with no factor of its own. */
 export const DEMO_DEFAULT_COLOR_FACTOR = 2.75;
 
 /**
@@ -130,5 +130,5 @@ export const DEMO_DATA_DISCLAIMER =
   'Demo prices are a synthetic, deterministic dataset built into this app so it runs with no API ' +
   'credentials. They are not real BrickLink prices and must not be used to plan a purchase.';
 
-/** Used-condition prices are modelled as a flat discount on new. */
+/** Used-condition prices are modeled as a flat discount on new. */
 export const DEMO_USED_DISCOUNT = 0.62;

@@ -14,7 +14,7 @@ export default function ResultNotFound() {
         href="/optimize"
         className="mt-7 inline-block bg-[var(--accent)] px-5 py-2.5 text-[0.9rem] font-semibold text-[#14100a] hover:bg-[#eeb552]"
       >
-        Optimise a model
+        Optimize a model
       </Link>
     </div>
   );

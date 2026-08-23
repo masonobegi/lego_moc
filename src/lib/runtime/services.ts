@@ -38,11 +38,11 @@ export function getCatalog(config: RuntimeConfig = getRuntimeConfig()): CatalogS
 
   // Written by `npm run catalog:import` when it has been run.
   //
-  // Only the MOLD RULES are adopted from that import. Its colour data is keyed
-  // by REBRICKABLE colour ids, which are a different numbering scheme from the
-  // LDraw colour ids this app works in; consuming them without a verified
+  // Only the MOLD RULES are adopted from that import. Its color data is keyed
+  // by REBRICKABLE color ids, which are a different numbering scheme from the
+  // LDraw color ids this app works in; consuming them without a verified
   // translation table would silently mis-answer "does this part exist in this
-  // colour", which is the one question the optimiser must never get wrong.
+  // color", which is the one question the optimizer must never get wrong.
   // See docs/RESEARCH.md section 10.
   const importPath = path.join(config.repoRoot, 'data', 'catalog', 'rebrickable', 'catalog-import.json');
 

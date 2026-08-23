@@ -1,14 +1,14 @@
 /**
- * Imports the Rebrickable catalogue into data/catalog/rebrickable/.
+ * Imports the Rebrickable catalog into data/catalog/rebrickable/.
  *
  *   npm run catalog:import
  *
  * WHAT IT IS FOR
  * --------------
- * The app ships an offline catalogue derived from LDraw Official Model
+ * The app ships an offline catalog derived from LDraw Official Model
  * Repository files, which is real data but covers only ~2,000 parts. This
- * replaces it with Rebrickable's full catalogue, which is what "did this part
- * ever exist in this colour" should really be answered from.
+ * replaces it with Rebrickable's full catalog, which is what "did this part
+ * ever exist in this color" should really be answered from.
  *
  * SOURCE AND TERMS
  * ----------------
@@ -113,7 +113,7 @@ async function main(): Promise<void> {
     }
   }
 
-  console.log('Downloading Rebrickable catalogue CSVs from https://rebrickable.com/downloads/ ...');
+  console.log('Downloading Rebrickable catalog CSVs from https://rebrickable.com/downloads/ ...');
   const [inventoryParts, inventories, sets, partRelationships] = await Promise.all([
     fetchCsvGz('inventory_parts'),
     fetchCsvGz('inventories'),
@@ -121,7 +121,7 @@ async function main(): Promise<void> {
     fetchCsvGz('part_relationships'),
   ]);
 
-  // --- which colours does each part exist in -------------------------------
+  // --- which colors does each part exist in -------------------------------
   const inventoryRows = parseCsv(inventories);
   const inventoryHeader = inventoryRows[0]!;
   const invId = columnIndex(inventoryHeader, 'id');
@@ -184,21 +184,21 @@ async function main(): Promise<void> {
 
   // ---------------------------------------------------------------------------
   // NOTE ON REBRICKABLE COLOUR IDS
-  // Rebrickable uses its own colour numbering, which is NOT the LDraw numbering
-  // this app works in. Importing the colour sets without translating them would
-  // silently corrupt every colour-validity check, so the mapping is applied via
+  // Rebrickable uses its own color numbering, which is NOT the LDraw numbering
+  // this app works in. Importing the color sets without translating them would
+  // silently corrupt every color-validity check, so the mapping is applied via
   // colors.csv, which carries no LDraw column - meaning a translation table is
-  // required. Until one is present, colour data is written to a SEPARATE file
-  // and is not loaded by the app; the mold rules, which are colour-independent,
+  // required. Until one is present, color data is written to a SEPARATE file
+  // and is not loaded by the app; the mold rules, which are color-independent,
   // are safe to use immediately.
   // ---------------------------------------------------------------------------
   const payload = {
     generatedAt: new Date().toISOString(),
-    source: 'Rebrickable catalogue downloads',
+    source: 'Rebrickable catalog downloads',
     attribution: 'Data source: Rebrickable (https://rebrickable.com/downloads/)',
     warning:
-      'colorsByRebrickableColorId uses REBRICKABLE colour ids, not LDraw colour ids. The app ' +
-      'does not consume it until a verified Rebrickable-to-LDraw colour mapping is supplied.',
+      'colorsByRebrickableColorId uses REBRICKABLE color ids, not LDraw color ids. The app ' +
+      'does not consume it until a verified Rebrickable-to-LDraw color mapping is supplied.',
     partCount: colorsByPart.size,
     moldRuleCount: moldRules.length,
     moldRules,
@@ -212,14 +212,14 @@ async function main(): Promise<void> {
 
   console.log('');
   console.log(`Wrote data/catalog/rebrickable/catalog-import.json`);
-  console.log(`  ${colorsByPart.size.toLocaleString()} parts with colour data`);
+  console.log(`  ${colorsByPart.size.toLocaleString()} parts with color data`);
   console.log(`  ${moldRules.length.toLocaleString()} alternate-mold rules (rel_type M)`);
   console.log('');
   console.log('Data source: Rebrickable (https://rebrickable.com/downloads/).');
   console.log('');
   console.log(
-    'IMPORTANT: the colour data uses Rebrickable colour ids, which are not LDraw colour ids.\n' +
-      'The app therefore keeps using its LDraw-native bundled catalogue for colour validity and\n' +
+    'IMPORTANT: the color data uses Rebrickable color ids, which are not LDraw color ids.\n' +
+      'The app therefore keeps using its LDraw-native bundled catalog for color validity and\n' +
       'only adopts the mold rules from this import. See docs/RESEARCH.md section 10.',
   );
 }

@@ -1,10 +1,10 @@
 /**
  * End-to-end test of the workflow a user actually performs:
  *
- *   open the site -> upload buried-brick.ldr -> analyse -> see the savings ->
+ *   open the site -> upload buried-brick.ldr -> analyze -> see the savings ->
  *   toggle the change off and watch the total change -> toggle back on ->
- *   download the optimised model -> confirm the downloaded file really does
- *   contain the substituted colour and still has its build steps.
+ *   download the optimized model -> confirm the downloaded file really does
+ *   contain the substituted color and still has its build steps.
  *
  * The download is parsed and asserted on, not merely observed to arrive: a
  * download button that hands back the original file would pass a weaker test.
@@ -18,19 +18,26 @@ import { expect, test } from '@playwright/test';
 const ROOT = process.cwd();
 const FIXTURE = path.join(ROOT, 'test-models', 'buried-brick.ldr');
 
-test.describe('optimise a model end to end', () => {
+test.describe('optimize a model end to end', () => {
   test('upload, inspect, toggle and download', async ({ page }) => {
     await page.goto('/optimize');
-    await expect(page.getByRole('heading', { name: 'Optimise a model' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Optimize a model' })).toBeVisible();
 
-    // ---- upload ---------------------------------------------------------
+    // ---- upload, then the "model detected" step --------------------------
     await page.setInputFiles('input[type="file"]', FIXTURE);
+    const detected = page.getByTestId('model-detected');
+    await expect(detected).toBeVisible({ timeout: 60_000 });
+    // The counts the parser reports for this fixture.
+    await expect(detected).toContainText('7');
+    await expect(detected).toContainText('Build steps');
+    await expect(detected).toContainText('Submodels');
+    await page.getByTestId('analyze-button').click();
 
     // ---- results --------------------------------------------------------
     await page.waitForURL(/\/results\/[0-9a-f-]{36}$/, { timeout: 180_000 });
     await expect(page.getByRole('heading', { name: 'Buried Brick' })).toBeVisible();
 
-    // Demo data must be labelled as such wherever it is used.
+    // Demo data must be labeled as such wherever it is used.
     await expect(page.getByTestId('demo-price-badge')).toBeVisible();
 
     // ---- the savings are the ones the fixture is designed to produce -----
@@ -62,7 +69,7 @@ test.describe('optimise a model end to end', () => {
     await expect(page.getByTestId('savings-amount')).toHaveText('$0.63', { timeout: 30_000 });
     await expect(page.getByTestId('optimized-cost')).toHaveText('$1.46');
 
-    // ---- download the optimised model -----------------------------------
+    // ---- download the optimized model -----------------------------------
     const downloadPromise = page.waitForEvent('download');
     await page.getByTestId('export-ldraw').getByRole('button', { name: 'Download' }).click();
     const download = await downloadPromise;
@@ -72,7 +79,7 @@ test.describe('optimise a model end to end', () => {
     const optimized = readFileSync(downloadPath, 'utf8');
     const original = readFileSync(FIXTURE, 'utf8');
 
-    // The substituted colour really is in the file.
+    // The substituted color really is in the file.
     expect(optimized).toContain('1 0 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat');
     expect(optimized).not.toContain('1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat');
     expect(original).toContain('1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat');
@@ -95,6 +102,7 @@ test.describe('optimise a model end to end', () => {
   test('downloading with the change disabled returns the original model', async ({ page }) => {
     await page.goto('/optimize');
     await page.setInputFiles('input[type="file"]', FIXTURE);
+    await page.getByTestId('analyze-button').click();
     await page.waitForURL(/\/results\/[0-9a-f-]{36}$/, { timeout: 180_000 });
 
     await page.getByRole('button', { name: 'Disable all' }).click();
@@ -111,6 +119,24 @@ test.describe('optimise a model end to end', () => {
       text.split(/\r?\n/).filter((line) => line.startsWith('1 '));
     expect(partLines(optimized)).toEqual(partLines(original));
     expect(optimized).toContain('1 4 0 -24 0 1 0 0 0 1 0 0 0 1 3001.dat');
+  });
+});
+
+test.describe('the model detected step', () => {
+  test('reports the parse result before running the analysis', async ({ page }) => {
+    await page.goto('/optimize');
+    await page.setInputFiles('input[type="file"]', path.join(ROOT, 'test-models', 'multiple-instances.mpd'));
+
+    const detected = page.getByTestId('model-detected');
+    await expect(detected).toBeVisible({ timeout: 60_000 });
+    await expect(detected).toContainText('Repeated Submodel Instances');
+    await expect(detected).toContainText('23');
+    // Nothing has been analyzed yet: we are still on /optimize.
+    expect(page.url()).toContain('/optimize');
+
+    await page.getByRole('button', { name: 'Choose another' }).click();
+    await expect(detected).toBeHidden();
+    await expect(page.getByText('Drop your LEGO model here')).toBeVisible();
   });
 });
 
@@ -132,7 +158,7 @@ test.describe('error handling', () => {
       mimeType: 'application/octet-stream',
       buffer: Buffer.from('not an ldraw file'),
     });
-    await expect(page.getByText('Could not analyse that file')).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText('Could not analyze that file')).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText('Unsupported file type ".io"', { exact: false })).toBeVisible();
   });
 
@@ -149,6 +175,7 @@ test.describe('error handling', () => {
       mimeType: 'text/plain',
       buffer: Buffer.from(source),
     });
+    await page.getByTestId('analyze-button').click();
     await page.waitForURL(/\/results\/[0-9a-f-]{36}$/, { timeout: 180_000 });
     await expect(
       page.getByText('could not be found in the LDraw library', { exact: false }),

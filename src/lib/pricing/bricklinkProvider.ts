@@ -38,7 +38,7 @@ export interface BrickLinkOptions {
   readonly region?: string;
   /** Maps an LDraw part id to the BrickLink part number. Returns null to skip. */
   readonly mapPart: (partId: string) => string | null;
-  /** Maps an LDraw colour id to the BrickLink colour id. Returns null to skip. */
+  /** Maps an LDraw color id to the BrickLink color id. Returns null to skip. */
   readonly mapColor: (colorId: number) => number | null;
   readonly cache: PriceCache;
   /** Injected for tests. Defaults to global fetch. */

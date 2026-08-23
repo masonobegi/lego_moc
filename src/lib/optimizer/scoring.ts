@@ -4,7 +4,7 @@
  *
  * There is exactly one rule here that matters: a change is enabled by default
  * only when every piece of evidence supporting it clears the threshold for the
- * chosen safety level. A false positive - recolouring a brick that turns out to
+ * chosen safety level. A false positive - recoloring a brick that turns out to
  * be visible - is far worse than a missed saving, so everything is biased
  * towards not acting.
  */
@@ -68,7 +68,7 @@ export function isHiddenEnough(consensus: VisibilityConsensus, level: SafetyLeve
 }
 
 /**
- * Confidence for a colour substitution.
+ * Confidence for a color substitution.
  *
  * The number is the visibility confidence, which is itself derived from the ray
  * count by the rule of three, tempered slightly when more than one physical

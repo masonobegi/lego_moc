@@ -13,7 +13,7 @@ export type PriceSourceId = 'demo' | 'bricklink';
 export interface PriceQuote {
   /** LDraw part id the quote was requested for. */
   readonly partId: string;
-  /** LDraw colour id the quote was requested for. */
+  /** LDraw color id the quote was requested for. */
   readonly colorId: number;
   readonly condition: Condition;
   /** The figure the cost calculation uses, per piece. */
@@ -41,7 +41,7 @@ export interface PriceQuote {
 }
 
 /**
- * The abstraction the optimiser depends on. Implementations must never throw
+ * The abstraction the optimizer depends on. Implementations must never throw
  * for an unknown part: return null so the caller can carry on and report the
  * gap.
  */

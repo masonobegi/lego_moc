@@ -5,7 +5,7 @@
  * The subtle part is instance identity. A submodel referenced three times
  * produces three physical instances from ONE line type 1. Those three
  * instances share a `commandRef`, because that line is the only place a change
- * can be written. The optimiser relies on this: it groups candidates by
+ * can be written. The optimizer relies on this: it groups candidates by
  * commandRef and refuses a change unless every instance sharing that command is
  * safe. See src/lib/optimizer/candidates.ts.
  */

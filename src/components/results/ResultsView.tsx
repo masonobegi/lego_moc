@@ -148,7 +148,7 @@ export function ResultsView({ result, initialSavings }: Props) {
               testId="original-cost"
             />
             <Figure
-              label="Optimised"
+              label="Optimized"
               value={money(savings.optimizedCost, savings.currency)}
               testId="optimized-cost"
             />
@@ -214,7 +214,7 @@ export function ResultsView({ result, initialSavings }: Props) {
             <div className="flex border border-[var(--line-strong)]">
               {(
                 [
-                  ['optimized', 'Optimised'],
+                  ['optimized', 'Optimized'],
                   ['original', 'Original'],
                   ['split', 'Compare'],
                 ] as const
@@ -256,7 +256,7 @@ export function ResultsView({ result, initialSavings }: Props) {
                   />
                 </div>
                 <div className="relative">
-                  <SplitLabel>Optimised</SplitLabel>
+                  <SplitLabel>Optimized</SplitLabel>
                   <ModelViewer
                     url={geometryUrl}
                     showOptimized

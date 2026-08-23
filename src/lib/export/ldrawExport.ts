@@ -1,8 +1,8 @@
 /**
- * Optimised LDraw export.
+ * Optimized LDraw export.
  *
  * The exported file is produced by re-serializing the document after the
- * enabled changes have been written into it. Every line the optimiser did not
+ * enabled changes have been written into it. Every line the optimizer did not
  * touch is emitted with its original bytes, so the output differs from the
  * input by exactly the lines that were changed and nothing else.
  *
@@ -67,13 +67,13 @@ function buildHeader(
 
   const lines = [
     '0 // ---------------------------------------------------------------------',
-    '0 // Optimised by BrickThrift.',
+    '0 // Optimized by BrickThrift.',
     `0 // Source model: ${options.modelName}`,
     `0 // ${appliedCount} line(s) changed, affecting ${changedPieceCount} physical part(s).`,
-    `0 //   ${colorChanges} hidden-colour substitution(s), ${moldChanges} equivalent-mold substitution(s).`,
+    `0 //   ${colorChanges} hidden-color substitution(s), ${moldChanges} equivalent-mold substitution(s).`,
     `0 // Price source: ${options.priceSourceLabel}`,
     '0 // Build steps, submodel structure and part positions are unchanged: only',
-    '0 // the colour and part fields of the listed lines were rewritten in place.',
+    '0 // the color and part fields of the listed lines were rewritten in place.',
     '0 //',
   ];
 

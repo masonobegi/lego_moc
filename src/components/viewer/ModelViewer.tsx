@@ -5,7 +5,7 @@
  *
  * Renders real LDraw geometry, not stand-in boxes. Parts are instanced: a model
  * with 6,000 bricks made of 270 distinct parts uploads 270 geometries and draws
- * them with per-instance transforms and colours, which is what makes a large
+ * them with per-instance transforms and colors, which is what makes a large
  * MOC interactive in a browser at all.
  *
  * LDraw is -Y up, so the whole scene is rotated 180 degrees about X to put the
@@ -35,7 +35,7 @@ export interface SelectedPart {
 interface Props {
   readonly url: string;
   readonly showOptimized: boolean;
-  /** Candidate ids currently switched on. Only these show their new colour. */
+  /** Candidate ids currently switched on. Only these show their new color. */
   readonly enabledCandidateIds?: ReadonlySet<string>;
   readonly highlightInstanceIds?: readonly string[];
   readonly onSelect?: (part: SelectedPart | null) => void;
@@ -118,7 +118,7 @@ export function ModelViewer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
-  // ---- recolour when the optimised toggle or the highlight changes ---------
+  // ---- recolor when the optimized toggle or the highlight changes ---------
   useEffect(() => {
     const handles = sceneRef.current;
     if (!handles || status !== 'ready') return;
@@ -309,7 +309,7 @@ function createScene(mount: HTMLElement): SceneHandles {
   const fitToView = (): void => {
     // The scene root carries the LDraw -Y-up correction. Its world matrix is
     // normally refreshed during render, so it must be forced here or the first
-    // fit aims at the un-rotated centre and the model sits off to one side.
+    // fit aims at the un-rotated center and the model sits off to one side.
     root.updateMatrixWorld(true);
 
     const direction = new THREE.Vector3(0.72, 0.46, 0.92).normalize();

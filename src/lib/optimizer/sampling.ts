@@ -1,7 +1,7 @@
 /**
  * Deterministic sampling helpers for the visibility engine.
  *
- * Everything here is deterministic - no RNG anywhere. Two analyses of the same
+ * Everything here is deterministic - no RNG anywhere. Two analyzes of the same
  * model produce identical ray counts and identical verdicts, which matters
  * because those numbers are shown to the user as evidence and asserted by
  * tests.
@@ -12,7 +12,7 @@ import type { Vec3 } from '../ldraw/math';
 /**
  * The only thing the samplers need from a mesh. Keeping it structural means a
  * worker thread can rebuild just the triangle buffer instead of a whole
- * PartMesh with colours and provenance it will never read.
+ * PartMesh with colors and provenance it will never read.
  */
 export interface SampleableMesh {
   readonly positions: Float32Array;

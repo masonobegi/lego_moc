@@ -38,7 +38,7 @@ const partSource = new ChainedPartSource(libraries.map((dir) => new NodePartSour
 /**
  * A solid rectangular block of 2x4 bricks.
  *
- * This is deliberately the WORST CASE for the analyser, not a flattering one.
+ * This is deliberately the WORST CASE for the analyzer, not a flattering one.
  * Roughly half the bricks in a solid block are fully enclosed, so the expensive
  * per-triangle verification pass runs on about half the model - a higher
  * proportion than a real MOC, where 20-40% is typical. Benchmarking a flat
@@ -46,7 +46,7 @@ const partSource = new ChainedPartSource(libraries.map((dir) => new NodePartSour
  * software actually is.
  *
  * Interior bricks are red (expensive in the demo dataset) and the outer shell
- * is light bluish gray, so the optimiser has real work to do as well.
+ * is light bluish gray, so the optimizer has real work to do as well.
  */
 function syntheticModel(targetParts: number): string {
   // A 2x4 brick is 80 x 24 x 40 LDU. Choose counts so the block is roughly
@@ -71,11 +71,11 @@ function syntheticModel(targetParts: number): string {
       for (let ix = 0; ix < nx; ix++) {
         if (placed >= targetParts) break outer;
         const interior = ix > 0 && ix < nx - 1 && iy > 0 && iy < ny - 1 && iz > 0 && iz < nz - 1;
-        const colour = interior ? 4 : 71;
+        const color = interior ? 4 : 71;
         const x = ix * 80;
         const y = -iy * 24;
         const z = iz * 40;
-        lines.push(`1 ${colour} ${x} ${y} ${z} 1 0 0 0 1 0 0 0 1 3001.dat`);
+        lines.push(`1 ${color} ${x} ${y} ${z} 1 0 0 0 1 0 0 0 1 3001.dat`);
         placed++;
         sinceStep++;
         if (sinceStep >= 60) {
@@ -98,7 +98,7 @@ interface Row {
   geometryMs: number;
   visibilityMs: number;
   pricingMs: number;
-  optimiseMs: number;
+  optimizeMs: number;
   totalMs: number;
   rays: number;
   hidden: number;
@@ -131,7 +131,7 @@ async function measure(label: string, source: string, fileName: string, singleTh
     geometryMs: r.timings.geometry ?? 0,
     visibilityMs: r.timings.visibility ?? 0,
     pricingMs: r.timings.pricing ?? 0,
-    optimiseMs: (r.timings.colors ?? 0) + (r.timings.molds ?? 0) + (r.timings.savings ?? 0),
+    optimizeMs: (r.timings.colors ?? 0) + (r.timings.molds ?? 0) + (r.timings.savings ?? 0),
     totalMs: r.totalMs,
     rays: r.visibility.totalRays,
     hidden: r.visibility.counts.HIDDEN + r.visibility.counts.LIKELY_HIDDEN,
@@ -142,14 +142,14 @@ async function measure(label: string, source: string, fileName: string, singleTh
 
 function formatTable(rows: readonly Row[]): string {
   const header =
-    '| Model | Parts | Distinct | Triangles | Parse | Geometry | Visibility | Optimise | **Total** | Rays | Hidden | Threads |\n' +
+    '| Model | Parts | Distinct | Triangles | Parse | Geometry | Visibility | Optimize | **Total** | Rays | Hidden | Threads |\n' +
     '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |';
   const body = rows
     .map(
       (r) =>
         `| ${r.label} | ${r.parts.toLocaleString()} | ${r.distinctParts} | ` +
         `${r.triangles.toLocaleString()} | ${r.parseMs} ms | ${r.geometryMs} ms | ` +
-        `${r.visibilityMs} ms | ${r.optimiseMs + r.pricingMs} ms | **${(r.totalMs / 1000).toFixed(2)} s** | ` +
+        `${r.visibilityMs} ms | ${r.optimizeMs + r.pricingMs} ms | **${(r.totalMs / 1000).toFixed(2)} s** | ` +
         `${r.rays.toLocaleString()} | ${r.hidden.toLocaleString()} | ${r.workers} |`,
     )
     .join('\n');

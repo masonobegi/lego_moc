@@ -9,7 +9,7 @@ export default function AboutPage() {
       <h1 className="text-[2rem] font-semibold tracking-tight">How BrickThrift works</h1>
       <p className="mt-4 text-[1rem] leading-relaxed text-[var(--text-dim)]">
         BrickThrift makes a digital LEGO design cheaper to buy before you buy it. It is not a
-        generic BrickLink price optimiser: it changes the model itself, in the one way that costs
+        generic BrickLink price optimizer: it changes the model itself, in the one way that costs
         nothing visually, and leaves everything else alone.
       </p>
 
@@ -34,11 +34,11 @@ export default function AboutPage() {
             ],
             [
               'Price',
-              'Every distinct part-and-colour combination is priced once. Alternatives are only priced for parts that are already known to be hidden, which is what keeps live BrickLink usage inside its daily budget.',
+              'Every distinct part-and-color combination is priced once. Alternatives are only priced for parts that are already known to be hidden, which is what keeps live BrickLink usage inside its daily budget.',
             ],
             [
               'Propose',
-              'A cheaper colour is proposed only when catalogue data shows the part has genuinely been produced in it. The change is written by rewriting the colour field of the existing line, in place, so the part cannot move and cannot change build step.',
+              'A cheaper color is proposed only when catalog data shows the part has genuinely been produced in it. The change is written by rewriting the color field of the existing line, in place, so the part cannot move and cannot change build step.',
             ],
           ].map(([title, body]) => (
             <li key={title} className="flex gap-4">
@@ -72,9 +72,9 @@ export default function AboutPage() {
           {[
             'A transparent part never counts as hiding anything. Anything behind glass reads as visible.',
             'A submodel used more than once is a single line in the file. If any copy of it is visible, the line is left alone - even when the other copies are sealed inside the model. On real sets this is usually the largest single block of missed savings.',
-            'A part drawn in LDraw colour 16 takes its colour from whatever references it, so rewriting it there would recolour the whole submodel. Skipped.',
+            'A part drawn in LDraw color 16 takes its color from whatever references it, so rewriting it there would recolor the whole submodel. Skipped.',
             'A part whose geometry could not be fully resolved from the library can never reach the top confidence tier.',
-            'A colour that cannot be evidenced in the catalogue is never proposed, however cheap the price data says it would be.',
+            'A color that cannot be evidenced in the catalog is never proposed, however cheap the price data says it would be.',
             'Mold substitutions where the two molds are not visually identical are only offered for parts that are hidden anyway.',
           ].map((item) => (
             <li key={item} className="flex gap-2.5">
@@ -95,8 +95,8 @@ export default function AboutPage() {
         <p className="mt-3">
           With no configuration the app uses a built-in{' '}
           <strong className="font-semibold text-[var(--text)]">demo price dataset</strong>. Those
-          numbers are synthetic, deliberately shaped to make the optimiser easy to see working, and
-          labelled as such everywhere they appear. Live BrickLink pricing is opt-in and needs API
+          numbers are synthetic, deliberately shaped to make the optimizer easy to see working, and
+          labeled as such everywhere they appear. Live BrickLink pricing is opt-in and needs API
           credentials in <code className="font-mono">.env.local</code>; the app never presents demo
           figures as live ones.
         </p>
@@ -109,10 +109,10 @@ export default function AboutPage() {
         </p>
         <ul className="mt-3 space-y-2.5">
           {[
-            'A model with a lift-off roof is analysed with the roof on.',
-            'A hinged panel is analysed in the position it was saved in.',
+            'A model with a lift-off roof is analyzed with the roof on.',
+            'A hinged panel is analyzed in the position it was saved in.',
             'A part that is on show while you are building but buried at the end counts as hidden.',
-            'A model meant to be viewed from underneath is analysed from every direction, including underneath, so this case is handled - but a model displayed permanently against a wall will not gain the savings it could.',
+            'A model meant to be viewed from underneath is analyzed from every direction, including underneath, so this case is handled - but a model displayed permanently against a wall will not gain the savings it could.',
           ].map((item) => (
             <li key={item} className="flex gap-2.5">
               <span className="mt-[0.6em] h-[3px] w-[3px] shrink-0 bg-[var(--text-faint)]" />
@@ -125,7 +125,7 @@ export default function AboutPage() {
       <Section title="Instructions">
         <p>
           BrickThrift does not generate building instructions. It preserves your{' '}
-          <code className="font-mono">0 STEP</code> structure exactly, so the optimised file opens
+          <code className="font-mono">0 STEP</code> structure exactly, so the optimized file opens
           in BrickLink Studio with the same step sequence and Studio&apos;s Instruction Maker can
           produce instructions from it. Re-creating a designer&apos;s own PDF instructions is out of
           scope for this version.
@@ -134,7 +134,7 @@ export default function AboutPage() {
 
       <Section title="Attribution and trademarks">
         <p>
-          Part geometry and colour definitions come from the{' '}
+          Part geometry and color definitions come from the{' '}
           <a
             className="text-[var(--accent)] hover:underline"
             href="https://www.ldraw.org/"
@@ -145,7 +145,7 @@ export default function AboutPage() {
           </a>
           , licensed under Creative Commons Attribution 2.0. Credit belongs to LDraw.org and the
           individual part authors, whose names are preserved in the part files this app ships.
-          Colour-availability data is derived from LDraw Official Model Repository files, also CC BY
+          Color-availability data is derived from LDraw Official Model Repository files, also CC BY
           2.0.
         </p>
         <p className="mt-3">
@@ -160,7 +160,7 @@ export default function AboutPage() {
           href="/optimize"
           className="bg-[var(--accent)] px-5 py-2.5 text-[0.9rem] font-semibold text-[#14100a] hover:bg-[#eeb552]"
         >
-          Optimise a model
+          Optimize a model
         </Link>
         <Link
           href="/dev"

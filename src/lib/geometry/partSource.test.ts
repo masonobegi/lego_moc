@@ -57,7 +57,7 @@ describe('ChainedPartSource', () => {
 });
 
 describe('normalizeLookupPath', () => {
-  it('lowercases and normalises separators', () => {
+  it('lowercases and normalizes separators', () => {
     expect(normalizeLookupPath('  S\\3001S01.DAT ')).toBe('s/3001s01.dat');
     expect(normalizeLookupPath('./3001.dat')).toBe('3001.dat');
   });

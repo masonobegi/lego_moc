@@ -1,16 +1,16 @@
 /**
  * Builds data/catalog/bundled-catalog.json - the offline fallback catalog that
- * tells the optimiser which colours a part has actually been produced in.
+ * tells the optimizer which colors a part has actually been produced in.
  *
  * WHY THIS EXISTS
  * ---------------
  * The authoritative source is Rebrickable's `inventory_parts.csv`, fetched by
  * `npm run catalog:import`. That needs network access to rebrickable.com. When
- * it has not been run, the app still must not invent colours, so it falls back
+ * it has not been run, the app still must not invent colors, so it falls back
  * to this file.
  *
  * The data is derived from the LDraw Official Model Repository: 100+ LDraw
- * files of real official LEGO sets. Every (part, colour) pair recorded here was
+ * files of real official LEGO sets. Every (part, color) pair recorded here was
  * observed in at least one official set, and the set numbers are kept so the UI
  * can cite the evidence. It is REAL data with narrower coverage than
  * Rebrickable, not a guess.
@@ -19,7 +19,7 @@
  *   npm run catalog:build-bundled -- /path/to/ldraw/models
  *
  * The OMR files are CC BY 2.0 and individually authored; this script emits only
- * derived aggregate data (part id, colour id, set number, count) and does not
+ * derived aggregate data (part id, color id, set number, count) and does not
  * copy any model into the repository. See docs/RESEARCH.md section 12.
  */
 
@@ -64,7 +64,7 @@ function main(): void {
     const text = readFileSync(path.join(modelsDir, file), 'utf8');
     const document = parseLDraw(text, { sourceName: file });
 
-    // Names declared inside the document are submodels, not catalogue parts.
+    // Names declared inside the document are submodels, not catalog parts.
     const submodels = new Set(
       document.files.filter((f) => !f.isAnonymous).map((f) => f.name.trim().toLowerCase()),
     );
@@ -115,12 +115,12 @@ function main(): void {
     schemaVersion: 1,
     source: 'LDraw Official Model Repository',
     sourceUrl: 'https://library.ldraw.org/omr',
-    licence: 'Derived from CC BY 2.0 LDraw OMR model files. Attribution: LDraw.org and the individual model authors.',
+    license: 'Derived from CC BY 2.0 LDraw OMR model files. Attribution: LDraw.org and the individual model authors.',
     description:
-      'Part/colour combinations observed in official LEGO sets modelled in LDraw. Used as evidence ' +
-      'that a given part has genuinely been produced in a given colour. Coverage is limited to the ' +
+      'Part/color combinations observed in official LEGO sets modeled in LDraw. Used as evidence ' +
+      'that a given part has genuinely been produced in a given color. Coverage is limited to the ' +
       'sets in the OMR sample and is narrower than Rebrickable; a pair missing here is not proof ' +
-      'that it does not exist, so the optimiser simply never proposes it.',
+      'that it does not exist, so the optimizer simply never proposes it.',
     modelFileCount: files.length,
     setCount: sets.size,
     partCount: sortedPartIds.length,
@@ -132,7 +132,7 @@ function main(): void {
   const outPath = 'data/catalog/bundled-catalog.json';
   writeFileSync(outPath, JSON.stringify(output));
   console.log(
-    `Wrote ${outPath}: ${sortedPartIds.length} parts, ${pairCount} part/colour pairs, ` +
+    `Wrote ${outPath}: ${sortedPartIds.length} parts, ${pairCount} part/color pairs, ` +
       `from ${files.length} model files covering ${sets.size} sets.`,
   );
 }

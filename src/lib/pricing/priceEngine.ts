@@ -1,10 +1,10 @@
 /**
- * Price engine: turns a set of part+colour+condition requests into a price
+ * Price engine: turns a set of part+color+condition requests into a price
  * book, and a price book plus a part list into a cost.
  *
  * Deduplication happens here, not in the providers. A 2,800-part model with 411
- * distinct part/colour combinations issues 411 lookups, not 2,800. With the
- * alternative colours the optimiser wants to evaluate on top, that number grows
+ * distinct part/color combinations issues 411 lookups, not 2,800. With the
+ * alternative colors the optimizer wants to evaluate on top, that number grows
  * again, so requests are batched and deduplicated in one place.
  */
 

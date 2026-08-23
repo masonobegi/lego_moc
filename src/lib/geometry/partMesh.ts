@@ -16,10 +16,10 @@
  *    so it never needs a reliable outward normal, and the viewer renders
  *    double-sided. This removes a whole class of "part had inverted normals"
  *    bugs. See docs/ARCHITECTURE.md.
- *  - Colour 16 on a triangle means "inherit from the instance". It is stored as
- *    16 and resolved at render time. Any other value is a fixed colour baked
+ *  - Color 16 on a triangle means "inherit from the instance". It is stored as
+ *    16 and resolved at render time. Any other value is a fixed color baked
  *    into the part (rubber tyres, printed decoration) and is preserved, which
- *    also means the optimiser must never assume recolouring an instance changes
+ *    also means the optimizer must never assume recoloring an instance changes
  *    every triangle.
  */
 
@@ -32,7 +32,7 @@ import type { PartSource } from './partSource';
 export interface PartMesh {
   /** 9 floats per triangle: x1,y1,z1, x2,y2,z2, x3,y3,z3. */
   readonly positions: Float32Array;
-  /** One colour id per triangle. 16 means "inherit the instance colour". */
+  /** One color id per triangle. 16 means "inherit the instance color". */
   readonly triangleColors: Int32Array;
   readonly triangleCount: number;
   readonly bounds: Box3;
@@ -251,7 +251,7 @@ export class PartMeshLibrary {
   }
 }
 
-/** Colour ids referenced by LDraw geometry that are not real materials. */
+/** Color ids referenced by LDraw geometry that are not real materials. */
 export function isInheritColor(colorId: number): boolean {
   return colorId === COLOR_INHERIT;
 }

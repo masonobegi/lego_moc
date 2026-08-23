@@ -1,32 +1,32 @@
 /**
- * LDraw colour id  <->  BrickLink colour id.
+ * LDraw color id  <->  BrickLink color id.
  *
  * These are two independent numbering schemes: LDraw 4 is Red, BrickLink 5 is
  * Red. There is no free, official, complete crosswalk (docs/RESEARCH.md
  * section 10), so this module works in two tiers:
  *
  *  1. **Live** - when BrickLink credentials are configured, the app fetches
- *     `GET colors` from the BrickLink API and matches BrickLink's colour names
+ *     `GET colors` from the BrickLink API and matches BrickLink's color names
  *     against LDraw's. LDConfig.ldr itself states that "LDraw and BrickLink
- *     mostly share naming conventions for their colours", which makes name
+ *     mostly share naming conventions for their colors", which makes name
  *     matching a genuinely reliable, *verifiable* mapping rather than a guess.
  *     See src/lib/pricing/bricklinkColors.ts.
  *
- *  2. **Offline** - the curated table below, covering the colours that account
+ *  2. **Offline** - the curated table below, covering the colors that account
  *     for the overwhelming majority of parts in real models.
  *
- * A colour that resolves to `unmapped` is EXCLUDED from BrickLink live pricing
+ * A color that resolves to `unmapped` is EXCLUDED from BrickLink live pricing
  * and from the Wanted List export, and the count of excluded lots is shown to
  * the user. Nothing is ever guessed.
  */
 
 import type { ColorMapping } from './types';
 
-const CURATED_SOURCE = 'curated table (BrickLink colour names, unverified against the live API)';
+const CURATED_SOURCE = 'curated table (BrickLink color names, unverified against the live API)';
 
-/** LDraw colour code -> BrickLink colour id. */
+/** LDraw color code -> BrickLink color id. */
 const LDRAW_TO_BRICKLINK: ReadonlyMap<number, number> = new Map([
-  // --- core solid colours ---
+  // --- core solid colors ---
   [0, 11],   // Black
   [1, 7],    // Blue
   [2, 6],    // Green
@@ -95,7 +95,7 @@ const LDRAW_TO_BRICKLINK: ReadonlyMap<number, number> = new Map([
   [484, 68],  // Dark Orange
   [503, 99],  // Very Light Bluish Gray
 
-  // --- transparent colours ---
+  // --- transparent colors ---
   [32, 13],  // Trans Black (IR lens)
   [33, 14],  // Trans Dark Blue
   [34, 20],  // Trans Green
@@ -134,7 +134,7 @@ export function mapLDrawColorToBrickLink(
       ldrawColorId: colorId,
       brickLinkColorId: fromOverride,
       confidence: 'verified',
-      source: 'BrickLink API colour list, matched by colour name',
+      source: 'BrickLink API color list, matched by color name',
     };
   }
   const curated = LDRAW_TO_BRICKLINK.get(colorId);
@@ -150,7 +150,7 @@ export function mapLDrawColorToBrickLink(
     ldrawColorId: colorId,
     brickLinkColorId: null,
     confidence: 'unmapped',
-    source: 'no known BrickLink colour for this LDraw colour',
+    source: 'no known BrickLink color for this LDraw color',
   };
 }
 

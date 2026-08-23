@@ -16,7 +16,7 @@ describe('DemoPriceProvider', () => {
     expect((await demo.getPrice('3001', 1, 'new'))!.unitPrice).toBe(0.19); // Blue
   });
 
-  it('produces the documented 0.63 saving for a red 2x4 recoloured to black', async () => {
+  it('produces the documented 0.63 saving for a red 2x4 recolored to black', async () => {
     const red = (await demo.getPrice('3001', 4, 'new'))!.unitPrice;
     const black = (await demo.getPrice('3001', 0, 'new'))!.unitPrice;
     expect(Math.round((red - black) * 100) / 100).toBe(0.63);
@@ -35,7 +35,7 @@ describe('DemoPriceProvider', () => {
     expect(quote.quantityAverage).toBeNull();
   });
 
-  it('computes base price times colour factor for a table part', async () => {
+  it('computes base price times color factor for a table part', async () => {
     // 3003 base 0.10, Light Bluish Gray factor 1.00.
     expect((await demo.getPrice('3003', 71, 'new'))!.unitPrice).toBe(0.1);
   });
@@ -247,7 +247,7 @@ describe('OAuth 1.0a signing', () => {
 });
 
 describe('PriceBook', () => {
-  it('keys on part, colour and condition together', () => {
+  it('keys on part, color and condition together', () => {
     expect(priceKey('3001', 4, 'new')).not.toBe(priceKey('3001', 4, 'used'));
     const book = new PriceBook({
       requested: 0, resolved: 0, unresolved: 0, elapsedMs: 0,

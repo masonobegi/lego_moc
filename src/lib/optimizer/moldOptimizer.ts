@@ -1,14 +1,14 @@
 /**
- * Optimiser 2: known-equivalent / mold substitution.
+ * Optimizer 2: known-equivalent / mold substitution.
  *
  * Some elements exist in more than one mold and BrickLink sells them as
- * separate catalogue items at different prices - the classic case being a tile
+ * separate catalog items at different prices - the classic case being a tile
  * "with Groove" and "without Groove". Swapping the expensive mold for the cheap
  * one buys the same brick.
  *
- * The safety rules here are deliberately tighter than for colour changes,
+ * The safety rules here are deliberately tighter than for color changes,
  * because a wrong mold substitution changes a physical object rather than just
- * its colour:
+ * its color:
  *
  *   1. The rule must come from a source we can name, with an explicit
  *      confidence, and must be marked geometryCompatible. Rules are never
@@ -17,7 +17,7 @@
  *      applied to parts the visibility engine says are hidden. A groove along
  *      the edge of a tile is a small difference, but it is a difference, and
  *      the promise of this product is that the exterior does not change.
- *   3. The replacement must exist in the SAME colour, evidenced by the catalog.
+ *   3. The replacement must exist in the SAME color, evidenced by the catalog.
  *   4. It must actually be cheaper.
  *
  * V1 never replaces one part with several and never changes how parts connect.
@@ -111,12 +111,12 @@ export function findMoldCandidates(input: MoldOptimizerInput): MoldOptimizerOutp
         continue;
       }
       if (!input.catalog.isKnownCombination(rule.replacementPart, colorId)) {
-        blockers.add('replacement_colour_unavailable');
+        blockers.add('replacement_color_unavailable');
         continue;
       }
       const quote = input.prices.get(rule.replacementPart, colorId, input.condition);
       if (!quote) {
-        blockers.add('replacement_colour_unavailable');
+        blockers.add('replacement_color_unavailable');
         continue;
       }
       const saving = round2((originalQuote.unitPrice - quote.unitPrice) * group.quantity);
@@ -152,7 +152,7 @@ export function findMoldCandidates(input: MoldOptimizerInput): MoldOptimizerOutp
       );
     }
     evidence.push(
-      `The replacement is catalogued in ${colorName(colorId)}, so the colour does not change.`,
+      `The replacement is catalogd in ${colorName(colorId)}, so the color does not change.`,
     );
     evidence.push(
       `Build step is unchanged: only the part reference on the existing line is rewritten.`,

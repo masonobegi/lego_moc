@@ -13,7 +13,7 @@
  *     `regenerate: true` discards every `raw` and rebuilds each line from its
  *     parsed fields. Re-parsing that output yields a semantically identical
  *     document. This is the real test of the writer, and it is what runs for
- *     any line the optimiser actually modified.
+ *     any line the optimizer actually modified.
  */
 
 import { DIRECT_COLOR_BASE, isDirectColor } from './parser';

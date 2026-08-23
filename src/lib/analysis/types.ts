@@ -24,9 +24,9 @@ export const ANALYSIS_STAGES: { id: AnalysisStage; label: string }[] = [
   { id: 'parsing', label: 'Parsing model' },
   { id: 'resolving', label: 'Resolving parts' },
   { id: 'geometry', label: 'Building geometry' },
-  { id: 'visibility', label: 'Analysing visibility' },
+  { id: 'visibility', label: 'Analyzing visibility' },
   { id: 'pricing', label: 'Loading prices' },
-  { id: 'colors', label: 'Finding cheaper colours' },
+  { id: 'colors', label: 'Finding cheaper colors' },
   { id: 'molds', label: 'Checking equivalent molds' },
   { id: 'savings', label: 'Calculating savings' },
 ];

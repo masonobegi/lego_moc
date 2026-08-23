@@ -32,7 +32,7 @@ describe('resolveModel: transforms', () => {
     expect(instance.position.z).toBeCloseTo(-10);
   });
 
-  it('resolves colour 16 up the reference chain', () => {
+  it('resolves color 16 up the reference chain', () => {
     const document = parseLDraw(
       [
         '0 FILE main.ldr',

@@ -111,7 +111,7 @@ export function ChangeList({
         <Field label="Type">
           <Select value={kind} onChange={(v) => setKind(v as KindFilter)}>
             <option value="all">All types</option>
-            <option value="hidden_color">Hidden colour</option>
+            <option value="hidden_color">Hidden color</option>
             <option value="mold_equivalent">Equivalent mold</option>
           </Select>
         </Field>
@@ -139,7 +139,7 @@ export function ChangeList({
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Filter by part number, description, colour or submodel"
+            placeholder="Filter by part number, description, color or submodel"
             className="w-full rounded-[2px] border border-[var(--line)] bg-[var(--panel-2)] px-3 py-2 text-[0.83rem] outline-none placeholder:text-[var(--text-faint)] focus:border-[var(--line-strong)]"
           />
         </div>

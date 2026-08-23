@@ -5,12 +5,12 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'BrickThrift - LEGO MOC cost optimiser',
+    default: 'BrickThrift - LEGO MOC cost optimizer',
     template: '%s - BrickThrift',
   },
   description:
-    'Make expensive LEGO builds cheaper without changing how they look. Analyse an LDraw model, ' +
-    'find pieces that cannot be seen, and buy them in cheaper colours.',
+    'Make expensive LEGO builds cheaper without changing how they look. Analyze an LDraw model, ' +
+    'find pieces that cannot be seen, and buy them in cheaper colors.',
 };
 
 export const viewport: Viewport = {
@@ -20,7 +20,7 @@ export const viewport: Viewport = {
 };
 
 const NAV = [
-  { href: '/optimize', label: 'Optimise' },
+  { href: '/optimize', label: 'Optimize' },
   { href: '/dev', label: 'Dev' },
   { href: '/about', label: 'About' },
 ];
@@ -52,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   href="/optimize"
                   className="border border-[var(--line-strong)] px-3 py-[5px] text-[0.85rem] font-medium text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
                 >
-                  Optimise a model
+                  Optimize a model
                 </Link>
               </nav>
             </div>

@@ -154,19 +154,19 @@ export interface LDrawDocument {
  * `commandRef` is the single most important field: it identifies the exact
  * line type 1 that produced this instance. Because a submodel may be referenced
  * more than once, several PartInstances can share one commandRef - editing that
- * line changes all of them. The optimiser groups candidates by commandRef for
+ * line changes all of them. The optimizer groups candidates by commandRef for
  * exactly this reason (see src/lib/optimizer/candidates.ts).
  */
 export interface PartInstance {
   /** Unique within a model. Encodes the full reference path, so it is stable across re-parses. */
   readonly instanceId: string;
-  /** Normalised part id: lowercase, `.dat` stripped, `\` -> `/`. e.g. `3001`. */
+  /** Normalized part id: lowercase, `.dat` stripped, `\` -> `/`. e.g. `3001`. */
   readonly partId: string;
   /** The reference exactly as written on the line. */
   readonly partFile: string;
-  /** Effective colour after resolving colour 16 (inherit) up the reference chain. */
+  /** Effective color after resolving color 16 (inherit) up the reference chain. */
   readonly colorId: number;
-  /** Colour as written on this line, before inheritance resolution. */
+  /** Color as written on this line, before inheritance resolution. */
   readonly declaredColorId: number;
   readonly position: Vec3;
   readonly transformation: Mat3;
@@ -196,7 +196,7 @@ export function commandRefKey(ref: CommandRef): string {
 export interface UnresolvedReference {
   /** Reference as written. */
   readonly file: string;
-  /** Normalised id used for lookup. */
+  /** Normalized id used for lookup. */
   readonly partId: string;
   /** Number of times it appears. */
   readonly count: number;

@@ -18,16 +18,16 @@ upload (.ldr / .mpd)
   visibility ---------- per part: is any surface reachable from outside?
         |
         v
-  pricing ------------- one quote per part+colour+condition
+  pricing ------------- one quote per part+color+condition
         |
         v
-  optimisers ---------- hidden colour, then equivalent mold
+  optimizers ---------- hidden color, then equivalent mold
         |
         v
   results ------------- candidates with evidence; exports; 3D viewer
 ```
 
-Every stage is a plain function over plain data. The optimiser does not import
+Every stage is a plain function over plain data. The optimizer does not import
 anything from `src/app` or `src/components`, and the UI does not contain a line
 of analysis logic. `tests/pipeline.test.ts` drives the whole pipeline with no
 browser and no server.
@@ -36,20 +36,20 @@ browser and no server.
 
 | Path | What it is |
 | --- | --- |
-| `src/lib/ldraw/` | Parser, serializer, resolver, colour table, vector maths |
+| `src/lib/ldraw/` | Parser, serializer, resolver, color table, vector maths |
 | `src/lib/geometry/` | Part mesh resolution, triangle BVH, two-level scene |
-| `src/lib/optimizer/` | Visibility engine, sampling, candidate grouping, the two optimisers, scoring, application |
-| `src/lib/catalog/` | Colour validity, id and colour mappings, mold rules |
+| `src/lib/optimizer/` | Visibility engine, sampling, candidate grouping, the two optimizers, scoring, application |
+| `src/lib/catalog/` | Color validity, id and color mappings, mold rules |
 | `src/lib/pricing/` | Price provider interface, demo provider, BrickLink provider, cache, cost calculation |
 | `src/lib/analysis/` | Pipeline orchestration, result types, viewer payload |
-| `src/lib/export/` | Optimised LDraw, JSON report, CSV log, Wanted List XML |
+| `src/lib/export/` | Optimized LDraw, JSON report, CSV log, Wanted List XML |
 | `src/lib/runtime/` | Server-only configuration, service wiring, storage |
 | `src/lib/security/` | Limits and input sanitisation |
 | `src/app/` | Next.js routes and API handlers |
 | `src/components/` | React UI, including the Three.js viewer |
-| `data/catalog/` | Generated catalogue data, committed |
+| `data/catalog/` | Generated catalog data, committed |
 | `test-models/` | Synthetic fixtures with known expected outcomes |
-| `scripts/` | Library fetch, catalogue generation, benchmarks |
+| `scripts/` | Library fetch, catalog generation, benchmarks |
 
 ## Decisions that are not the obvious ones
 
@@ -119,7 +119,7 @@ Nothing anywhere in the codebase produces a confidence figure by any other means
 
 The brief allows a database "only if persistent storage materially helps". It
 does not here. An analysis is one self-contained document that one browser
-session reads back a handful of times. It is written to `.brickthrift/analyses/`
+session reads back a handful of times. It is written to `.brickthrift/analyzes/`
 with an in-memory index in front, which keeps setup to `npm install && npm run
 dev` with nothing to provision.
 
@@ -164,9 +164,9 @@ explainable, and the quote says which path produced it.
 
 These are deliberately left as seams rather than as TODOs:
 
-**Structural optimisation** (one 1x8 plate to two 1x4 plates). An
+**Structural optimization** (one 1x8 plate to two 1x4 plates). An
 `OptimizationCandidate` already carries `originalPartId`/`replacementPartId`
-separately from colour, and `applyOptimizations` edits a command in place. A
+separately from color, and `applyOptimizations` edits a command in place. A
 one-to-many change needs a different application step - inserting lines - which
 is exactly where step preservation gets hard, which is why it is not in V1.
 
@@ -176,14 +176,14 @@ what that does to the user's instructions.
 
 **User-owned inventory.** `calculateCost` takes an instance list and a price
 book. Subtracting owned parts is a filter on the instance list before it, with
-no change to the optimiser.
+no change to the optimizer.
 
-**A different catalogue.** `CatalogService` is an interface with four methods.
-`DefaultCatalogService` already accepts an alternative LDraw-native colour
+**A different catalog.** `CatalogService` is an interface with four methods.
+`DefaultCatalogService` already accepts an alternative LDraw-native color
 source through `ldrawNativeColors`.
 
 **A different price source.** `PriceProvider` is one method. A multi-store
-purchasing optimiser would consume the Wanted List export rather than living
+purchasing optimizer would consume the Wanted List export rather than living
 inside this codebase.
 
 **Instruction generation.** Out of scope on purpose. The step structure is
@@ -191,7 +191,7 @@ preserved exactly so BrickLink Studio's Instruction Maker can do it.
 
 ## What the code deliberately does not do
 
-- No AI or heuristic judgement about whether a structural change is safe.
+- No AI or heuristic judgment about whether a structural change is safe.
 - No scraping. The BrickLink API is the only route to live prices.
-- No guessing of catalogue ids. Unmappable lots are excluded and reported.
+- No guessing of catalog ids. Unmappable lots are excluded and reported.
 - No mutation of the uploaded file, ever.

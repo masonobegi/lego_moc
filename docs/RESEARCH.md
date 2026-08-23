@@ -19,7 +19,7 @@ policy. The following hosts were **blocked at the egress proxy** (HTTP 403 on CO
 | `en.wikipedia.org`, `cdn.jsdelivr.net`, `unpkg.com` | general | **Blocked** |
 
 Reachable: `registry.npmjs.org`, `raw.githubusercontent.com`, anonymous git clone of public
-GitHub repositories, and a web-search tool that returns summarised content from the blocked
+GitHub repositories, and a web-search tool that returns summarized content from the blocked
 pages.
 
 **Consequences for this repository, and how each was handled:**
@@ -62,11 +62,11 @@ whitespace-delimited token on a line is the **line type**:
 | Type | Meaning | Syntax |
 | --- | --- | --- |
 | `0` | Comment or META command | `0 // comment` or `0 !META ...` or `0 free text` |
-| `1` | Sub-file reference (a part or submodel) | `1 <colour> x y z a b c d e f g h i <file>` |
-| `2` | Line | `2 <colour> x1 y1 z1 x2 y2 z2` |
-| `3` | Triangle | `3 <colour> x1 y1 z1 x2 y2 z2 x3 y3 z3` |
-| `4` | Quadrilateral | `4 <colour> x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4` |
-| `5` | Optional line | `5 <colour> x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4` |
+| `1` | Sub-file reference (a part or submodel) | `1 <color> x y z a b c d e f g h i <file>` |
+| `2` | Line | `2 <color> x1 y1 z1 x2 y2 z2` |
+| `3` | Triangle | `3 <color> x1 y1 z1 x2 y2 z2 x3 y3 z3` |
+| `4` | Quadrilateral | `4 <color> x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4` |
+| `5` | Optional line | `5 <color> x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4` |
 
 A blank line is legal and carries no meaning. Anything else is invalid; this parser preserves
 unparseable lines verbatim as `raw` commands rather than discarding them.
@@ -101,20 +101,20 @@ the geometry builder in this project accounts for that when computing surface no
 The `<file>` field of a line type 1 is a filename. It may contain spaces (real OMR models rely on
 this: `1 16 0 0 0 1 0 0 0 1 0 0 0 1 10182 - Ground floor.ldr`), so it must be parsed as
 "everything after the 14th token", never by splitting on whitespace. It uses `\` as a path
-separator (e.g. `s\3001s01.dat`) which must be normalised to `/` for filesystem/URL lookup, and
+separator (e.g. `s\3001s01.dat`) which must be normalized to `/` for filesystem/URL lookup, and
 resolution is **case-insensitive** in practice.
 
-### Colour values in geometry
+### Color values in geometry
 
-Two colour values are special inside part files:
+Two color values are special inside part files:
 
-* **16** — "inherit": use the colour the caller specified for this sub-file reference.
-* **24** — "complement/edge": use the caller's edge colour.
+* **16** — "inherit": use the color the caller specified for this sub-file reference.
+* **24** — "complement/edge": use the caller's edge color.
 
-**Limitation:** because 16 is an inherit sentinel rather than a real colour, it must be excluded
-when deriving "which colours does this part exist in" from model files, and a part instance
-placed with colour 16 in a top-level model cannot be recoloured meaningfully. The optimiser
-skips colour 16 and 24 instances.
+**Limitation:** because 16 is an inherit sentinel rather than a real color, it must be excluded
+when deriving "which colors does this part exist in" from model files, and a part instance
+placed with color 16 in a top-level model cannot be recolored meaningfully. The optimizer
+skips color 16 and 24 instances.
 
 ---
 
@@ -139,7 +139,7 @@ Primary spec: <https://www.ldraw.org/article/47.html> (MPD — Multi-Part Docume
 **Limitation:** an `.mpd` may reference a submodel that is *not* included in the document and
 not present in the parts library (a designer's custom part). This is not an error in the format.
 The app reports these as unresolved references, still imports the model, and excludes affected
-instances from optimisation rather than crashing.
+instances from optimization rather than crashing.
 
 ---
 
@@ -151,15 +151,15 @@ Modern tools (LPub3D, Studio, LeoCAD) interpret it as a **build-step boundary**:
 between the start of the file (or the previous `0 STEP`) and this `0 STEP` belong to one step of
 the building instructions.
 
-Consequences the optimiser must respect:
+Consequences the optimizer must respect:
 
 * Step index is *positional*, derived from how many `0 STEP` lines precede a part reference
   **within its own sub-file**.
 * Each sub-file has its own independent step numbering.
 * A trailing `0 STEP` at the end of a file is common and does not create an empty extra step
   with content.
-* **Therefore: changing only the colour field of a line type 1, in place, cannot change any
-  step assignment.** This is the structural reason the V1 optimiser is safe with respect to
+* **Therefore: changing only the color field of a line type 1, in place, cannot change any
+  step assignment.** This is the structural reason the V1 optimizer is safe with respect to
   build steps, and the serializer is written so it never reorders or moves lines.
 
 Related META commands that also affect step semantics and must be preserved verbatim:
@@ -168,7 +168,7 @@ Related META commands that also affect step semantics and must be preserved verb
 
 ---
 
-## 4. LDraw colour IDs
+## 4. LDraw color IDs
 
 Defined by `LDConfig.ldr`, distributed with the parts library. Format
 (`0 !COLOUR` language extension):
@@ -179,15 +179,15 @@ Defined by `LDConfig.ldr`, distributed with the parts library. Format
 ```
 
 The version bundled here (`LDConfig.ldr`, `0 !LDRAW_ORG Configuration UPDATE 2022-03-31`)
-defines **204 colours**. Key facts used by this project:
+defines **204 colors**. Key facts used by this project:
 
-* `ALPHA` present and < 255 ⇒ **transparent colour**. This is the authoritative signal the
+* `ALPHA` present and < 255 ⇒ **transparent color**. This is the authoritative signal the
   visibility engine uses to decide a part cannot occlude opaque geometry. There are 40
-  transparent colours in the bundled config.
+  transparent colors in the bundled config.
 * Codes 16 and 24 are the inherit/edge sentinels described above.
-* The file carries `// LEGOID <n> - <name>` comments giving the LEGO colour number, which is
-  useful context but is *not* a BrickLink colour ID.
-* **LDraw colour IDs are NOT BrickLink colour IDs.** LDraw 4 = Red, BrickLink 5 = Red. A
+* The file carries `// LEGOID <n> - <name>` comments giving the LEGO color number, which is
+  useful context but is *not* a BrickLink color ID.
+* **LDraw color IDs are NOT BrickLink color IDs.** LDraw 4 = Red, BrickLink 5 = Red. A
   mapping table is required and is a genuine product limitation (see §10).
 
 ---
@@ -200,7 +200,7 @@ defines **204 colours**. Key facts used by this project:
   `.ldr`/`.mpd`.
 * Studio *imports* `.ldr`/`.mpd` directly via **File → Import → Import Model**.
 * Studio's Instruction Maker operates on a model opened in Studio. Because our export preserves
-  `0 STEP` boundaries exactly, a model optimised here and re-imported into Studio retains its
+  `0 STEP` boundaries exactly, a model optimized here and re-imported into Studio retains its
   step structure and can be run through Instruction Maker.
 
 **Limitation:** Studio's LDraw export uses BrickLink part numbering for some parts where it
@@ -225,14 +225,14 @@ Endpoints used by this project:
 | Purpose | Method + path |
 | --- | --- |
 | Price guide | `GET items/{type}/{no}/price` |
-| Known colours for a part | `GET items/{type}/{no}/colors` |
+| Known colors for a part | `GET items/{type}/{no}/colors` |
 | Element ID mapping | `GET item_mapping/{type}/{no}` |
 
 `items/{type}/{no}/price` parameters (`type` = `PART`):
 
 | Param | Values | Notes |
 | --- | --- | --- |
-| `color_id` | BrickLink colour id | required for a meaningful part price |
+| `color_id` | BrickLink color id | required for a meaningful part price |
 | `guide_type` | `stock` \| `sold` | `stock` = current items for sale; `sold` = last 6 months sales |
 | `new_or_used` | `N` \| `U` | |
 | `country_code`, `region` | ISO code / `europe`, `eu`, `north_america`, … | optional filter |
@@ -243,7 +243,7 @@ Response body (`meta` + `data`) contains: `item`, `new_or_used`, `currency_code`
 `max_price`, **`avg_price`**, **`qty_avg_price`**, `unit_quantity`, `total_quantity`, and a
 `price_detail[]` array of individual lots.
 
-Verified against the documented behaviour of two maintained client libraries,
+Verified against the documented behavior of two maintained client libraries,
 [`FrogCosmonaut/bricklink_py`](https://github.com/FrogCosmonaut/bricklink_py) and
 [`gebirgslok/BricklinkSharp`](https://github.com/gebirgslok/BricklinkSharp), because
 `bricklink.com` itself was unreachable from this environment.
@@ -253,10 +253,10 @@ Verified against the documented behaviour of two maintained client libraries,
 * `avg_price` and `qty_avg_price` are *statistics over listings or past sales*, not a checkout
   price. Shipping, seller minimums, lot availability, and tax are not included. The app
   therefore always says **"estimated market parts cost"**, never a guaranteed price.
-* There is **no bulk price endpoint** — one request per part+colour+condition. A 400-unique-lot
+* There is **no bulk price endpoint** — one request per part+color+condition. A 400-unique-lot
   model is 400 requests against a 5,000/day budget, so caching is mandatory, not optional.
 * `unit_quantity`/`total_quantity` give sample size for `stock`; a low value means the average
-  is not trustworthy. The app exposes this and de-prioritises thin-sample quotes.
+  is not trustworthy. The app exposes this and de-prioritizes thin-sample quotes.
 * **Scraping BrickLink's website as a substitute for the API is against their terms and is not
   implemented here.**
 
@@ -297,16 +297,16 @@ over time; `stock` is a better estimate of what is purchasable right now. This a
 * Files: `https://cdn.rebrickable.com/media/downloads/{table}.csv.gz` for
   `themes`, `colors`, `part_categories`, `parts`, `part_relationships`, `elements`, `sets`,
   `minifigs`, `inventories`, `inventory_parts`, `inventory_sets`, `inventory_minifigs`.
-* Updated daily. **Licence/terms: free for any purpose including commercial, provided
+* Updated daily. **License/terms: free for any purpose including commercial, provided
   Rebrickable is acknowledged as the data source. Automated download is permitted at most once
   per day.** `npm run catalog:import` enforces the once-per-day rule locally.
 
 `part_relationships.csv` (`rel_type, child_part_num, parent_part_num`) is the basis of the mold
-optimiser. Relationship types:
+optimizer. Relationship types:
 
 | Code | Meaning | Usable as a drop-in replacement? |
 | --- | --- | --- |
-| `M` | **Mold** — alternate mold, functional drop-in replacement | **Yes** — this is the one the optimiser uses |
+| `M` | **Mold** — alternate mold, functional drop-in replacement | **Yes** — this is the one the optimizer uses |
 | `A` | Alternate — similar part, usually but *not necessarily* functionally compatible | No (offered only as low-confidence, off by default) |
 | `P` | Print — printed/painted surface of the parent | No |
 | `T` | Pattern — marbled/embossed/molded pattern | No |
@@ -314,12 +314,12 @@ optimiser. Relationship types:
 | `B` | Sub-part | No |
 
 `inventory_parts.csv` joined to `inventories.csv`/`sets.csv` gives **which part existed in which
-colour in which official set** — the ground truth for colour validity.
+color in which official set** — the ground truth for color validity.
 
 **Limitation:** these CSVs cover official LEGO sets only (no MOC-exclusive parts), and
-`elements.csv` colour coverage is what LEGO actually produced, which is a *subset* of what
+`elements.csv` color coverage is what LEGO actually produced, which is a *subset* of what
 BrickLink sells (BrickLink also lists parts that only ever appeared in promotional or
-non-set contexts). Being narrower is the safe direction for this product: a colour we cannot
+non-set contexts). Being narrower is the safe direction for this product: a color we cannot
 prove exists is simply never recommended.
 
 ### Bundled fallback catalog (what this repo ships)
@@ -327,13 +327,13 @@ prove exists is simply never recommended.
 Because `cdn.rebrickable.com` was unreachable, the repository ships
 `data/catalog/bundled-catalog.json`, generated by `scripts/build-bundled-catalog.ts` from the
 **104 real LDraw Official Model Repository `.mpd`/`.ldr` files** in the mirrored library. Each
-entry records a `(LDraw part, LDraw colour)` pair together with the official set numbers it was
-observed in, so every colour-validity claim the app makes offline is traceable to a specific
-official LEGO set. Colour 16/24 sentinels are excluded.
+entry records a `(LDraw part, LDraw color)` pair together with the official set numbers it was
+observed in, so every color-validity claim the app makes offline is traceable to a specific
+official LEGO set. Color 16/24 sentinels are excluded.
 
-This yields ~5,400 verified part/colour combinations across ~2,100 parts. **That is far smaller
+This yields ~5,400 verified part/color combinations across ~2,100 parts. **That is far smaller
 than Rebrickable's catalog, so offline coverage is limited and many parts will have no
-alternative colours proposed at all.** That is a deliberate false-negative-over-false-positive
+alternative colors proposed at all.** That is a deliberate false-negative-over-false-positive
 trade-off, and the UI states which catalog source was used.
 
 ---
@@ -346,7 +346,7 @@ There is **no single official, freely downloadable, complete crosswalk**. What e
   targets for Live Mode.
 * **LDraw `0 !KEYWORDS`** — LDraw part files may carry cross-reference numbers from external
   inventory sites in their keywords. Coverage is inconsistent, so it is used only as a hint.
-* **BrickLink `item_mapping`** endpoint — maps BrickLink part+colour to LEGO Element ID and
+* **BrickLink `item_mapping`** endpoint — maps BrickLink part+color to LEGO Element ID and
   back. It does *not* map from LDraw ids.
 * [`Bricksnspace/brickmapping`](https://github.com/Bricksnspace/brickmapping) — a Java library
   for converting between LEGO Design ID, LDraw and BrickLink catalogs. Inspected: the repo
@@ -366,8 +366,8 @@ So `src/lib/catalog/mapping.ts` implements a three-tier mapping with an explicit
 `MappingConfidence` on every result: `verified` (from a curated table or Rebrickable
 `external_ids`), `identity` (the numeric stem matched and no override exists), and `unmapped`.
 **Instances whose mapping is not `verified` or `identity` are excluded from BrickLink live
-pricing and from the Wanted List export**, and the UI shows the count. Colour mapping
-(LDraw ↔ BrickLink) is a curated table covering the common colours, with unmapped colours
+pricing and from the Wanted List export**, and the UI shows the count. Color mapping
+(LDraw ↔ BrickLink) is a curated table covering the common colors, with unmapped colors
 excluded rather than guessed.
 
 **This is a real, and the largest, source of cost-estimate error in the product.** It is
@@ -393,7 +393,7 @@ Confirmed structure (element names verified against the test fixtures and export
 ```
 
 * `ITEMTYPE` `P` = part. `ITEMID` is the **BrickLink** part number. `COLOR` is the
-  **BrickLink** colour id. `MINQTY` is the quantity wanted. `CONDITION` (`N`/`U`) is optional.
+  **BrickLink** color id. `MINQTY` is the quantity wanted. `CONDITION` (`N`/`U`) is optional.
 * BrickLink's own upload UI is at *Want → Upload → Upload BrickLink XML format*; the site
   requires **pasting the XML text**, not dropping the file.
 * Studio can import a Wanted List XML to create a custom palette.
@@ -401,7 +401,7 @@ Confirmed structure (element names verified against the test fixtures and export
 **Limitation — stated in the app, not hidden:** this export has **not** been round-tripped
 through a live BrickLink or Studio import from this environment, because `bricklink.com` was
 unreachable. The generated XML is validated by unit tests for structure, escaping and
-BrickLink-id/colour resolution only. The download UI labels it *"format follows the documented
+BrickLink-id/color resolution only. The download UI labels it *"format follows the documented
 BrickLink XML schema; please verify the first import"*.
 
 ---
@@ -425,10 +425,10 @@ BrickLink XML schema; please verify the first import"*.
    of the parts used by the built-in fixtures — with `CAreadme.txt`, `CAlicense.txt` and the
    original unmodified headers intact, and `NOTICE.md` naming LDraw.org and the part authors.
 2. Does **not** bundle any OMR model file. The bundled catalog is *derived* aggregate data
-   (part/colour/set-number triples) and credits LDraw.org and the OMR; the models themselves are
+   (part/color/set-number triples) and credits LDraw.org and the OMR; the models themselves are
    downloaded by the user via `npm run parts:fetch --models`.
 3. Preserves the `0 !LICENSE` and `0 Author:` lines of any model it processes, so an exported
-   optimised model carries its original attribution.
+   optimized model carries its original attribution.
 4. Does not use the LEGO® or BrickLink® logos or wordmarks as branding. LEGO is a trademark of
    the LEGO Group, which does not sponsor or endorse this project.
 

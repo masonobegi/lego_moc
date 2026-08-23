@@ -24,11 +24,11 @@ import type {
   ParseWarning,
 } from './types';
 
-/** Colour 16: inherit the colour of the referencing line. */
+/** Color 16: inherit the color of the referencing line. */
 export const COLOR_INHERIT = 16;
-/** Colour 24: complement/edge colour of the referencing line. */
+/** Color 24: complement/edge color of the referencing line. */
 export const COLOR_EDGE = 24;
-/** Direct ("0x2RRGGBB") colours are stored as this value + the RGB triple. */
+/** Direct ("0x2RRGGBB") colors are stored as this value + the RGB triple. */
 export const DIRECT_COLOR_BASE = 0x2000000;
 
 export function isDirectColor(colorId: number): boolean {
@@ -45,7 +45,7 @@ export interface ParseOptions {
 }
 
 /**
- * Normalise an LDraw sub-file reference for lookup:
+ * Normalize an LDraw sub-file reference for lookup:
  * lowercase, backslashes to forward slashes, whitespace trimmed.
  * Reference resolution in LDraw is case-insensitive and `\` is the historical
  * path separator.
@@ -72,7 +72,7 @@ function parseNumber(token: string): number | null {
 }
 
 /**
- * Parse the colour field. Accepts a plain LDraw colour code, or a direct colour
+ * Parse the color field. Accepts a plain LDraw color code, or a direct color
  * in `0x2RRGGBB` / `#RRGGBB` form.
  */
 export function parseColorToken(token: string): number | null {
@@ -158,7 +158,7 @@ function parseLine(raw: string, sourceLine: number): { command: LDrawCommand; wa
 
   // ---- Line type 1: sub-file reference ------------------------------------
   if (lineType === '1') {
-    // 1 <colour> x y z a b c d e f g h i <file>
+    // 1 <color> x y z a b c d e f g h i <file>
     // 14 fixed tokens, then the filename which MAY CONTAIN SPACES, so it is
     // taken as the remainder of the line rather than as token 14.
     if (tokens.length < 15) {
@@ -166,7 +166,7 @@ function parseLine(raw: string, sourceLine: number): { command: LDrawCommand; wa
     }
     const colorId = parseColorToken(tokens[1]!);
     if (colorId === null) {
-      return malformed(raw, sourceLine, `Unreadable colour value "${tokens[1]}"`);
+      return malformed(raw, sourceLine, `Unreadable color value "${tokens[1]}"`);
     }
     const nums: number[] = [];
     for (let i = 2; i < 14; i++) {
@@ -205,7 +205,7 @@ function parseLine(raw: string, sourceLine: number): { command: LDrawCommand; wa
     }
     const colorId = parseColorToken(tokens[1]!);
     if (colorId === null) {
-      return malformed(raw, sourceLine, `Unreadable colour value "${tokens[1]}"`);
+      return malformed(raw, sourceLine, `Unreadable color value "${tokens[1]}"`);
     }
     const coords: number[] = [];
     for (let i = 2; i < expected; i++) {

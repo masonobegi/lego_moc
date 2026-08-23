@@ -42,9 +42,9 @@ export async function runAnalysis(request: AnalyzeRequest): Promise<AnalyzeRespo
     priceProvider: provider,
     condition: config.condition,
     safetyLevel: request.safetyLevel ?? DEFAULT_SAFETY_LEVEL,
-    // Demo prices cost nothing to look up, so every catalogued colour is
+    // Demo prices cost nothing to look up, so every catalogd color is
     // evaluated. Live BrickLink calls are rate limited, so the search is
-    // narrowed to the colours that are actually likely to be cheaper.
+    // narrowed to the colors that are actually likely to be cheaper.
     exhaustiveColorSearch: provider.id === 'demo',
     onStage: request.onStage,
   });

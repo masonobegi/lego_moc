@@ -16,8 +16,8 @@ const moldRules = JSON.parse(
 
 const catalog = new DefaultCatalogService({ bundled, moldRules });
 
-describe('bundled catalogue', () => {
-  it('carries real evidence for every part/colour pair', () => {
+describe('bundled catalog', () => {
+  it('carries real evidence for every part/color pair', () => {
     const colors = catalog.availableColors('3001')!;
     expect(colors.length).toBeGreaterThan(5);
     const black = colors.find((c) => c.colorId === 0)!;
@@ -25,7 +25,7 @@ describe('bundled catalogue', () => {
     expect(black.evidence.sets.length).toBeGreaterThan(0);
   });
 
-  it('never records the inherit or edge colour sentinels', () => {
+  it('never records the inherit or edge color sentinels', () => {
     for (const [, byColor] of Object.entries(bundled.parts).slice(0, 400)) {
       expect(Object.keys(byColor)).not.toContain('16');
       expect(Object.keys(byColor)).not.toContain('24');
@@ -34,7 +34,7 @@ describe('bundled catalogue', () => {
 
   it('returns null for a part it has never seen, rather than an empty list', () => {
     // The distinction matters: null means "unknown", [] would mean "exists in
-    // no colours", and the optimiser treats those differently.
+    // no colors", and the optimizer treats those differently.
     expect(catalog.availableColors('not-a-real-part-id')).toBeNull();
     expect(catalog.isKnownCombination('not-a-real-part-id', 0)).toBe(false);
   });
@@ -42,7 +42,7 @@ describe('bundled catalogue', () => {
   it('confirms and denies specific combinations', () => {
     expect(catalog.isKnownCombination('3001', 0)).toBe(true);
     expect(catalog.isKnownCombination('3001', 4)).toBe(true);
-    // 3001 has not been observed in every colour in the palette.
+    // 3001 has not been observed in every color in the palette.
     const known = new Set(catalog.availableColors('3001')!.map((c) => c.colorId));
     const unknown = [...Array(200).keys()].find((c) => !known.has(c) && c !== 16 && c !== 24)!;
     expect(catalog.isKnownCombination('3001', unknown)).toBe(false);
@@ -110,7 +110,7 @@ describe('part id mapping', () => {
     expect(mapPartId('u9012').confidence).toBe('unmapped');
   });
 
-  it('applies curated exceptions where the catalogues genuinely diverge', () => {
+  it('applies curated exceptions where the catalogs genuinely diverge', () => {
     const mapping = mapPartId('6141');
     expect(mapping.confidence).toBe('verified');
     expect(mapping.brickLinkPartId).toBe('4073');
@@ -123,8 +123,8 @@ describe('part id mapping', () => {
   });
 });
 
-describe('colour mapping', () => {
-  it('maps the common colours to their BrickLink ids', () => {
+describe('color mapping', () => {
+  it('maps the common colors to their BrickLink ids', () => {
     expect(mapLDrawColorToBrickLink(0).brickLinkColorId).toBe(11); // Black
     expect(mapLDrawColorToBrickLink(4).brickLinkColorId).toBe(5); // Red
     expect(mapLDrawColorToBrickLink(71).brickLinkColorId).toBe(86); // Light Bluish Gray

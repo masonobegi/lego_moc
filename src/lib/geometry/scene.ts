@@ -34,7 +34,7 @@ import type { PartInstance } from '../ldraw/types';
 import { TriangleBVH, type TransferableBVH } from './bvh';
 import type { PartMesh } from './partMesh';
 
-/** Mirrors VisibilityTarget in the optimiser, kept structural to avoid a cycle. */
+/** Mirrors VisibilityTarget in the optimizer, kept structural to avoid a cycle. */
 export interface VisibilityTargetRecord {
   readonly instanceId: string;
   readonly partId: string;
@@ -308,8 +308,8 @@ export class ModelScene {
     let j = start + count - 1;
     while (i <= j) {
       const idx = this.order[i]! * 6;
-      const centre = (this.instBounds[idx + axis]! + this.instBounds[idx + 3 + axis]!) / 2;
-      if (centre < split) {
+      const center = (this.instBounds[idx + axis]! + this.instBounds[idx + 3 + axis]!) / 2;
+      if (center < split) {
         i++;
       } else {
         const tmp = this.order[i]!;
