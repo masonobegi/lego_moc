@@ -256,13 +256,15 @@ Read `docs/AUDIT.md` for the full list. The ones most likely to affect you:
 2. **Offline color coverage is narrow.** Without a Rebrickable import, color
    validity comes from ~2,000 parts observed in 101 official sets. A part not in
    that data never gets a proposal.
-3. **How much you save depends entirely on the model, and on many models it is
-   very little.** Measured across the 103 models of the LDraw Official Model
-   Repository - see `docs/validation-results.json` and the verdict in
-   `docs/AUDIT.md`. Most official sets are hollow shells with open interiors,
-   and what is genuinely sealed inside is often already a cheap color. A MOC
-   built from whatever the designer had plenty of typically has more headroom.
-   Do not assume the numbers on this page apply to your model; run it.
+3. **On most models this saves very little, and you should know that before you
+   install it.** Measured across all 103 models of the LDraw Official Model
+   Repository: **median saving $0.08, or 0.1%**. 42% of them save nothing at
+   all, and none reaches 10%. The best result in the corpus was $23.25 on a $783
+   model. The reason is not a bug - three quarters of the parts in a LEGO model
+   can simply be seen, and the median model has 0.8% of its pieces fully hidden.
+   Full data in `docs/validation-results.json`, the honest verdict in
+   `docs/AUDIT.md`. Large, colorful, interior-heavy models do best; run yours
+   rather than assuming.
 4. **Analysis is slow on large models.** A 1,845-part model takes about 90
    seconds and a 3,457-part one about two minutes. That is the price of the
    observer pass, which cut the rate of changes proposed on parts that can

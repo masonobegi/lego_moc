@@ -102,34 +102,15 @@ Real models are considerably faster than the synthetic worst case at the same
 part count, because a real MOC has a smaller hidden fraction and reuses far more
 distinct parts.
 
-A wider survey of 15 official sets, spread across the size range, ran the full
-pipeline end to end with no failures, no part moved and no build step altered:
+The savings figures previously quoted here came from a 15-model sample taken
+before the visibility engine was corrected. They were wrong, and rather than
+restate them the whole corpus was measured instead: all 103 LDraw Official Model
+Repository models, in `docs/validation-results.json`, with the verdict in
+`docs/AUDIT.md`. The short version is that the median model saves 0.1% and 42%
+save nothing, because three quarters of the parts in a LEGO model can be seen.
 
-| Model | Parts | Unresolved parts | Candidates | Saving (demo prices) | Time |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| 21309 NASA Apollo Saturn V | 1,845 | 0 | 212 | $31.40 (9.2%) | 11.3 s |
-| 10227 B-wing Starfighter | 1,688 | 5 | 107 | $18.76 (7.0%) | 7.8 s |
-| 75144 Snowspeeder | 2,467 | 6 | 180 | $17.28 (4.8%) | 10.5 s |
-| 10019 Rebel Blockade Runner | 1,870 | 0 | 66 | $30.57 (3.9%) | 5.9 s |
-| 21041 Great Wall of China | 552 | 0 | 11 | $2.08 (2.0%) | 3.0 s |
-| 5571 Giant Truck | 1,769 | 0 | 51 | $6.15 (1.6%) | 4.4 s |
-| 6235 Buried Treasure | 31 | 0 | 2 | $0.06 (0.8%) | 0.9 s |
-| 10179 Millennium Falcon UCS | 6,034 | 8 | 102 | $4.83 (0.7%) | 11.9 s |
-| 7181 TIE Interceptor UCS | 694 | 0 | 1 | $0.25 (0.2%) | 2.7 s |
-| 6919 Planetary Prowler | 369 | 1 | 3 | $0.07 (0.1%) | 1.9 s |
-| 6973 Deep Freeze Defender | 544 | 0 | 1 | $0.06 (0.1%) | 2.1 s |
-| 6285 Black Seas Barracuda | 4,399 | 11 | 4 | $0.12 (0.0%) | 5.2 s |
-| 1713 Shipwrecked Pirate | 29 | 0 | 0 | $0.00 (0.0%) | 0.2 s |
-| 6799 Showdown Canyon Carriage | 81 | 0 | 0 | $0.00 (0.0%) | 0.5 s |
-| 6862 Secret Space Voyager | 374 | 0 | 0 | $0.00 (0.0%) | 1.4 s |
-
-The spread is the honest answer to "how much will this save me": it depends
-entirely on how much hidden interior the model has and what colors the designer
-used there. Five of these fifteen models save essentially nothing. Nothing in
-the product tries to make that number look better than it is.
-
-These figures are estimated PART prices, not delivered order totals - see
-`docs/ARCHITECTURE.md` and the results page for what that distinction means.
+Runtime across that corpus, with worker threads: median 3.9 s per model, and the
+largest (8,149 parts) around two minutes.
 
 ## A bug worth recording
 

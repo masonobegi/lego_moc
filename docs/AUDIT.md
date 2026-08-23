@@ -342,4 +342,120 @@ models found what a test suite could not, and the corpus is not in CI.
 
 ## Does this product create real economic value?
 
-*(Filled in from the validation study - see below.)*
+**On the evidence I have: no.** Not enough to pay for, and not enough to be
+worth the user's afternoon.
+
+I am going to state the numbers before the excuses.
+
+### What was measured
+
+All 103 models of the LDraw Official Model Repository, 29 to 8,149 parts,
+$21,292 of estimated parts in total, run through the optimizer at the default
+safety level with demo prices. Method and criteria: `docs/VALIDATION_PLAN.md`,
+written before the run. Full data: `docs/validation-results.json`.
+
+| | |
+| --- | ---: |
+| Median saving | **$0.08** |
+| Median saving, percent | **0.1%** |
+| Mean saving | $1.64 (0.5%) |
+| 25th / 75th percentile | $0.00 / $1.40 |
+| Models saving nothing at all | **41.7%** |
+| Models saving over $5 | 8.7% |
+| Models saving over $10 | 5.8% |
+| Models saving over $20 | 1.9% |
+| Models saving over $50 | 0% |
+| Models reaching 10% | **0%** |
+| Best single result | $23.25 on a $783 model (3.0%) |
+| Best percentage | 5.0% (B-wing, $13.46) |
+| Total across the whole corpus | $169 of $21,292 = **0.8%** |
+| Savings from color changes | 96.8% |
+
+Correlation of savings with part count is 0.54 - bigger models save more in
+absolute terms, which is the one encouraging line in the table - but with
+percentage only 0.29. Even among the 29 models over 1,500 parts the median
+saving is **$2.43**.
+
+### Against the criteria fixed in advance
+
+- **Strong signal** required median ≥10% AND median above $20 on large models.
+  Measured: 0.1% and $2.43. Not close.
+- **Weak signal** was any of: median below 5%, median absolute below $10, or
+  fewer than a quarter of models clearing $10. **All three** are true (0.1%,
+  $0.08, 5.8%).
+
+The plan says weak signal means stop or change the product. That is the finding.
+I am not going to move the thresholds now that I can see the numbers.
+
+### Why, mechanically
+
+The optimizer is not failing. It is reporting the truth about these models.
+
+Across a sample of three large sets, of the pieces it declined to change:
+
+| Reason | Pieces | |
+| --- | ---: | --- |
+| Visible from outside | 5,375 | 77% |
+| Reused submodel with a visible copy | 1,533 | 22% |
+| Drawn in inherited color 16 | 386 | 6% |
+| Everything else | ~55 | <1% |
+
+**Three quarters of the parts in a LEGO model can be seen.** The median model in
+this corpus has 0.8% of its pieces fully hidden. There is very little buried
+plastic, and what is buried is often already a cheap color, because the designer
+had no reason to spend on it either.
+
+This is a fact about how LEGO models are built, not a gap in the software. No
+amount of engineering makes an exterior brick invisible.
+
+### An honest note about the earlier numbers
+
+An earlier version of this software reported far better results - 13.5% on
+Apollo Saturn V where the corrected engine reports 3.9%. Those numbers were
+wrong: the visibility worker was running a stale bundle and the sampling method
+could not find parts visible through gaps. Fixing that withdrew about 45% of
+proposed changes and cut measured savings by roughly two thirds.
+
+So the honest summary of this project's arc is that **the product looked
+viable until it was measured correctly.** That is worth saying plainly, because
+the temptation to stop auditing while the numbers still look good is exactly
+what the audit exists to resist.
+
+### The one part that worked
+
+The feature that tells the user we found nothing is doing its job. Of 103
+models, 95 were rated "already cost-efficient" and 1 "not worth acting on" -
+and that is the correct answer for those models. A tool that had reported a
+result for all 103 would have been lying 96 times.
+
+### What would have to be different
+
+Not excuses - the specific things that could change the answer, and how much I
+believe each:
+
+1. **Reused submodels (most promising).** 22% of declined pieces are lines
+   shared between hidden and visible copies. Splitting the submodel would unlock
+   them, at the cost of changing the file's structure and therefore the build
+   instructions. On Cafe Corner alone that is 1,163 pieces. The value is
+   unmeasured, and those particular pieces are mostly already-cheap tan and
+   white, so I would not assume it rescues the number.
+2. **Fan MOCs rather than official sets.** The biggest unknown, and it cuts both
+   ways: MOCs are often display models with more open interiors, which would be
+   worse, not better. This needs measuring, not assuming.
+3. **Live BrickLink prices.** Real color rarity spreads may be wider than the
+   demo dataset's. This would change absolute dollars; it is unlikely to move a
+   0.1% median by two orders of magnitude.
+4. **Used-condition pricing**, where color premiums are larger.
+
+### The recommendation
+
+As a paid product, on this evidence: no. As a free tool that occasionally finds
+$10-20 on a large, colorful, interior-heavy model - Blockade Runner, Apollo,
+the B-wing - it is genuinely useful, and it is honest about the other 95 cases.
+
+The delivered-cost point makes it worse rather than better, and it belongs in
+this verdict: a $0.08 median part-price saving cannot survive a shipping charge.
+Even the $23 best case has to survive the order splitting across an extra
+seller. The verify-on-BrickLink workflow exists precisely so nobody has to take
+my estimate on faith, and if anything it will make these numbers look worse, not
+better.

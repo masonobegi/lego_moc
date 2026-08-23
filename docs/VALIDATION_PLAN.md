@@ -124,5 +124,11 @@ the difference between that and a checkout price is not a rounding error.
 
 ## The answer
 
-The measured outcome and the verdict against the criteria above are in
-`docs/AUDIT.md`, under "Does this product create real economic value?".
+**Weak signal.** All three weak-signal conditions were met: median saving 0.1%,
+median absolute saving $0.08, and 5.8% of models clearing $10. No threshold was
+adjusted after the fact.
+
+The full numbers and what they mean are in `docs/AUDIT.md`, under "Does this
+product create real economic value?". The short version: three quarters of the
+parts in a LEGO model can be seen, so there is very little hidden plastic to
+recolor, and what is hidden is often already a cheap color.
