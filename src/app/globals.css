@@ -1,0 +1,125 @@
+@import 'tailwindcss';
+
+/*
+ * BrickThrift design tokens.
+ *
+ * Restrained, typographic, dark-first. The single accent is a warm amber used
+ * only for money saved, so the number the product exists to produce is the one
+ * thing on the page that is coloured. No LEGO trademarks, logos or brand
+ * colours are used anywhere.
+ */
+@theme {
+  --color-ink-950: #08090c;
+  --color-ink-900: #0d0f14;
+  --color-ink-850: #12151c;
+  --color-ink-800: #171b24;
+  --color-ink-700: #222833;
+  --color-ink-600: #2f3746;
+  --color-ink-500: #48526414;
+  --color-slate-1: #8b93a5;
+  --color-slate-2: #a8b0c0;
+  --color-slate-3: #d3d8e2;
+
+  --color-amber-accent: #f0a836;
+  --color-amber-soft: #6b4a12;
+  --color-teal-accent: #3fb8a8;
+  --color-rose-accent: #e2617a;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, 'Noto Sans', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #08090c;
+  --panel: #0d0f14;
+  --panel-2: #12151c;
+  --line: #1e2430;
+  --line-strong: #2a3140;
+  --text: #e8ebf2;
+  --text-dim: #a8b0c0;
+  --text-faint: #7c8496;
+  --accent: #f0a836;
+  --accent-dim: #b3781f;
+  --good: #3fb8a8;
+  --warn: #e0a458;
+  --bad: #e2617a;
+}
+
+* {
+  border-color: var(--line);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* Numeric figures line up in tables and in the savings headline. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+}
+
+.panel-2 {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 0.625rem;
+}
+
+.hairline {
+  border-top: 1px solid var(--line);
+}
+
+/* Subtle grid used behind the hero, evoking a stud grid without imitating it. */
+.stud-grid {
+  background-image:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--text) 7%, transparent) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+input[type='range'] {
+  accent-color: var(--accent);
+}
+
+.scroll-thin::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 6px;
+  border: 2px solid var(--panel);
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
