@@ -95,6 +95,58 @@ bugs never existing.
 
 The viewer renders double-sided for the same reason.
 
+### Visibility is judged from the observer's side, not the part's
+
+The obvious formulation - cast rays from random points on the part in random
+directions and see whether any escape - is the one this project started with,
+and it is wrong for real LEGO models.
+
+Real models are full of small gaps. A part visible only through one of them is a
+rare event in a four-dimensional space: the surface point has to land on the
+patch that faces the gap AND the direction has to fall inside the gap's solid
+angle. Measured on the UCS Millennium Falcon, such parts escape on the order of
+one ray in a hundred thousand. Worse, the estimate does not converge: raising
+the budget from 34,200 rays per part to 804,000 took the share of accepted parts
+found to be visible from 34.7% to 58.5%, still climbing.
+
+So the engine also asks the question an observer asks - "standing over there, do
+I see this part?" - by framing the part's projected bounding box from many
+viewpoints and shooting a grid of parallel rays. Rays are laid out on the IMAGE
+PLANE, which is exactly where the gap's aperture is: a pinhole one LDU across on
+a 40 LDU part is one fortieth of the image width. On the same test this found
+MORE visible parts than the largest surface-sampling budget did, in a sixth of
+the time.
+
+A part is called hidden only when BOTH passes find nothing. Across fifteen real
+models the rate of proposed changes with a genuine line of sight fell from 15.9%
+to 1.4%, at three to eight times the analysis time and with about 45% of
+previously proposed changes withdrawn. That trade is the right way round: a
+missed saving costs pennies, recoloring a brick somebody can see costs the
+user's trust in everything else the tool says.
+
+The six world axes are always among the viewpoints. LDraw models are
+axis-aligned and are looked at from straight above, straight ahead and straight
+along a side far more often than from anywhere else.
+
+### Safe and cheaper is not the same as worth buying
+
+`optimizer/practicality.ts` exists because the color optimizer answers two
+questions - is this safe, is it cheaper - and neither is the question the user
+actually has. A replacement color that exists in four lots worldwide is not a
+bargain: the order gains a seller, a shipping charge and probably a
+minimum-order top-up, and the few cents a piece are gone several times over.
+
+So every quote carries what the marketplace can tell us about supply, assessed
+against the quantity this build needs, and thinly-stocked replacements are
+rejected unless the saving is large enough to absorb a shipping charge. The
+policy lives in one file rather than being spread through the optimizers.
+
+Deliberately NOT built: a shipping calculator or a seller picker. BrickLink
+already has that machinery and it needs the whole order to work. Reimplementing
+it from a price-guide endpoint would produce a confident number that was wrong,
+which is worse than no number. Instead both Wanted Lists are exported so
+BrickLink can price each one, and the results page collects the two totals back.
+
 ### The unit of change is a line, not a part
 
 A submodel referenced four times produces four physical bricks from one line

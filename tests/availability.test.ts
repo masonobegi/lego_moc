@@ -298,10 +298,22 @@ describe('the practicality pass', () => {
   });
 
   it('uses the documented default threshold', () => {
-    expect(DEFAULT_PRACTICALITY.minSavingPerChange).toBe(0.1);
-    const justUnder = applyPracticality([change({ savings: 0.09 })]);
-    const justOver = applyPracticality([change({ savings: 0.11 })]);
+    // Deliberately low: candidates are per LINE, and a big model is mostly
+    // lines covering one or two pieces, so a high floor throws away a long tail
+    // that adds up. See the comment on DEFAULT_PRACTICALITY.
+    expect(DEFAULT_PRACTICALITY.minSavingPerChange).toBe(0.02);
+    const justUnder = applyPracticality([change({ savings: 0.01 })]);
+    const justOver = applyPracticality([change({ savings: 0.03 })]);
     expect(justUnder.candidates).toHaveLength(0);
     expect(justOver.candidates).toHaveLength(1);
+  });
+
+  it('still keeps the long tail of small per-line changes', () => {
+    // A ten-cent floor dropped 22 of 32 changes and 30% of the saving on a
+    // real model. Each of these is small; together they are the product.
+    const tail = Array.from({ length: 20 }, (_, i) =>
+      change({ id: `c${i}`, commandRef: { fileIndex: 0, commandIndex: i }, savings: 0.05 }),
+    );
+    expect(applyPracticality(tail).candidates).toHaveLength(20);
   });
 });

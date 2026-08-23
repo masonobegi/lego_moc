@@ -48,11 +48,21 @@ export interface PracticalityOptions {
 }
 
 /**
- * Ten cents. Small enough that a bag of common bricks still qualifies, large
- * enough that the change list is about decisions rather than rounding.
+ * Two cents.
+ *
+ * The obvious value is ten cents, and it is wrong. Candidates are per LINE, and
+ * a large model is mostly lines covering one or two pieces, so a ten-cent floor
+ * throws away a long tail that adds up: measured on 5571 Giant Truck it dropped
+ * 22 of 32 changes and 30% of the total saving. Two cents keeps the tail while
+ * still excluding the case this exists for - a one-cent saving on a single
+ * piece, which is noise in the change list and nothing else.
+ *
+ * The results page has its own threshold control on top of this, so a user who
+ * does want a ten-cent floor can have one without the analysis having thrown
+ * those changes away first.
  */
 export const DEFAULT_PRACTICALITY: PracticalityOptions = {
-  minSavingPerChange: 0.1,
+  minSavingPerChange: 0.02,
   highConfidenceMinConfidence: 0.99,
   highConfidenceMinAvailability: 'MODERATE',
 };

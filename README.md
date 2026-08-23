@@ -108,6 +108,14 @@ has had a successful response.
   primitives, in a two-level BVH.
 - **Casts rays, not guesses.** Points across each part's real triangle surface,
   rays in directions over the whole sphere. One escaping ray disqualifies a part.
+- **Looks at the model from outside.** A second pass views the finished model
+  from ~100 directions, including from underneath, and any part that shows up
+  through a gap is left alone - the test that actually catches narrow lines of
+  sight.
+- **Checks you can buy it.** A replacement color stocked in four lots worldwide
+  is not a saving. Supply is assessed against the quantity your build needs, and
+  poorly stocked replacements are rejected unless the saving is large enough to
+  absorb a shipping charge.
 - **Checks the color exists.** A cheaper color is only proposed when catalog
   data evidences that the part has been produced in it.
 - **Preserves your build.** Changes are written by rewriting the color field of
@@ -120,8 +128,13 @@ has had a successful response.
 
 - No structural redesign, no changing how parts connect.
 - Never replaces one piece with several.
-- No checkout price: shipping, seller minimums, lot availability and tax are not
-  included. It says "estimated market parts cost" and means it.
+- No checkout price. Shipping, seller minimums, lot availability and tax are not
+  included, and it never claims otherwise: everything it shows is an
+  **estimated part cost**. For the real answer it exports your original and
+  optimized Wanted Lists so BrickLink - which does know about sellers and
+  shipping - can price both, and you compare the totals.
+- No shipping calculator and no seller picker. BrickLink has those already; a
+  confident number computed without the data would be worse than no number.
 - Analyzes the completed model as supplied - not detachable roofs, hinged panels
   or half-built states.
 - Does not generate instructions. It preserves your step structure so Studio can.
@@ -200,7 +213,7 @@ They go through exactly the same code an upload does. Nothing is special-cased.
 | --- | --- |
 | `npm run dev` | Development server on :3000 |
 | `npm run build` / `npm start` | Production build and server |
-| `npm test` | 159 unit and integration tests |
+| `npm test` | 252 unit and integration tests |
 | `npm run test:e2e` | Playwright end-to-end tests |
 | `npm run typecheck` | TypeScript, strict |
 | `npm run bench` | Performance benchmark |
@@ -209,6 +222,7 @@ They go through exactly the same code an upload does. Nothing is special-cased.
 | `npm run colors:build` | Regenerate the color table from `LDConfig.ldr` |
 | `npm run parts:bundle -- <lib>` | Regenerate the bundled parts subset |
 | `npm run workers:build` | Bundle the visibility worker (runs automatically) |
+| `npx tsx scripts/validation-study.ts <dir>` | Run a model corpus and report the savings distribution |
 
 `npm run test:e2e` needs a browser. If Playwright's managed browser is not
 installed, run `npm run test:e2e:install`, or point at an existing one with
@@ -224,6 +238,8 @@ installed, run `npm run test:e2e:install`, or point at an existing one with
 | `docs/ARCHITECTURE.md` | How it is put together and why, including the decisions that are not obvious |
 | `docs/PERFORMANCE.md` | Benchmarks and what makes it fast |
 | `docs/AUDIT.md` | Honest self-assessment, scored, with the weaknesses named |
+| `docs/VALIDATION_PLAN.md` | How to test whether this is commercially worth building, with criteria fixed in advance |
+| `docs/validation-results.json` | The measured savings distribution across the model corpus |
 | `NOTICE.md` | Third-party data, licenses and attribution |
 | `test-models/README.md` | Fixture geometry and expected outcomes |
 
