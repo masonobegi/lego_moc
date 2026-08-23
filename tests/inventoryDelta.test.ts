@@ -19,13 +19,19 @@ import { describe, expect, it } from 'vitest';
 import { applyToInstances } from '@/lib/analysis/pipeline';
 import { DefaultCatalogService } from '@/lib/catalog/catalogService';
 import { buildInventoryDelta, type InventoryDelta } from '@/lib/export/inventoryDelta';
-import { buildInventoryDeltaCsv, buildInventoryDeltaWantedListXml } from '@/lib/export/reports';
+import {
+  buildInventoryDeltaCsv,
+  buildInventoryDeltaWantedListXml,
+  deltaExportPreamble,
+  type DeltaExportContext,
+} from '@/lib/export/reports';
 import { parseLDraw } from '@/lib/ldraw/parser';
 import { resolveModel } from '@/lib/ldraw/resolve';
 import { countLots } from '@/lib/ldraw/inventory';
 import { PriceBook } from '@/lib/pricing/priceEngine';
 import type { OptimizationCandidate } from '@/lib/optimizer/types';
 import { assessAvailability } from '@/lib/pricing/availability';
+import { DELTA_ACTION_LABELS } from '@/lib/export/inventoryDelta';
 import type { PriceQuote } from '@/lib/pricing/types';
 
 const catalog = new DefaultCatalogService({
@@ -164,6 +170,17 @@ function delta(enabledIds: ReadonlySet<string>, candidates = recolorAll): Invent
   });
 }
 
+const CONTEXT: DeltaExportContext = {
+  modelFileName: 'delta.ldr',
+  analysisId: 'test-analysis-id',
+  generatedAt: '2026-01-01T00:00:00.000Z',
+  enabledChangeCount: 4,
+  candidateCount: 4,
+  priceSourceLabel: 'Demo price data',
+  isDemoData: true,
+  condition: 'new',
+};
+
 function lot(d: InventoryDelta, partId: string, colorId: number) {
   return d.lots.find((l) => l.partId === partId && l.colorId === colorId);
 }
@@ -295,9 +312,10 @@ describe('nothing enabled', () => {
   });
 
   it('still produces a valid, empty CSV and XML', () => {
-    const csv = buildInventoryDeltaCsv(d);
-    expect(csv.split('\r\n')[0]).toContain('action');
-    expect(csv.trim().split('\r\n')).toHaveLength(1);
+    const csv = buildInventoryDeltaCsv(d, CONTEXT);
+    const rows = csv.trim().split('\r\n').filter((row) => !row.startsWith('#'));
+    expect(rows[0]).toContain('action');
+    expect(rows).toHaveLength(1);
 
     const xml = buildInventoryDeltaWantedListXml(d, catalog, 'new');
     expect(xml.xml.trim()).toBe('<INVENTORY>\n</INVENTORY>');
@@ -307,8 +325,8 @@ describe('nothing enabled', () => {
 
 describe('the delta CSV', () => {
   const d = delta(new Set(recolorAll.map((c) => c.id)));
-  const csv = buildInventoryDeltaCsv(d);
-  const rows = csv.trim().split('\r\n');
+  const csv = buildInventoryDeltaCsv(d, CONTEXT);
+  const rows = csv.trim().split('\r\n').filter((row) => !row.startsWith('#'));
 
   it('names the direction in words, not just a sign', () => {
     // This file gets opened out of context. "-4" is ambiguous; "No longer
@@ -328,16 +346,37 @@ describe('the delta CSV', () => {
   });
 
   it('carries both directions, which the XML cannot', () => {
-    expect(rows).toHaveLength(3); // header plus two lots
+    expect(rows).toHaveLength(3); // column row plus two lots
+  });
+
+  it('opens with provenance, not a naked column row', () => {
+    // This file is short, actionable, and will be opened weeks later with no
+    // memory of which model or settings produced it.
+    const preamble = csv.split('\r\n').filter((row) => row.startsWith('#'));
+    expect(preamble.length).toBeGreaterThan(10);
+    const text = preamble.join('\n');
+    expect(text).toContain('NOT a complete parts list');
+    expect(text).toContain('delta.ldr');
+    expect(text).toContain('test-analysis-id');
+    expect(text).toContain('DEMO PRICE DATA');
+    expect(csv.startsWith('#')).toBe(true);
+  });
+
+  it('is still parseable once the comment lines are dropped', () => {
+    const dataRows = rows.slice(1);
+    const actions = dataRows.map((row) => row.split(',')[0]);
+    for (const action of actions) {
+      expect(Object.values(DELTA_ACTION_LABELS)).toContain(action);
+    }
   });
 
   it('still guards text that came from the uploaded model', () => {
     // The injection guard has to stay on for anything the file supplied. A part
     // description is whatever the model said it was.
-    const injected = buildInventoryDeltaCsv({
-      ...d,
-      lots: [{ ...d.lots[0]!, partDescription: '=cmd|calc!A1' }],
-    });
+    const injected = buildInventoryDeltaCsv(
+      { ...d, lots: [{ ...d.lots[0]!, partDescription: '=cmd|calc!A1' }] },
+      CONTEXT,
+    );
     expect(injected).toContain("'=cmd|calc!A1");
   });
 });
@@ -431,7 +470,8 @@ describe('netting happens at the BrickLink level, not the LDraw level', () => {
     ],
     piecesAdded: 12, piecesRemoved: 12, pieceCountConserved: true, totalPieces: 100,
     lotsAdded: 1, lotsRemoved: 1, lotsChanged: 2,
-    estimatedCostDifference: -0.24, unpricedLotCount: 0, currency: 'USD',
+    estimatedCostDifference: -0.24, additionalSpend: 0.96, spareValue: 1.2,
+    unpricedLotCount: 0, unpricedPieceCount: 0, currency: 'USD',
   };
 
   it('emits nothing when the swap is one item number to BrickLink', () => {
@@ -528,5 +568,101 @@ describe('a delta that does not conserve pieces', () => {
         currency: 'USD',
       }),
     ).toThrow(/not piece-conserving/);
+  });
+});
+
+/**
+ * The money on a delta is the main way this export could mislead.
+ *
+ * The reader a delta is FOR has already bought the original parts list - that
+ * is why they want the difference rather than the whole thing. For them the
+ * optimization does not save the net figure: they cannot un-buy what they
+ * already have, so acting on this file costs them the increases and leaves them
+ * with spare bricks. Presenting one number labelled "savings" would be exactly
+ * backwards for the audience.
+ */
+describe('the three money figures', () => {
+  const d = delta(new Set(recolorAll.map((c) => c.id)));
+
+  it('separates the net difference from what acting on the file costs', () => {
+    // 4 red out at $0.75, 4 black in at $0.12.
+    expect(d.additionalSpend).toBe(0.48);
+    expect(d.spareValue).toBe(3);
+    expect(d.estimatedCostDifference).toBe(-2.52);
+  });
+
+  it('keeps the three consistent: net equals spend minus spare', () => {
+    expect(Math.abs(d.estimatedCostDifference - (d.additionalSpend - d.spareValue))).toBeLessThan(0.005);
+  });
+
+  it('never presents a single figure as a saving', () => {
+    const preamble = deltaExportPreamble(d, CONTEXT).join('\n');
+    expect(preamble).not.toMatch(/you save/i);
+    expect(preamble).not.toMatch(/^savings:/im);
+  });
+
+  it('states plainly that acting on it after ordering costs money and returns nothing', () => {
+    const preamble = deltaExportPreamble(d, CONTEXT).join('\n');
+    expect(preamble).toContain('COSTS you');
+    expect(preamble).toContain('cannot be un-bought');
+    expect(preamble).toContain('BEFORE you order');
+  });
+
+  it('names the precondition and the alternative export', () => {
+    const preamble = deltaExportPreamble(d, CONTEXT).join('\n');
+    expect(preamble).toContain('correct only if');
+    expect(preamble).toContain('OPTIMIZED Wanted List');
+  });
+
+  it('warns that the top-up is its own order with its own shipping', () => {
+    const preamble = deltaExportPreamble(d, CONTEXT).join('\n');
+    expect(preamble).toContain('own BrickLink order');
+    expect(preamble).toContain('seller minimums');
+  });
+});
+
+describe('lots with no price estimate', () => {
+  it('sort to the end rather than ranking as a zero cost change', () => {
+    // An unpriced 40-piece lot filed in the middle of the money ordering reads
+    // as "this one does not matter", when the truth is we do not know.
+    const unpricedInstances = instances.map((i) =>
+      i.partId === '3005' ? { ...i, partId: 'no-price-part' } : i,
+    );
+    const d = buildInventoryDelta({
+      originalInstances: unpricedInstances,
+      optimizedInstances: unpricedInstances.map((i) =>
+        i.colorId === 4 ? { ...i, colorId: 0, declaredColorId: 0 } : i,
+      ),
+      prices,
+      condition: 'new',
+      currency: 'USD',
+    });
+    const unpricedIndex = d.lots.findIndex((l) => l.costDifference === null);
+    const pricedIndexes = d.lots
+      .map((l, i) => (l.costDifference === null ? -1 : i))
+      .filter((i) => i >= 0);
+    if (unpricedIndex >= 0) {
+      expect(unpricedIndex).toBeGreaterThan(Math.max(...pricedIndexes));
+    }
+  });
+
+  it('are counted, in lots and in pieces, so the size of the gap is visible', () => {
+    const oddInstances = [
+      ...instances,
+      { ...instances[0]!, instanceId: 'x1', partId: 'no-price-part' },
+      { ...instances[0]!, instanceId: 'x2', partId: 'no-price-part' },
+    ];
+    const d = buildInventoryDelta({
+      originalInstances: oddInstances,
+      optimizedInstances: oddInstances.map((i) =>
+        i.partId === 'no-price-part' ? { ...i, colorId: 2, declaredColorId: 2 } : i,
+      ),
+      prices,
+      condition: 'new',
+      currency: 'USD',
+    });
+    expect(d.unpricedLotCount).toBe(2);
+    expect(d.unpricedPieceCount).toBe(4);
+    expect(deltaExportPreamble(d, CONTEXT).join('\n')).toContain('no price');
   });
 });

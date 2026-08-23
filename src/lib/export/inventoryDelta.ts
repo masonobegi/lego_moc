@@ -32,7 +32,7 @@
 import { colorName } from '../ldraw/colors';
 import { countLots } from '../ldraw/inventory';
 import type { PartInstance } from '../ldraw/types';
-import type { PriceBook } from '../pricing/priceEngine';
+import { round2, type PriceBook } from '../pricing/priceEngine';
 import type { Condition } from '../pricing/types';
 
 export type DeltaAction =
@@ -91,15 +91,35 @@ export interface InventoryDelta {
    * optimized order is cheaper. This is the SAME figure as the headline saving
    * (with the sign flipped), not a separate one - the removed lots and the added
    * lots are both in it.
+   *
+   * IMPORTANT: this figure is only meaningful to somebody who has not ordered
+   * yet. See `additionalSpend`.
    */
   readonly estimatedCostDifference: number;
-  /** Lots in the delta with no price estimate, so not in the figure above. */
+  /**
+   * What it costs to act on this list: the sum of the increases alone.
+   *
+   * This is the number that matters to the reader a delta is actually FOR -
+   * somebody who has already bought the original parts list and wants to know
+   * what to buy differently. They cannot un-buy the parts they no longer need,
+   * so for them the optimization does not save `estimatedCostDifference`; it
+   * costs this, and leaves them with spare bricks.
+   *
+   * Never negative.
+   */
+  readonly additionalSpend: number;
+  /**
+   * Estimated value of the parts that become spare: the sum of the decreases.
+   *
+   * Real money, but only recoverable by not having bought them in the first
+   * place. Never negative.
+   */
+  readonly spareValue: number;
+  /** Lots in the delta with no price estimate, so in none of the figures above. */
   readonly unpricedLotCount: number;
+  /** Pieces inside those lots, so the size of the gap is visible. */
+  readonly unpricedPieceCount: number;
   readonly currency: string;
-}
-
-function round2(value: number): number {
-  return Math.round(value * 100) / 100;
 }
 
 export interface InventoryDeltaInput {
@@ -122,7 +142,10 @@ export function buildInventoryDelta(input: InventoryDeltaInput): InventoryDelta 
   let piecesAdded = 0;
   let piecesRemoved = 0;
   let estimatedCostDifference = 0;
+  let additionalSpend = 0;
+  let spareValue = 0;
   let unpricedLotCount = 0;
+  let unpricedPieceCount = 0;
 
   for (const key of keys) {
     const before = original.get(key);
@@ -147,8 +170,14 @@ export function buildInventoryDelta(input: InventoryDeltaInput): InventoryDelta 
         ? null
         : round2(optimizedLineTotal - originalLineTotal);
 
-    if (costDifference === null) unpricedLotCount++;
-    else estimatedCostDifference += costDifference;
+    if (costDifference === null) {
+      unpricedLotCount++;
+      unpricedPieceCount += Math.abs(difference);
+    } else {
+      estimatedCostDifference += costDifference;
+      if (costDifference > 0) additionalSpend += costDifference;
+      else spareValue += -costDifference;
+    }
 
     const action: DeltaAction =
       difference > 0
@@ -176,13 +205,22 @@ export function buildInventoryDelta(input: InventoryDeltaInput): InventoryDelta 
   }
 
   // Biggest money first, then biggest quantity change, then a stable tiebreak.
-  lots.sort(
-    (a, b) =>
+  //
+  // Lots with no price estimate sort to the END rather than being treated as a
+  // zero cost change. Ranking an unknown alongside a known neutral would file
+  // an unpriced 40-piece lot in the middle of the money ordering as though it
+  // did not matter, when in fact we simply do not know what it costs.
+  lots.sort((a, b) => {
+    const aUnpriced = a.costDifference === null;
+    const bUnpriced = b.costDifference === null;
+    if (aUnpriced !== bUnpriced) return aUnpriced ? 1 : -1;
+    return (
       (a.costDifference ?? 0) - (b.costDifference ?? 0) ||
       Math.abs(b.difference) - Math.abs(a.difference) ||
       a.partId.localeCompare(b.partId) ||
-      a.colorId - b.colorId,
-  );
+      a.colorId - b.colorId
+    );
+  });
 
   // Every substitution this optimizer performs is one-for-one: a color change
   // rewrites a colour field, and an EquivalentPartRule is documented as a
@@ -212,7 +250,10 @@ export function buildInventoryDelta(input: InventoryDeltaInput): InventoryDelta 
     lotsRemoved: lots.filter((l) => l.action === 'no_longer_needed').length,
     lotsChanged: lots.length,
     estimatedCostDifference: round2(estimatedCostDifference),
+    additionalSpend: round2(additionalSpend),
+    spareValue: round2(spareValue),
     unpricedLotCount,
+    unpricedPieceCount,
     currency: input.currency,
   };
 }

@@ -282,7 +282,12 @@ test.describe('the changed-parts-only export', () => {
     await page.getByTestId('export-changed-parts-csv').getByRole('button', { name: 'Download' }).click();
     const csv = readFileSync(await (await csvDownload).path(), 'utf8');
 
-    const rows = csv.trim().split('\r\n');
+    // Provenance first, then the column row.
+    expect(csv.startsWith('#')).toBe(true);
+    expect(csv).toContain('NOT a complete parts list');
+    expect(csv).toContain('DEMO PRICE DATA');
+    expect(csv).toContain('COSTS you');
+    const rows = csv.trim().split('\r\n').filter((row) => !row.startsWith('#'));
     expect(rows[0]).toContain('action');
     expect(rows.length).toBeGreaterThan(1);
     // buried-brick.ldr recolors one red 2x4 to black: one lot out, one lot in.
@@ -322,7 +327,8 @@ test.describe('the changed-parts-only export', () => {
     await page.getByTestId('export-changed-parts-csv').getByRole('button', { name: 'Download' }).click();
     const csv = readFileSync(await (await csvDownload).path(), 'utf8');
 
-    // Header only: nothing changed, so nothing to buy differently.
-    expect(csv.trim().split('\r\n')).toHaveLength(1);
+    // Column row only: nothing changed, so nothing to buy differently.
+    const rows = csv.trim().split('\r\n').filter((row) => !row.startsWith('#'));
+    expect(rows).toHaveLength(1);
   });
 });

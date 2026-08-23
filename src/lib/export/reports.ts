@@ -364,28 +364,108 @@ const DELTA_CSV_COLUMNS = [
 ] as const;
 
 /**
- * The delta as a spreadsheet.
+ * Context every changed-parts file has to carry.
  *
- * Unlike the Wanted List XML below, this can carry BOTH directions, so it is the
- * authoritative artifact: the lots you need fewer of only exist here. The
- * `action` column spells that out in words rather than leaving the reader to
- * infer it from a minus sign, because this file will be opened out of context.
+ * A parts list with no provenance is dangerous in a way a report is not: it is
+ * short, it is actionable, and it will be opened weeks later with no memory of
+ * which model or which settings produced it.
  */
-export interface DeltaWantedListResult extends WantedListResult {
-  /**
-   * Lots that cancelled out once resolved to BrickLink ids - a mold swap that
-   * BrickLink sells under a single number is no change at all to an order.
-   */
-  readonly nettedToNothing: number;
-  /**
-   * Decreases we could not map to a BrickLink id. They cannot be netted against
-   * the increases, so a quantity in this file may be higher than it needs to be.
-   */
-  readonly unmappedDecreases: number;
+export interface DeltaExportContext {
+  readonly modelFileName: string;
+  readonly analysisId: string;
+  readonly generatedAt: string;
+  readonly enabledChangeCount: number;
+  readonly candidateCount: number;
+  readonly priceSourceLabel: string;
+  readonly isDemoData: boolean;
+  readonly condition: 'new' | 'used';
 }
 
-export function buildInventoryDeltaCsv(delta: InventoryDelta): string {
-  const rows: string[] = [DELTA_CSV_COLUMNS.join(',')];
+/**
+ * The lines every changed-parts export opens with, without comment markers.
+ *
+ * Shared so the CSV and the XML cannot drift into telling different stories,
+ * and so the one sentence that actually decides whether this file is safe to
+ * act on - "only if what you already hold is the original list" - is written
+ * once.
+ */
+export function deltaExportPreamble(delta: InventoryDelta, context: DeltaExportContext): string[] {
+  const money = (value: number): string => `${value.toFixed(2)} ${delta.currency}`;
+  const lines = [
+    'CHANGED PARTS ONLY - this is NOT a complete parts list for this model.',
+    '',
+    `Model:            ${context.modelFileName}`,
+    `Analysis:         ${context.analysisId}`,
+    `Generated:        ${context.generatedAt}`,
+    `Changes applied:  ${context.enabledChangeCount} of ${context.candidateCount} proposed`,
+    `Prices:           ${context.priceSourceLabel} (${context.condition === 'new' ? 'New' : 'Used'}, ${delta.currency})`,
+  ];
+
+  if (context.isDemoData) {
+    lines.push(
+      'DEMO PRICE DATA - synthetic figures built into the app, not real market prices.',
+    );
+  }
+
+  lines.push(
+    '',
+    'This is the difference between the ORIGINAL parts list for this model and',
+    `the optimized one. It is correct only if what you already hold or have`,
+    'ordered is exactly the original list. If you have not ordered yet, do not',
+    'use this file - use the OPTIMIZED Wanted List, which is complete on its own.',
+    '',
+    `Pieces to buy:    ${delta.piecesAdded}`,
+    `Pieces made spare: ${delta.piecesRemoved}`,
+    `Whole model:      ${delta.totalPieces} pieces`,
+    '',
+    'MONEY. Three different figures, because they answer different questions:',
+    `  If you have NOT ordered yet, the optimized list costs ${money(
+      delta.estimatedCostDifference,
+    )} more than`,
+    '    the original (a negative number means it is cheaper).',
+    `  To act on THIS file you spend ${money(delta.additionalSpend)} on the parts below.`,
+    `  You will be left with roughly ${money(delta.spareValue)} of parts you no longer need.`,
+    '',
+    'If your original order is already placed, acting on this file COSTS you the',
+    'second figure and returns nothing: the parts you no longer need are already',
+    'bought and cannot be un-bought. The optimization only pays if it is applied',
+    'BEFORE you order.',
+    '',
+    'These are estimated PART prices, not an order total. Buying the difference',
+    'is its own BrickLink order with its own shipping charge and seller minimums,',
+    'which on a small difference can easily exceed what the change saves.',
+  );
+
+  if (delta.unpricedLotCount > 0) {
+    lines.push(
+      '',
+      `${delta.unpricedLotCount} lot(s) covering ${delta.unpricedPieceCount} piece(s) have no price`,
+      'estimate and are excluded from every figure above. They are still listed.',
+    );
+  }
+
+  return lines;
+}
+
+/**
+ * The delta as a spreadsheet.
+ *
+ * Unlike the Wanted List XML, this can carry BOTH directions, so it is the
+ * authoritative artifact: the lots you need fewer of only exist here. The
+ * `action` column spells that out in words rather than leaving the reader to
+ * infer it from a minus sign.
+ *
+ * The preamble uses `#` comment lines. Every mainstream CSV reader either skips
+ * them or shows them as plain rows at the top of the sheet, and neither outcome
+ * can be mistaken for data - the alternative, a naked column row, ships a file
+ * with no model name, no settings and no note that the prices might be
+ * synthetic.
+ */
+export function buildInventoryDeltaCsv(delta: InventoryDelta, context: DeltaExportContext): string {
+  const rows: string[] = deltaExportPreamble(delta, context).map((line) =>
+    line === '' ? '#' : `# ${line}`,
+  );
+  rows.push(DELTA_CSV_COLUMNS.join(','));
   for (const lot of delta.lots) {
     rows.push(
       [
@@ -410,6 +490,19 @@ export function buildInventoryDeltaCsv(delta: InventoryDelta): string {
     );
   }
   return rows.join('\r\n') + '\r\n';
+}
+
+export interface DeltaWantedListResult extends WantedListResult {
+  /**
+   * Lots that cancelled out once resolved to BrickLink ids - a mold swap that
+   * BrickLink sells under a single number is no change at all to an order.
+   */
+  readonly nettedToNothing: number;
+  /**
+   * Decreases we could not map to a BrickLink id. They cannot be netted against
+   * the increases, so a quantity in this file may be higher than it needs to be.
+   */
+  readonly unmappedDecreases: number;
 }
 
 /**
